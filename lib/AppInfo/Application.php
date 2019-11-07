@@ -30,14 +30,17 @@
 namespace OCA\FilesLock\AppInfo;
 
 
+use OC\Files\Filesystem;
 use OCA\DAV\Connector\Sabre\CachingTree;
 use OCA\DAV\Connector\Sabre\ObjectTree;
 use OCA\FilesLock\Plugins\FilesLockPlugin;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
+use OCA\FilesLock\Storage\LockWrapper;
 use OCP\AppFramework\App;
 use OCP\AppFramework\QueryException;
 use OCP\SabrePluginEvent;
+use OCP\Util;
 use Sabre\DAV\Locks\Plugin;
 
 
@@ -93,6 +96,23 @@ class Application extends App {
 			);
 		}
 		);
+
+		Util::connectHook('OC_Filesystem', 'preSetup', $this, 'addStorageWrapper');
+	}
+
+	/**
+	 * @internal
+	 */
+	public function addStorageWrapper() {
+		$userSession = $this->getContainer()->getServer()->getUserSession();
+		 
+		Filesystem::addStorageWrapper('files_lock', function($storage) use ($userSession) {
+			return new LockWrapper([
+				'storage' => $storage,
+				'lock_service' => $this->lockService,
+				'user_session' => $userSession,
+			]);
+		}, 10);
 	}
 
 }
