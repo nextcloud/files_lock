@@ -105,8 +105,8 @@ class Application extends App {
 	 */
 	public function addStorageWrapper() {
 		$userSession = $this->getContainer()->getServer()->getUserSession();
-		 
-		Filesystem::addStorageWrapper('files_lock', function($storage) use ($userSession) {
+
+		Filesystem::addStorageWrapper('files_lock', function($mountPoint, $storage) use ($userSession) {
 			return new LockWrapper([
 				'storage' => $storage,
 				'lock_service' => $this->lockService,
