@@ -24,6 +24,7 @@ namespace OCA\FilesLock\Storage;
 use OC\Files\Storage\Wrapper\Wrapper;
 use OCA\FilesLock\Service\LockService;
 use OCP\Constants;
+use OCP\Files\InvalidPathException;
 use OCP\IUserSession;
 
 class LockWrapper extends Wrapper {
@@ -40,7 +41,11 @@ class LockWrapper extends Wrapper {
 	}
 
 	protected function checkPermissions($path, $permissions) {
-		// TODO: get locks, check if file is locked by someone other than the current user
+		try {
+			return !$this->lockService->isPathLocked($path);
+		} catch (InvalidPathException $e) {
+		}
+
 		return true;
 	}
 

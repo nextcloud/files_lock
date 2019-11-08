@@ -91,6 +91,7 @@ class Lock extends Base {
 		parent::configure();
 		$this->setName('files:lock')
 			 ->addOption('unlock', 'u', InputOption::VALUE_NONE, 'unlock a file')
+			 ->addOption('status', 's', InputOption::VALUE_NONE, 'returns lock status of the file')
 			 ->addArgument('user_id', InputArgument::REQUIRED, 'userId of the locker')
 			 ->addArgument('file_id', InputArgument::REQUIRED, 'Id of the locked file')
 			 ->setDescription('lock a file to a user');
@@ -116,6 +117,16 @@ class Lock extends Base {
 			$file = $this->fileService->getFileFromId($user->getUID(), $fileId);
 		} catch (NotFoundException $e) {
 			throw new Exception('File not found');
+		}
+
+		if ($input->getOption('status')) {
+			if ($this->lockService->isFileLocked($file->getId())) {
+				$output->writeln($file->getName() . ' is <comment>locked</comment>');
+			} else {
+				$output->writeln($file->getName() . ' is <info>not locked<info>');
+			}
+
+			return;
 		}
 
 		if ($input->getOption('unlock')) {

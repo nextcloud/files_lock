@@ -35,7 +35,9 @@ use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\AlreadyLockedException;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
+use OCP\Files\InvalidPathException;
 use OCP\Files\Node;
+use OCP\Files\NotFoundException;
 
 
 /**
@@ -55,12 +57,17 @@ class LockService {
 	/** @var LocksRequest */
 	private $locksRequest;
 
+	/** @var FileService */
+	private $fileService;
+
 	/** @var MiscService */
 	private $miscService;
 
 
-	public function __construct(LocksRequest $locksRequest, MiscService $miscService) {
+	public function __construct(LocksRequest $locksRequest, FileService $fileService, MiscService $miscService
+	) {
 		$this->locksRequest = $locksRequest;
+		$this->fileService = $fileService;
 		$this->miscService = $miscService;
 	}
 
@@ -119,6 +126,39 @@ class LockService {
 
 
 	/**
+	 * @param string $path
+	 *
+	 * @return bool
+	 * @throws InvalidPathException
+	 */
+	public function isPathLocked(string $path): bool {
+		try {
+			$file = $this->fileService->getFileFromPath($path);
+
+			return $this->isFileLocked($file->getId());
+		} catch (NotFoundException $e) {
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param int $fileId
+	 *
+	 * @return bool
+	 */
+	public function isFileLocked(int $fileId): bool {
+		try {
+			$this->getLocksFromFileId($fileId);
+
+			return true;
+		} catch (LockNotFoundException $e) {
+			return false;
+		}
+	}
+
+
+	/**
 	 * @param FileLock $lock
 	 */
 	public function generateToken(FileLock $lock) {
@@ -128,7 +168,6 @@ class LockService {
 
 		$lock->setToken(self::PREFIX . '-' . $this->uuid());
 	}
-
 
 }
 

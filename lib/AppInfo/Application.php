@@ -104,15 +104,21 @@ class Application extends App {
 	 * @internal
 	 */
 	public function addStorageWrapper() {
-		$userSession = $this->getContainer()->getServer()->getUserSession();
+		$userSession = $this->getContainer()
+							->getServer()
+							->getUserSession();
 
-		Filesystem::addStorageWrapper('files_lock', function($mountPoint, $storage) use ($userSession) {
-			return new LockWrapper([
-				'storage' => $storage,
-				'lock_service' => $this->lockService,
-				'user_session' => $userSession,
-			]);
-		}, 10);
+		Filesystem::addStorageWrapper(
+			'files_lock', function($mountPoint, $storage) use ($userSession) {
+			return new LockWrapper(
+				[
+					'storage'      => $storage,
+					'lock_service' => $this->lockService,
+					'user_session' => $userSession,
+				]
+			);
+		}, 10
+		);
 	}
 
 }
