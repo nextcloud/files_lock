@@ -73,16 +73,52 @@ class LocksRequest extends LocksRequestBuilder {
 
 
 	/**
+	 * @param FileLock $lock
+	 */
+	public function delete(FileLock $lock) {
+		$qb = $this->getLocksDeleteSql();
+		$qb->limitToId($lock->getId());
+
+		$qb->execute();
+	}
+
+
+	/**
+	 * @param int[] $ids
+	 */
+	public function removeIds(array $ids) {
+		$qb = $this->getLocksDeleteSql();
+		$qb->limitToIds($ids);
+
+		$qb->execute();
+	}
+
+
+	/**
 	 * @param int $fileId
 	 *
 	 * @return FileLock
 	 * @throws LockNotFoundException
 	 */
-	public function getFromFileId(int $fileId) {
+	public function getFromFileId(int $fileId): FileLock {
 		$qb = $this->getLocksSelectSql();
 		$qb->limitToFileId($fileId);
 
 		return $this->getLockFromRequest($qb);
+	}
+
+
+	/**
+	 * @param int $timeout
+	 *
+	 * @return FileLock[]
+	 * @throws Exception
+	 */
+	public function getLocksOlderThan(int $timeout): array {
+		$qb = $this->getLocksSelectSql();
+		$qb->limitToCreation($timeout);
+
+		return $this->getLocksFromRequest($qb);
 	}
 
 

@@ -30,16 +30,18 @@
 namespace OCA\FilesLock\Command;
 
 
-use Exception;
 use OC\Core\Command\Base;
+use OC\User\NoUserException;
 use OCA\FilesLock\Exceptions\AlreadyLockedException;
+use OCA\FilesLock\Exceptions\LockNotFoundException;
+use OCA\FilesLock\Exceptions\NotFileException;
+use OCA\FilesLock\Exceptions\SuccessException;
+use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCA\FilesLock\Service\MiscService;
 use OCP\Files\InvalidPathException;
-use OCP\Files\Node;
 use OCP\Files\NotFoundException;
-use OCP\IUser;
 use OCP\IUserManager;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -92,8 +94,8 @@ class Lock extends Base {
 		$this->setName('files:lock')
 			 ->addOption('unlock', 'u', InputOption::VALUE_NONE, 'unlock a file')
 			 ->addOption('status', 's', InputOption::VALUE_NONE, 'returns lock status of the file')
-			 ->addArgument('user_id', InputArgument::REQUIRED, 'userId of the locker')
 			 ->addArgument('file_id', InputArgument::REQUIRED, 'Id of the locked file')
+			 ->addArgument('user_id', InputArgument::OPTIONAL, 'owner of the lock', '')
 			 ->setDescription('lock a file to a user');
 	}
 
@@ -102,61 +104,86 @@ class Lock extends Base {
 	 * @param InputInterface $input
 	 * @param OutputInterface $output
 	 *
-	 * @throws Exception
+	 * @throws NoUserException
+	 * @throws NotFoundException
+	 * @throws UnauthorizedUnlockException
+	 * @throws AlreadyLockedException
+	 * @throws NotFileException
+	 * @throws InvalidPathException
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output) {
 		$fileId = (int)$input->getArgument('file_id');
 		$userId = $input->getArgument('user_id');
 
-		$user = $this->userManager->get($userId);
-		if ($user === null) {
-			throw new Exception("Unknown user '" . $userId . "'");
-		}
 
 		try {
-			$file = $this->fileService->getFileFromId($user->getUID(), $fileId);
-		} catch (NotFoundException $e) {
-			throw new Exception('File not found');
-		}
-
-		if ($input->getOption('status')) {
-			if ($this->lockService->isFileLocked($file->getId())) {
-				$output->writeln($file->getName() . ' is <comment>locked</comment>');
-			} else {
-				$output->writeln($file->getName() . ' is <info>not locked<info>');
-			}
-
+			$this->getStatus($input, $output, $fileId);
+			$this->getUnlock($input, $output, $fileId);
+		} catch (SuccessException $e) {
 			return;
 		}
 
-		if ($input->getOption('unlock')) {
-			$output->writeln('<info>unlocking ' . $file->getName() . ' from ' . $userId . '</info>');
-			$this->unlock($file);
-		} else {
-			$output->writeln('<info>locking ' . $file->getName() . ' to ' . $userId . '</info>');
-			$this->lock($file, $user);
+		if ($userId === '') {
+			throw new NoUserException('please specify userId');
 		}
+
+		$user = $this->userManager->get($userId);
+		if ($user === null) {
+			throw new NoUserException("Unknown user '" . $userId . "'");
+		}
+
+		$file = $this->fileService->getFileFromId($user->getUID(), $fileId);
+
+		$output->writeln('<info>locking ' . $file->getName() . ' to ' . $userId . '</info>');
+		$this->lockService->lockFile($file, $user);
 	}
 
 
 	/**
-	 * @param Node $file
-	 * @param IUser $user
+	 * @param InputInterface $input
+	 * @param OutputInterface $output
+	 * @param int $fileId
 	 *
-	 * @throws NotFoundException
-	 * @throws AlreadyLockedException
-	 * @throws InvalidPathException
+	 * @throws SuccessException
 	 */
-	private function lock(Node $file, IUser $user) {
-		$this->lockService->lockFile($user->getUID(), $file->getId());
+	private function getStatus(InputInterface $input, OutputInterface $output, int $fileId) {
+		if (!$input->getOption('status')) {
+			return;
+		}
+
+		try {
+			$lock = $this->lockService->getLockFromFileId($fileId);
+			$output->writeln(
+				'File #' . $fileId . ' is <comment>locked</comment> by ' . $lock->getUserId()
+			);
+		} catch (LockNotFoundException $e) {
+			$output->writeln('File #' . $fileId . ' is <info>not locked<info>');
+		}
+
+		throw new SuccessException();
 	}
 
 
 	/**
-	 * @param Node $file
+	 * @param InputInterface $input
+	 * @param OutputInterface $output
+	 * @param int $fileId
+	 *
+	 * @throws SuccessException
+	 * @throws UnauthorizedUnlockException
 	 */
-	private function unlock(Node $file) {
-		$this->lockService->unlock($file);
+	private function getUnlock(InputInterface $input, OutputInterface $output, int $fileId) {
+		if (!$input->getOption('unlock')) {
+			return;
+		}
+
+		$output->writeln('<info>unlocking File #' . $fileId);
+		try {
+			$this->lockService->unlockFile($fileId, '', true);
+		} catch (LockNotFoundException $e) {
+		}
+
+		throw new SuccessException();
 	}
 
 }

@@ -82,7 +82,7 @@ class FilesLockPlugin implements BackendInterface {
 				$file = $this->fileService->getFileFromUri($uri);
 			}
 
-			$lock = $this->lockService->getLocksFromFileId($file->getId());
+			$lock = $this->lockService->getLockFromFileId($file->getId());
 			return [$lock->toLockInfo()];
 		} catch (Exception $e) {
 			return $locks;

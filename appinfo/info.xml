@@ -10,7 +10,7 @@ Allow your users to temporary locks their files to avoid conflicts while working
 
 ]]>
 	</description>
-	<version>0.3.5</version>
+	<version>0.4.0</version>
 	<licence>agpl</licence>
 	<author>Maxence Lange</author>
 	<namespace>FilesLock</namespace>
@@ -28,10 +28,13 @@ Allow your users to temporary locks their files to avoid conflicts while working
 	<repository>https://github.com/nextcloud/files_lock.git</repository>
 	<screenshot>https://raw.githubusercontent.com/nextcloud/files_lock/master/screenshots/v0.1.0.png</screenshot>
 
+	<background-jobs>
+		<job>OCA\FilesLock\Cron\Unlock</job>
+	</background-jobs>
+
 	<commands>
 		<command>OCA\FilesLock\Command\Lock</command>
 	</commands>
-
 
 	<dependencies>
 		<nextcloud min-version="17" max-version="18"/>

@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 
 /**
@@ -27,43 +27,13 @@
  */
 
 
-namespace OCA\FilesLock\Db;
+namespace OCA\FilesLock\Exceptions;
 
 
-use daita\MySmallPhpTools\Db\ExtendedQueryBuilder;
-use daita\MySmallPhpTools\IExtendedQueryBuilder;
+use Exception;
 
 
-/**
- * Class LocksQueryBuilder
- *
- * @package OCA\FilesLock\Db
- */
-class LocksQueryBuilder extends ExtendedQueryBuilder {
-
-
-	/**
-	 * @param int $fileId
-	 *
-	 * @return IExtendedQueryBuilder
-	 */
-	public function limitToFileId(int $fileId): IExtendedQueryBuilder {
-		$this->limitToDBFieldInt('file_id', $fileId);
-
-		return $this;
-	}
-
-
-	/**
-	 * @param array $ids
-	 *
-	 * @return IExtendedQueryBuilder
-	 */
-	public function limitToIds(array $ids): IExtendedQueryBuilder {
-		$this->limitToDBFieldArray('id', $ids);
-
-		return $this;
-	}
+class NotFileException extends Exception {
 
 }
 

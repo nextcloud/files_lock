@@ -31,13 +31,17 @@ namespace OCA\FilesLock\Service;
 
 
 use daita\MySmallPhpTools\Traits\TStringTools;
+use Exception;
 use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\AlreadyLockedException;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
+use OCA\FilesLock\Exceptions\NotFileException;
+use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Node;
 use OCP\Files\NotFoundException;
+use OCP\IUser;
 
 
 /**
@@ -60,33 +64,21 @@ class LockService {
 	/** @var FileService */
 	private $fileService;
 
+	/** @var ConfigService */
+	private $configService;
+
 	/** @var MiscService */
 	private $miscService;
 
 
-	public function __construct(LocksRequest $locksRequest, FileService $fileService, MiscService $miscService
+	public function __construct(
+		LocksRequest $locksRequest, FileService $fileService, ConfigService $configService,
+		MiscService $miscService
 	) {
 		$this->locksRequest = $locksRequest;
 		$this->fileService = $fileService;
+		$this->configService = $configService;
 		$this->miscService = $miscService;
-	}
-
-
-	/**
-	 * @param string $userId
-	 * @param int $fileId
-	 *
-	 * @return FileLock
-	 * @throws AlreadyLockedException
-	 */
-	public function lockFile(string $userId, int $fileId): FileLock {
-		$lock = new FileLock();
-		$lock->setUserId($userId);
-		$lock->setFileId($fileId);
-
-		$this->lock($lock);
-
-		return $lock;
 	}
 
 
@@ -109,8 +101,87 @@ class LockService {
 
 	/**
 	 * @param Node $file
+	 * @param IUser $user
+	 *
+	 * @return FileLock
+	 * @throws AlreadyLockedException
+	 * @throws InvalidPathException
+	 * @throws NotFileException
+	 * @throws NotFoundException
 	 */
-	public function unlock(Node $file) {
+	public function lockFile(Node $file, IUser $user): FileLock {
+		if ($file->getType() !== Node::TYPE_FILE) {
+			throw new NotFileException('Must be a file, seems to be a folder.');
+		}
+
+		$lock = new FileLock();
+		$lock->setUserId($user->getUID());
+		$lock->setFileId($file->getId());
+
+		$this->lock($lock);
+
+		return $lock;
+	}
+
+
+	/**
+	 * @param FileLock $lock
+	 * @param bool $force
+	 *
+	 * @throws LockNotFoundException
+	 * @throws UnauthorizedUnlockException
+	 */
+	public function unlock(FileLock $lock, bool $force = false) {
+		$known = $this->locksRequest->getFromFileId($lock->getFileId());
+
+		if (!$force && $known->getUserId() !== $known->getUserId()) {
+			throw new UnauthorizedUnlockException();
+		}
+
+		$this->locksRequest->delete($known);
+	}
+
+
+	/**
+	 * @param int $fileId
+	 * @param string $userId
+	 *
+	 * @param bool $force
+	 *
+	 * @return FileLock
+	 * @throws LockNotFoundException
+	 * @throws UnauthorizedUnlockException
+	 */
+	public function unlockFile(int $fileId, string $userId, bool $force = false): FileLock {
+		$lock = new FileLock();
+		$lock->setUserId($userId);
+		$lock->setFileId($fileId);
+
+		$this->unlock($lock, $force);
+
+		return $lock;
+	}
+
+
+	/**
+	 * @return FileLock[]
+	 */
+	public function getDeprecatedLocks(): array {
+		$timeout = (int)$this->configService->getAppValue(ConfigService::LOCK_TIMEOUT);
+		if ($timeout === 0) {
+			$timeout = $this->configService->defaults[ConfigService::LOCK_TIMEOUT];
+			$this->miscService->log(
+				'ConfigService::LOCK_TIMEOUT is not numerical, using default (' . $timeout . ')', 1
+			);
+		}
+
+		try {
+			$locks = $this->locksRequest->getLocksOlderThan($timeout);
+		} catch (Exception $e) {
+			return [];
+		}
+
+		return $locks;
 	}
 
 
@@ -120,7 +191,7 @@ class LockService {
 	 * @return FileLock
 	 * @throws LockNotFoundException
 	 */
-	public function getLocksFromFileId(int $fileId): FileLock {
+	public function getLockFromFileId(int $fileId): FileLock {
 		return $this->locksRequest->getFromFileId($fileId);
 	}
 
@@ -149,7 +220,7 @@ class LockService {
 	 */
 	public function isFileLocked(int $fileId): bool {
 		try {
-			$this->getLocksFromFileId($fileId);
+			$this->getLockFromFileId($fileId);
 
 			return true;
 		} catch (LockNotFoundException $e) {
@@ -167,6 +238,20 @@ class LockService {
 		}
 
 		$lock->setToken(self::PREFIX . '-' . $this->uuid());
+	}
+
+
+	/**
+	 * @param FileLock[] $locks
+	 */
+	public function removeLocks(array $locks) {
+		$ids = array_map(
+			function(FileLock $lock) {
+				return $lock->getId();
+			}, $locks
+		);
+
+		$this->locksRequest->removeIds($ids);
 	}
 
 }

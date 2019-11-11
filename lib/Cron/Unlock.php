@@ -27,42 +27,61 @@
  */
 
 
-namespace OCA\FilesLock\Db;
+namespace OCA\FilesLock\Cron;
 
 
-use daita\MySmallPhpTools\Db\ExtendedQueryBuilder;
-use daita\MySmallPhpTools\IExtendedQueryBuilder;
+use OC\BackgroundJob\TimedJob;
+use OCA\FilesLock\AppInfo\Application;
+use OCA\FilesLock\Service\LockService;
+use OCA\FilesLock\Service\MiscService;
+use OCP\AppFramework\QueryException;
 
 
 /**
- * Class LocksQueryBuilder
+ * Class Unlock
  *
- * @package OCA\FilesLock\Db
+ * @package OCA\FilesLock\Cron
  */
-class LocksQueryBuilder extends ExtendedQueryBuilder {
+class Unlock extends TimedJob {
+
+
+	/** @var LockService */
+	private $lockService;
+
+	/** @var MiscService */
+	private $miscService;
 
 
 	/**
-	 * @param int $fileId
-	 *
-	 * @return IExtendedQueryBuilder
+	 * Unlock constructor.
 	 */
-	public function limitToFileId(int $fileId): IExtendedQueryBuilder {
-		$this->limitToDBFieldInt('file_id', $fileId);
-
-		return $this;
+	public function __construct() {
+//		$this->setInterval(12 * 60); // 12 minutes
+		$this->setInterval(1);
 	}
 
 
 	/**
-	 * @param array $ids
+	 * @param mixed $argument
 	 *
-	 * @return IExtendedQueryBuilder
+	 * @throws QueryException
 	 */
-	public function limitToIds(array $ids): IExtendedQueryBuilder {
-		$this->limitToDBFieldArray('id', $ids);
+	protected function run($argument) {
+		$app = new Application();
+		$c = $app->getContainer();
 
-		return $this;
+		$this->lockService = $c->query(LockService::class);
+		$this->miscService = $c->query(MiscService::class);
+
+		$this->manageTimeoutLock();
+	}
+
+
+	/**
+	 *
+	 */
+	private function manageTimeoutLock() {
+		$this->lockService->removeLocks($this->lockService->getDeprecatedLocks());
 	}
 
 }
