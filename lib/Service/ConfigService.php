@@ -30,6 +30,7 @@
 namespace OCA\FilesLock\Service;
 
 
+use OCA\FilesLock\AppInfo\Application;
 use OCP\IConfig;
 use OCP\IRequest;
 
@@ -118,6 +119,14 @@ class ConfigService {
 	 */
 	public function deleteAppValue($key) {
 		return $this->config->deleteAppValue($this->appName, $key);
+	}
+
+
+	/**
+	 *
+	 */
+	public function unsetAppConfig() {
+		$this->config->deleteAppValues(Application::APP_NAME);
 	}
 
 }
