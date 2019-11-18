@@ -36,6 +36,7 @@ use OCA\DAV\Connector\Sabre\ObjectTree;
 use OCA\FilesLock\Plugins\FilesLockPlugin;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
+use OCA\FilesLock\Service\MiscService;
 use OCA\FilesLock\Storage\LockWrapper;
 use OCP\AppFramework\App;
 use OCP\AppFramework\QueryException;
@@ -55,6 +56,9 @@ class Application extends App {
 	/** @var LockService */
 	private $lockService;
 
+	/** @var MiscService */
+	private $miscService;
+
 
 	/**
 	 * @param array $params
@@ -73,6 +77,7 @@ class Application extends App {
 		try {
 			$this->fileService = $c->query(FileService::class);
 			$this->lockService = $c->query(LockService::class);
+			$this->miscService = $c->query(MiscService::class);
 		} catch (QueryException $e) {
 			return;
 		}
@@ -91,8 +96,11 @@ class Application extends App {
 					break;
 			}
 
+			$server->on('propFind',    [$this->lockService, 'propFind']);
 			$server->addPlugin(
-				new Plugin(new FilesLockPlugin($this->fileService, $this->lockService, $absolute))
+				new Plugin(
+					new FilesLockPlugin($this->fileService, $this->lockService, $this->miscService, $absolute)
+				)
 			);
 		}
 		);

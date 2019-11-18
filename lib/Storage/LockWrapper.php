@@ -42,7 +42,9 @@ class LockWrapper extends Wrapper {
 
 	protected function checkPermissions($path, $permissions) {
 		try {
-			return !$this->lockService->isPathLocked($path);
+			$userId = $this->userSession->getUser()->getUID();
+
+			return !$this->lockService->isPathLocked($path, $userId);
 		} catch (InvalidPathException $e) {
 		}
 

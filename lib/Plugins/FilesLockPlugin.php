@@ -31,6 +31,7 @@ namespace OCA\FilesLock\Plugins;
 use Exception;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
+use OCA\FilesLock\Service\MiscService;
 use Sabre\DAV\Locks\Backend\BackendInterface;
 use Sabre\DAV\Locks\LockInfo;
 
@@ -49,6 +50,9 @@ class FilesLockPlugin implements BackendInterface {
 	/** @var LockService */
 	private $lockService;
 
+	/** @var MiscService */
+	private $miscService;
+
 	/** @var bool */
 	private $absolute = false;
 
@@ -60,11 +64,15 @@ class FilesLockPlugin implements BackendInterface {
 	 * @param LockService $lockService
 	 * @param bool $absolute
 	 */
-	public function __construct(FileService $fileService, LockService $lockService, bool $absolute) {
+	public function __construct(
+		FileService $fileService, LockService $lockService, MiscService $miscService, bool $absolute
+	) {
 		$this->fileService = $fileService;
 		$this->lockService = $lockService;
+		$this->miscService = $miscService;
 		$this->absolute = $absolute;
 	}
+
 
 	/**
 	 * @param string $uri
@@ -83,6 +91,7 @@ class FilesLockPlugin implements BackendInterface {
 			}
 
 			$lock = $this->lockService->getLockFromFileId($file->getId());
+
 			return [$lock->toLockInfo()];
 		} catch (Exception $e) {
 			return $locks;

@@ -109,6 +109,16 @@ class LocksRequest extends LocksRequestBuilder {
 
 
 	/**
+	 * @return FileLock[]
+	 */
+	public function getAll(): array {
+		$qb = $this->getLocksSelectSql();
+
+		return $this->getLocksFromRequest($qb);
+	}
+
+
+	/**
 	 * @param int $timeout
 	 *
 	 * @return FileLock[]

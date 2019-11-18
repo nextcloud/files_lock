@@ -42,6 +42,8 @@ use OCP\Files\InvalidPathException;
 use OCP\Files\Node;
 use OCP\Files\NotFoundException;
 use OCP\IUser;
+use Sabre\DAV\INode;
+use Sabre\DAV\PropFind;
 
 
 /**
@@ -58,6 +60,9 @@ class LockService {
 	use TStringTools;
 
 
+	/** @var string */
+	private $userId;
+
 	/** @var LocksRequest */
 	private $locksRequest;
 
@@ -71,14 +76,41 @@ class LockService {
 	private $miscService;
 
 
+	/** @var array */
+	private $locks = [];
+
+	/** @var bool */
+	private $lockRetrieved = false;
+
+
 	public function __construct(
-		LocksRequest $locksRequest, FileService $fileService, ConfigService $configService,
+		$userId, LocksRequest $locksRequest, FileService $fileService, ConfigService $configService,
 		MiscService $miscService
 	) {
+		$this->userId = $userId;
 		$this->locksRequest = $locksRequest;
 		$this->fileService = $fileService;
 		$this->configService = $configService;
 		$this->miscService = $miscService;
+	}
+
+
+	/**
+	 * @param PropFind $propFind
+	 * @param INode $node
+	 *
+	 * @return void
+	 */
+	public function propFind(PropFind $propFind, INode $node) {
+		try {
+			$lock = $this->getLockFromCache($node->getId());
+
+			if ($lock->getUserId() === $this->userId) {
+				return;
+			}
+		} catch (LockNotFoundException $e) {
+			return;
+		}
 	}
 
 
@@ -198,15 +230,16 @@ class LockService {
 
 	/**
 	 * @param string $path
+	 * @param string $userId
 	 *
 	 * @return bool
 	 * @throws InvalidPathException
 	 */
-	public function isPathLocked(string $path): bool {
+	public function isPathLocked(string $path, string $userId): bool {
 		try {
 			$file = $this->fileService->getFileFromPath($path);
 
-			return $this->isFileLocked($file->getId());
+			return $this->isFileLocked($file->getId(), $userId);
 		} catch (NotFoundException $e) {
 		}
 
@@ -218,9 +251,13 @@ class LockService {
 	 *
 	 * @return bool
 	 */
-	public function isFileLocked(int $fileId): bool {
+	public function isFileLocked(int $fileId, string $userId): bool {
 		try {
-			$this->getLockFromFileId($fileId);
+			$lock = $this->getLockFromFileId($fileId);
+
+			if ($lock->getUserId() === $userId) {
+				return false;
+			}
 
 			return true;
 		} catch (LockNotFoundException $e) {
@@ -237,7 +274,7 @@ class LockService {
 			return;
 		}
 
-		$lock->setToken(self::PREFIX . '-' . $this->uuid());
+		$lock->setToken(self::PREFIX . '/' . $this->uuid());
 	}
 
 
@@ -252,6 +289,28 @@ class LockService {
 		);
 
 		$this->locksRequest->removeIds($ids);
+	}
+
+
+	/**
+	 * @param $nodeId
+	 *
+	 * @return FileLock
+	 * @throws LockNotFoundException
+	 */
+	private function getLockFromCache(int $nodeId): FileLock {
+		if (!$this->lockRetrieved) {
+			$this->locks = $this->locksRequest->getAll();
+			$this->lockRetrieved = true;
+		}
+
+		foreach ($this->locks as $lock) {
+			if ($lock->getFileId() === $nodeId) {
+				return $lock;
+			}
+		}
+
+		throw new LockNotFoundException();
 	}
 
 }
