@@ -85,6 +85,14 @@ class Application extends App {
 		}
 
 		$eventDispatcher->addListener(
+			'OCA\Files::loadAdditionalScripts',
+			function () {
+				Util::addScript(self::APP_NAME, 'files');
+			}
+		);
+
+
+		$eventDispatcher->addListener(
 			'OCA\DAV\Connector\Sabre::addPlugin', function(SabrePluginEvent $e) {
 			$server = $e->getServer();
 			$absolute = false;
