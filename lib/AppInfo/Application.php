@@ -50,6 +50,8 @@ class Application extends App {
 
 	const APP_NAME = 'files_lock';
 
+	const DAV_PROPERTY_LOCK = '{http://nextcloud.org/ns}lock';
+
 	/** @var FileService */
 	private $fileService;
 

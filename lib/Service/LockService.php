@@ -32,6 +32,7 @@ namespace OCA\FilesLock\Service;
 
 use daita\MySmallPhpTools\Traits\TStringTools;
 use Exception;
+use OCA\FilesLock\Application;
 use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\AlreadyLockedException;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
@@ -102,15 +103,22 @@ class LockService {
 	 * @return void
 	 */
 	public function propFind(PropFind $propFind, INode $node) {
-		try {
-			$lock = $this->getLockFromCache($node->getId());
+		$propFind->handle(\OCA\FilesLock\AppInfo\Application::DAV_PROPERTY_LOCK, function () use ($node) {
 
-			if ($lock->getUserId() === $this->userId) {
-				return;
+			try {
+				$lock = $this->getLockFromCache($node->getId());
+
+				if ($lock->getUserId() === $this->userId) {
+					return false;
+				}
+			} catch (LockNotFoundException $e) {
+				return false;
 			}
-		} catch (LockNotFoundException $e) {
-			return;
-		}
+			return true;
+
+		});
+
+
 	}
 
 
