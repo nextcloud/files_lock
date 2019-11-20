@@ -1,7 +1,7 @@
 (function() {
 
 	_.extend(OC.Files.Client, {
-		PROPERTY_FILES_LOCK:	'{' + OC.Files.Client.NS_NEXTCLOUD + '}lock'
+		PROPERTY_FILES_LOCK: '{' + OC.Files.Client.NS_NEXTCLOUD + '}lock'
 	})
 
 
@@ -39,21 +39,20 @@
 			fileList.fileActions.registerAction({
 				name: 'Locking',
 				displayName: function(context) {
-					console.log(context.$file.data('locked'))
 					if (context && context.$file) {
 						var locked = context.$file.data('locked')
 						if (locked) {
-							return t('files_lock', 'File is locked')
+							return t('files_lock', 'Unlock file')
 						}
 					}
-					return t('files_lock', 'File is not locked')
+					return t('files_lock', 'Lock file')
 				},
 				mime: 'all',
 				order: -140,
 				iconClass: 'icon-security',
 				permissions: OC.PERMISSION_READ,
 				actionHandler: function(fileName, context) {
-					console.log('handle locking')
+					self.switchLock(context.$file.data('id'), context.$file.data('locked'));
 				}
 			})
 
@@ -66,8 +65,7 @@
 					if (locked) {
 						$actionLink.text('Locked')
 					} else {
-						$actionLink.text('Not locked')
-
+						//$actionLink.text('Not locked')
 					}
 					context.$file.find('a.name>span.fileactions').append($actionLink)
 					return $actionLink
@@ -77,11 +75,34 @@
 				type: OCA.Files.FileActions.TYPE_INLINE,
 				permissions: OC.PERMISSION_READ,
 				actionHandler: function(fileName, context) {
-					console.log('handle locking')
+					self.switchLock(context.$file.data('id'), context.$file.data('locked'));
 				}
 			})
 
-		}
+			this.switchLock = function(fileId, locked) {
+				if (locked !== undefined && locked) {
+					$.ajax({
+						method: 'DELETE',
+						url: OC.generateUrl('/apps/files_lock/lock/' + fileId)
+					}).done(function (res) {
+						// success ?
+					}).fail(function () {
+						// error
+					});
+				} else {
+					$.ajax({
+						method: 'PUT',
+						url: OC.generateUrl('/apps/files_lock/lock/' + fileId)
+					}).done(function (res) {
+						// success ?
+					}).fail(function () {
+						// error
+					});
+				}
+			}
+
+		},
+
 	};
 
 	OC.Plugins.register('OCA.Files.FileList', FilesPlugin)
