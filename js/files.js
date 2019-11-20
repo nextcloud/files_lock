@@ -51,9 +51,7 @@
 				order: -140,
 				iconClass: 'icon-security',
 				permissions: OC.PERMISSION_READ,
-				actionHandler: function(fileName, context) {
-					self.switchLock(context.$file.data('id'), context.$file.data('locked'));
-				}
+				actionHandler: self.switchLock
 			})
 
 			fileList.fileActions.registerAction({
@@ -64,8 +62,6 @@
 					var $actionLink = $('<span/>')
 					if (locked) {
 						$actionLink.text('Locked')
-					} else {
-						//$actionLink.text('Not locked')
 					}
 					context.$file.find('a.name>span.fileactions').append($actionLink)
 					return $actionLink
@@ -74,34 +70,35 @@
 				order: -140,
 				type: OCA.Files.FileActions.TYPE_INLINE,
 				permissions: OC.PERMISSION_READ,
-				actionHandler: function(fileName, context) {
-					self.switchLock(context.$file.data('id'), context.$file.data('locked'));
-				}
+				actionHandler: self.switchLock
 			})
-
-			this.switchLock = function(fileId, locked) {
-				if (locked !== undefined && locked) {
-					$.ajax({
-						method: 'DELETE',
-						url: OC.generateUrl('/apps/files_lock/lock/' + fileId)
-					}).done(function (res) {
-						// success ?
-					}).fail(function () {
-						// error
-					});
-				} else {
-					$.ajax({
-						method: 'PUT',
-						url: OC.generateUrl('/apps/files_lock/lock/' + fileId)
-					}).done(function (res) {
-						// success ?
-					}).fail(function () {
-						// error
-					});
-				}
-			}
-
 		},
+
+		switchLock: function(fileName, context) {
+			var fileId = context.$file.data('id')
+			var locked = context.$file.data('locked')
+			var model = context.fileList.getModelForFile(fileName)
+			model.set('locked', !locked)
+			if (locked !== undefined && locked) {
+				$.ajax({
+					method: 'DELETE',
+					url: OC.generateUrl('/apps/files_lock/lock/' + fileId)
+				}).done(function (res) {
+					// success ?
+				}).fail(function () {
+					// error
+				});
+			} else {
+				$.ajax({
+					method: 'PUT',
+					url: OC.generateUrl('/apps/files_lock/lock/' + fileId)
+				}).done(function (res) {
+					// success ?
+				}).fail(function () {
+					// error
+				});
+			}
+		}
 
 	};
 
