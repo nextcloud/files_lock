@@ -128,7 +128,7 @@ class LockService {
 	 */
 	public function lock(FileLock $lock) {
 		$this->generateToken($lock);
-		$this->miscService->log(1, 'locking file ' . json_encode($lock));
+		$this->miscService->log('locking file ' . json_encode($lock), 1);
 
 		try {
 			$known = $this->locksRequest->getFromFileId($lock->getFileId());
@@ -173,7 +173,7 @@ class LockService {
 	 * @throws UnauthorizedUnlockException
 	 */
 	public function unlock(FileLock $lock, bool $force = false) {
-		$this->miscService->log(1, 'unlocking file ' . json_encode($lock));
+		$this->miscService->log('unlocking file ' . json_encode($lock), 1);
 
 		$known = $this->locksRequest->getFromFileId($lock->getFileId());
 
@@ -204,7 +204,6 @@ class LockService {
 
 		return $lock;
 	}
-
 
 
 	/**
