@@ -29,5 +29,7 @@
 
 return [
 	'routes' => [
+		['name' => 'Lock#locking', 'url' => '/lock/{fileId}', 'verb' => 'PUT'],
+		['name' => 'Lock#unlocking', 'url' => '/lock/{fileId}', 'verb' => 'DELETE'],
 	]
 ];

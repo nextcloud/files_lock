@@ -32,6 +32,7 @@ namespace OCA\FilesLock\Service;
 
 use daita\MySmallPhpTools\Traits\TStringTools;
 use Exception;
+use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\AlreadyLockedException;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
@@ -102,15 +103,21 @@ class LockService {
 	 * @return void
 	 */
 	public function propFind(PropFind $propFind, INode $node) {
-		try {
-			$lock = $this->getLockFromCache($node->getId());
+		$propFind->handle(
+			Application::DAV_PROPERTY_LOCK, function() use ($node) {
+			try {
+				$lock = $this->getLockFromCache($node->getId());
 
-			if ($lock->getUserId() === $this->userId) {
-				return;
+//				if ($lock->getUserId() === $this->userId) {
+//					return false;
+//				}
+			} catch (LockNotFoundException $e) {
+				return false;
 			}
-		} catch (LockNotFoundException $e) {
-			return;
+
+			return true;
 		}
+		);
 	}
 
 
@@ -195,6 +202,7 @@ class LockService {
 	}
 
 
+
 	/**
 	 * @return FileLock[]
 	 */
@@ -235,7 +243,7 @@ class LockService {
 	 * @return bool
 	 * @throws InvalidPathException
 	 */
-	public function isPathLocked(string $path, string $userId): bool {
+	public function isPathLocked(string $path, string $userId = ''): bool {
 		try {
 			$file = $this->fileService->getFileFromPath($path);
 
@@ -248,13 +256,13 @@ class LockService {
 
 	/**
 	 * @param int $fileId
+	 * @param string $userId
 	 *
 	 * @return bool
 	 */
-	public function isFileLocked(int $fileId, string $userId): bool {
+	public function isFileLocked(int $fileId, string $userId = ''): bool {
 		try {
 			$lock = $this->getLockFromFileId($fileId);
-
 			if ($lock->getUserId() === $userId) {
 				return false;
 			}
@@ -312,6 +320,7 @@ class LockService {
 
 		throw new LockNotFoundException();
 	}
+
 
 }
 

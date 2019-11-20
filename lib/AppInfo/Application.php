@@ -50,6 +50,8 @@ class Application extends App {
 
 	const APP_NAME = 'files_lock';
 
+	const DAV_PROPERTY_LOCK = '{http://nextcloud.org/ns}lock';
+
 	/** @var FileService */
 	private $fileService;
 
@@ -81,6 +83,14 @@ class Application extends App {
 		} catch (QueryException $e) {
 			return;
 		}
+
+		$eventDispatcher->addListener(
+			'OCA\Files::loadAdditionalScripts',
+			function () {
+				Util::addScript(self::APP_NAME, 'files');
+			}
+		);
+
 
 		$eventDispatcher->addListener(
 			'OCA\DAV\Connector\Sabre::addPlugin', function(SabrePluginEvent $e) {

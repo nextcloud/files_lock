@@ -42,7 +42,8 @@ class LockWrapper extends Wrapper {
 
 	protected function checkPermissions($path, $permissions) {
 		try {
-			$userId = $this->userSession->getUser()->getUID();
+			$userId = $this->userSession->getUser()
+										->getUID();
 
 			return !$this->lockService->isPathLocked($path, $userId);
 		} catch (InvalidPathException $e) {
@@ -56,29 +57,38 @@ class LockWrapper extends Wrapper {
 			$part = substr($path1, strlen($path2));
 			//This is a rename of the transfer file to the original file
 			if (strpos($part, '.ocTransferId') === 0) {
-				return $this->checkPermissions($path2, Constants::PERMISSION_CREATE) && parent::rename($path1, $path2);
+				return $this->checkPermissions($path2, Constants::PERMISSION_CREATE)
+					   && parent::rename($path1, $path2);
 			}
 		}
-		$permissions = $this->file_exists($path2) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+		$permissions =
+			$this->file_exists($path2) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
 		$sourceParent = dirname($path1);
 		if ($sourceParent === '.') {
 			$sourceParent = '';
 		}
-		return $this->checkPermissions($sourceParent, Constants::PERMISSION_DELETE) &&
-			$this->checkPermissions($path1, Constants::PERMISSION_UPDATE & Constants::PERMISSION_READ) &&
-			$this->checkPermissions($path2, $permissions) &&
-			parent::rename($path1, $path2);
+
+		return $this->checkPermissions($sourceParent, Constants::PERMISSION_DELETE)
+			   && $this->checkPermissions($path1, Constants::PERMISSION_UPDATE & Constants::PERMISSION_READ)
+			   && $this->checkPermissions($path2, $permissions)
+			   && parent::rename($path1, $path2);
 	}
 
 	public function copy($path1, $path2) {
-		$permissions = $this->file_exists($path2) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
-		return $this->checkPermissions($path2, $permissions) &&
-			$this->checkPermissions($path1, Constants::PERMISSION_READ) &&
-			parent::copy($path1, $path2);
+		$permissions =
+			$this->file_exists($path2) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+
+		return $this->checkPermissions($path2, $permissions)
+			   && $this->checkPermissions(
+				$path1, Constants::PERMISSION_READ
+			)
+			   && parent::copy($path1, $path2);
 	}
 
 	public function touch($path, $mtime = null) {
-		$permissions = $this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+		$permissions =
+			$this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+
 		return $this->checkPermissions($path, $permissions) && parent::touch($path, $mtime);
 	}
 
@@ -88,16 +98,18 @@ class LockWrapper extends Wrapper {
 
 	public function rmdir($path) {
 		return $this->checkPermissions($path, Constants::PERMISSION_DELETE)
-			&& parent::rmdir($path);
+			   && parent::rmdir($path);
 	}
 
 	public function unlink($path) {
 		return $this->checkPermissions($path, Constants::PERMISSION_DELETE)
-			&& parent::unlink($path);
+			   && parent::unlink($path);
 	}
 
 	public function file_put_contents($path, $data) {
-		$permissions = $this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+		$permissions =
+			$this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+
 		return $this->checkPermissions($path, $permissions) ? parent::file_put_contents($path, $data) : false;
 	}
 
@@ -105,13 +117,17 @@ class LockWrapper extends Wrapper {
 		if ($mode === 'r' or $mode === 'rb') {
 			$permissions = Constants::PERMISSION_READ;
 		} else {
-			$permissions = $this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+			$permissions =
+				$this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
 		}
+
 		return $this->checkPermissions($path, $permissions) ? parent::fopen($path, $mode) : false;
 	}
 
 	public function writeStream(string $path, $stream, int $size = null): int {
-		$permissions = $this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+		$permissions =
+			$this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+
 		return $this->checkPermissions($path, $permissions) ? parent::writeStream($path, $stream, $size) : 0;
 	}
 
@@ -119,6 +135,7 @@ class LockWrapper extends Wrapper {
 		if (!$this->checkPermissions($path, Constants::PERMISSION_READ)) {
 			return false;
 		}
+
 		return parent::file_get_contents($path);
 	}
 }
