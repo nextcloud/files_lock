@@ -177,8 +177,8 @@ class LockService {
 
 		$known = $this->locksRequest->getFromFileId($lock->getFileId());
 
-		if (!$force && $known->getUserId() !== $known->getUserId()) {
-			throw new UnauthorizedUnlockException();
+		if (!$force && $lock->getUserId() !== $known->getUserId()) {
+			throw new UnauthorizedUnlockException('File can only be unlocked by the owner of the lock');
 		}
 
 		$this->locksRequest->delete($known);
