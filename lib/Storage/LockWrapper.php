@@ -26,6 +26,7 @@ use OCA\FilesLock\Service\LockService;
 use OCP\Constants;
 use OCP\Files\InvalidPathException;
 use OCP\IUserSession;
+use OCP\Lock\LockedException;
 
 class LockWrapper extends Wrapper {
 	/** @var LockService */
@@ -40,7 +41,38 @@ class LockWrapper extends Wrapper {
 		$this->userSession = $arguments['user_session'];
 	}
 
-	protected function checkPermissions($path, $permissions) {
+
+	/**
+	 * @param $path
+	 * @param $permissions
+	 *
+	 * @return bool
+	 * @throws LockedException
+	 */
+	protected function checkPermissions($path, $permissions): bool {
+		if (!$this->isLocked($path)) {
+			return true;
+		}
+
+		\OC::$server->getLogger()
+					->log(3, '---- ' . $permissions);
+		switch ($permissions) {
+			case Constants::PERMISSION_DELETE:
+			case Constants::PERMISSION_UPDATE:
+				throw new LockedException($path);
+
+			default:
+				return false;
+		}
+
+	}
+
+	/**
+	 * @param $path
+	 *
+	 * @return bool
+	 */
+	protected function isLocked($path): bool {
 		try {
 			$user = $this->userSession->getUser();
 			$userId = '';
@@ -48,12 +80,13 @@ class LockWrapper extends Wrapper {
 				$userId = $user->getUID();
 			}
 
-			return !$this->lockService->isPathLocked($path, $userId);
+			return $this->lockService->isPathLocked($path, $userId);
 		} catch (InvalidPathException $e) {
 		}
 
-		return true;
+		return false;
 	}
+
 
 	public function rename($path1, $path2) {
 		if (strpos($path1, $path2) === 0) {
