@@ -50,7 +50,7 @@
 				mime: 'all',
 				order: -140,
 				iconClass: 'icon-security',
-				permissions: OC.PERMISSION_READ,
+				permissions: OC.PERMISSION_UPDATE,
 				actionHandler: self.switchLock
 			})
 
@@ -69,7 +69,7 @@
 				mime: 'all',
 				order: -140,
 				type: OCA.Files.FileActions.TYPE_INLINE,
-				permissions: OC.PERMISSION_READ,
+				permissions: OC.PERMISSION_UPDATE,
 				actionHandler: self.switchLock
 			})
 		},
@@ -78,24 +78,23 @@
 			var fileId = context.$file.data('id')
 			var locked = context.$file.data('locked')
 			var model = context.fileList.getModelForFile(fileName)
-			model.set('locked', !locked)
 			if (locked !== undefined && locked) {
 				$.ajax({
 					method: 'DELETE',
 					url: OC.generateUrl('/apps/files_lock/lock/' + fileId)
-				}).done(function (res) {
-					// success ?
-				}).fail(function () {
-					// error
+				}).done(function(res) {
+					model.set('locked', false)
+				}).fail(function(res) {
+					OCP.Toast.warning(res.responseJSON.message)
 				});
 			} else {
 				$.ajax({
 					method: 'PUT',
 					url: OC.generateUrl('/apps/files_lock/lock/' + fileId)
-				}).done(function (res) {
-					// success ?
-				}).fail(function () {
-					// error
+				}).done(function(res) {
+					model.set('locked', true)
+				}).fail(function(res) {
+					OCP.Toast.warning(res.responseJSON.message)
 				});
 			}
 		}
