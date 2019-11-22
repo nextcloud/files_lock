@@ -34,6 +34,7 @@ use daita\MySmallPhpTools\Exceptions\RowNotFoundException;
 use daita\MySmallPhpTools\Traits\TArrayTools;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
+use OCA\FilesLock\Service\ConfigService;
 
 
 /**
@@ -141,7 +142,7 @@ class LocksRequestBuilder extends CoreRequestBuilder {
 	 * @return FileLock
 	 */
 	public function parseLockSelectSql(array $data): FileLock {
-		$lock = new FileLock();
+		$lock = new FileLock($this->configService->getTimeoutSeconds());
 		$lock->importFromDatabase($data);
 
 		return $lock;

@@ -155,7 +155,7 @@ class LockService {
 			throw new NotFileException('Must be a file, seems to be a folder.');
 		}
 
-		$lock = new FileLock();
+		$lock = new FileLock($this->configService->getTimeoutSeconds());
 		$lock->setUserId($user->getUID());
 		$lock->setFileId($file->getId());
 

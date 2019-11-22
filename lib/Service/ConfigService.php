@@ -80,6 +80,14 @@ class ConfigService {
 
 
 	/**
+	 * @return int
+	 */
+	public function getTimeoutSeconds(): int {
+		return ((int)$this->getAppValue(ConfigService::LOCK_TIMEOUT)) * 60;
+	}
+
+
+	/**
 	 * Get a value by key
 	 *
 	 * @param string $key

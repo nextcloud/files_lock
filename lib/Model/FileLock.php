@@ -62,13 +62,19 @@ class FileLock implements IQueryRow, JsonSerializable {
 	private $fileId = 0;
 
 	/** @var int */
+	private $timeout = 1800;
+
+	/** @var int */
 	private $creation = 0;
 
 
 	/**
 	 * FileLock constructor.
+	 *
+	 * @param int $timeout
 	 */
-	public function __construct() {
+	public function __construct(int $timeout = 1800) {
+		$this->timeout = $timeout;
 	}
 
 
@@ -170,6 +176,25 @@ class FileLock implements IQueryRow, JsonSerializable {
 	/**
 	 * @return int
 	 */
+	public function getTimeout(): int {
+		return $this->timeout;
+	}
+
+	/**
+	 * @param int $timeout
+	 *
+	 * @return FileLock
+	 */
+	public function setTimeout(int $timeout): self {
+		$this->timeout = $timeout;
+
+		return $this;
+	}
+
+
+	/**
+	 * @return int
+	 */
 	public function getCreation(): int {
 		return $this->creation;
 	}
@@ -193,7 +218,7 @@ class FileLock implements IQueryRow, JsonSerializable {
 		$lock = new LockInfo();
 		$lock->owner = $this->getUserId();
 		$lock->token = $this->getToken();
-		$lock->timeout = 100000;
+		$lock->timeout = $this->getTimeout();
 		$lock->created = $this->getCreation();
 		$lock->scope = LockInfo::EXCLUSIVE;
 		$lock->depth = 1;

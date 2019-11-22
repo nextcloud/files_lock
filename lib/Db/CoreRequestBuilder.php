@@ -32,6 +32,7 @@ namespace OCA\FilesLock\Db;
 
 use OC;
 use OC\DB\SchemaWrapper;
+use OCA\FilesLock\Service\ConfigService;
 use OCA\FilesLock\Service\MiscService;
 use OCP\IDBConnection;
 use OCP\ILogger;
@@ -57,6 +58,9 @@ class CoreRequestBuilder {
 	/** @var IDBConnection */
 	protected $dbConnection;
 
+	/** @var ConfigService */
+	protected $configService;
+
 	/** @var MiscService */
 	protected $miscService;
 
@@ -70,11 +74,15 @@ class CoreRequestBuilder {
 	 *
 	 * @param IDBConnection $connection
 	 * @param ILogger $logger
+	 * @param ConfigService $configService
 	 * @param MiscService $miscService
 	 */
-	public function __construct(IDBConnection $connection, ILogger $logger, MiscService $miscService) {
+	public function __construct(
+		IDBConnection $connection, ILogger $logger, ConfigService $configService, MiscService $miscService
+	) {
 		$this->dbConnection = $connection;
 		$this->logger = $logger;
+		$this->configService = $configService;
 		$this->miscService = $miscService;
 	}
 
