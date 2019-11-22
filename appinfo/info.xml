@@ -10,7 +10,7 @@ Allow your users to temporary locks their files to avoid conflicts while working
 
 ]]>
 	</description>
-	<version>0.5.0</version>
+	<version>0.6.0</version>
 	<licence>agpl</licence>
 	<author>Maxence Lange</author>
 	<namespace>FilesLock</namespace>

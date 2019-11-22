@@ -54,8 +54,6 @@ class LockWrapper extends Wrapper {
 			return true;
 		}
 
-		\OC::$server->getLogger()
-					->log(3, '---- ' . $permissions);
 		switch ($permissions) {
 			case Constants::PERMISSION_DELETE:
 			case Constants::PERMISSION_UPDATE:
