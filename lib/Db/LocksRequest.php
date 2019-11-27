@@ -87,6 +87,10 @@ class LocksRequest extends LocksRequestBuilder {
 	 * @param int[] $ids
 	 */
 	public function removeIds(array $ids) {
+		if (empty($ids)) {
+			return;
+		}
+
 		$qb = $this->getLocksDeleteSql();
 		$qb->limitToIds($ids);
 
