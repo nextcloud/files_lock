@@ -1,5 +1,5 @@
 # Changelog
 
-### 0.6.1
+### 0.7.0
 
-First release
+First release, pre-18
