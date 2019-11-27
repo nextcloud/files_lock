@@ -88,6 +88,7 @@ class Application extends App {
 			'OCA\Files::loadAdditionalScripts',
 			function () {
 				Util::addScript(self::APP_NAME, 'files');
+				Util::addStyle(self::APP_NAME, 'files_lock');
 			}
 		);
 

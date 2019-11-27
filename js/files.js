@@ -47,9 +47,9 @@
 					}
 					return t('files_lock', 'Lock file')
 				},
-				mime: 'all',
+				mime: 'file',
 				order: -140,
-				iconClass: 'icon-security',
+				iconClass: 'icon-password',
 				permissions: OC.PERMISSION_UPDATE,
 				actionHandler: self.switchLock
 			})
@@ -61,12 +61,13 @@
 					var locked = context.$file.data('locked')
 					var $actionLink = $('<span/>')
 					if (locked) {
-						$actionLink.text('Locked')
+						$actionLink.addClass('locking-inline-state')
+						$actionLink.addClass('icon-password')
 					}
 					context.$file.find('a.name>span.fileactions').append($actionLink)
 					return $actionLink
 				},
-				mime: 'all',
+				mime: 'file',
 				order: -140,
 				type: OCA.Files.FileActions.TYPE_INLINE,
 				permissions: OC.PERMISSION_UPDATE,
