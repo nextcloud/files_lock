@@ -228,8 +228,7 @@ class FileLock implements IQueryRow, JsonSerializable {
 		$lock->created = $this->getCreation();
 		$lock->scope = LockInfo::EXCLUSIVE;
 		$lock->depth = 1;
-
-//		$lock->uri = $this->getUri();
+		$lock->uri = $this->getUri();
 
 		return $lock;
 	}
