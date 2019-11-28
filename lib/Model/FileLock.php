@@ -191,6 +191,12 @@ class FileLock implements IQueryRow, JsonSerializable {
 		return $this;
 	}
 
+	/**
+	 * @return int
+	 */
+	public function getETA(): int {
+		return 1;
+	}
 
 	/**
 	 * @return int

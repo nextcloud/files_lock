@@ -242,15 +242,21 @@ class LockService {
 	/**
 	 * @param string $path
 	 * @param string $userId
+	 * @param FileLock $lock
 	 *
 	 * @return bool
 	 * @throws InvalidPathException
 	 */
-	public function isPathLocked(string $path, string $userId = ''): bool {
+	public function isPathLocked(string $path, string $userId, &$lock = null): bool {
 		try {
-			$file = $this->fileService->getFileFromPath($path);
+			$file = $this->fileService->getFileFromPath($path, $userId);
 
-			return $this->isFileLocked($file->getId(), $userId);
+			// FIXME: too hacky - might be an issue if we start locking folders.
+			if ($file->getId() === null) {
+				throw new NotFoundException();
+			}
+
+			return $this->isFileLocked($file->getId(), $userId, $lock);
 		} catch (NotFoundException $e) {
 		}
 
@@ -260,10 +266,11 @@ class LockService {
 	/**
 	 * @param int $fileId
 	 * @param string $userId
+	 * @param FileLock $lock
 	 *
 	 * @return bool
 	 */
-	public function isFileLocked(int $fileId, string $userId = ''): bool {
+	public function isFileLocked(int $fileId, string $userId, &$lock = null): bool {
 		try {
 			$lock = $this->getLockFromFileId($fileId);
 			if ($lock->getUserId() === $userId) {

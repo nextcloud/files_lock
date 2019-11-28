@@ -22,6 +22,8 @@
 namespace OCA\FilesLock\Storage;
 
 use OC\Files\Storage\Wrapper\Wrapper;
+use OC\User\NoUserException;
+use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\LockService;
 use OCP\Constants;
 use OCP\Files\InvalidPathException;
@@ -50,13 +52,22 @@ class LockWrapper extends Wrapper {
 	 * @throws LockedException
 	 */
 	protected function checkPermissions($path, $permissions): bool {
-		if (!$this->isLocked($path)) {
+		try {
+			$userId = $this->getViewer($path);
+		} catch (NoUserException $e) {
+			return true;
+		}
+
+		/** @var FileLock $lock */
+		if (!$this->isLocked($path, $userId, $lock)) {
 			return true;
 		}
 
 		switch ($permissions) {
 			case Constants::PERMISSION_DELETE:
 			case Constants::PERMISSION_UPDATE:
+				// NC18 - TemporaryLockedException() - switch to $lock->getETA()
+				// throw new LockedException($path, null, $lock->getToken(), $lock->getOwner(), $lock->getTimeout());
 				throw new LockedException($path);
 
 			default:
@@ -65,20 +76,38 @@ class LockWrapper extends Wrapper {
 
 	}
 
+
+	/**
+	 * @param string $path
+	 *
+	 * @return string
+	 * @throws NoUserException
+	 */
+	protected function getViewer(string $path): string {
+		$user = $this->userSession->getUser();
+		if ($user !== null) {
+			$userId = $user->getUID();
+		} else {
+			$userId = $this->getOwner($path);
+		}
+
+		if ($userId === false || $userId === '') {
+			throw new NoUserException();
+		}
+
+		return $userId;
+	}
+
+
 	/**
 	 * @param $path
+	 * @param FileLock $lock
 	 *
 	 * @return bool
 	 */
-	protected function isLocked($path): bool {
+	protected function isLocked(string $path, string $userId, &$lock = null): bool {
 		try {
-			$user = $this->userSession->getUser();
-			$userId = '';
-			if ($user !== null) {
-				$userId = $user->getUID();
-			}
-
-			return $this->lockService->isPathLocked($path, $userId);
+			return $this->lockService->isPathLocked($path, $userId, $lock);
 		} catch (InvalidPathException $e) {
 		}
 
@@ -172,4 +201,5 @@ class LockWrapper extends Wrapper {
 
 		return parent::file_get_contents($path);
 	}
+
 }

@@ -85,18 +85,17 @@ class FileService {
 
 	/**
 	 * @param string $path
+	 * @param string $userId
 	 *
 	 * @return Node
 	 * @throws NotFoundException
 	 */
-	public function getFileFromPath(string $path): Node {
+	public function getFileFromPath(string $path, string $userId): Node {
 		if (substr($path, 0, 6) !== 'files/') {
 			throw new NotFoundException();
 		}
 
 		$path = '/' . substr($path, 6);
-		$user = $this->userSession->getUser();
-		$userId = $user->getUID();
 		$file = $this->rootFolder->getUserFolder($userId)
 								 ->get($path);
 
