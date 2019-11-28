@@ -51,6 +51,9 @@ class Application extends App {
 	const APP_NAME = 'files_lock';
 
 	const DAV_PROPERTY_LOCK = '{http://nextcloud.org/ns}lock';
+	const DAV_PROPERTY_LOCK_OWNER = '{http://nextcloud.org/ns}lock-owner';
+	const DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME = '{http://nextcloud.org/ns}lock-owner-displayname';
+	const DAV_PROPERTY_LOCK_TIME = '{http://nextcloud.org/ns}lock-time';
 
 	/** @var FileService */
 	private $fileService;
