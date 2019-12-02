@@ -90,7 +90,7 @@ class FileService {
 	 * @return Node
 	 * @throws NotFoundException
 	 */
-	public function getFileFromPath(string $path, string $userId): Node {
+	public function getFileFromPath(string $userId, string $path): Node {
 		if (substr($path, 0, 6) !== 'files/') {
 			throw new NotFoundException();
 		}

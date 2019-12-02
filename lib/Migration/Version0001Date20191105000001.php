@@ -107,9 +107,11 @@ class Version0001Date20191105000001 extends SimpleMigrationStep {
 			]
 		);
 		$table->addColumn(
-			'creation', 'datetime',
+			'creation', 'bigint',
 			[
 				'notnull' => true,
+				'unsigned' => true,
+				'length' => 14
 			]
 		);
 

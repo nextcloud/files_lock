@@ -30,12 +30,10 @@
 namespace OCA\FilesLock\Db;
 
 
-use DateTime;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Exception;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
-use OCP\DB\QueryBuilder\IQueryBuilder;
 
 
 /**
@@ -53,15 +51,8 @@ class LocksRequest extends LocksRequestBuilder {
 		$qb = $this->getLocksInsertSql();
 		$qb->setValue('user_id', $qb->createNamedParameter($lock->getUserId()))
 		   ->setValue('file_id', $qb->createNamedParameter($lock->getFileId()))
-		   ->setValue('token', $qb->createNamedParameter($lock->getToken()));
-
-		try {
-			$qb->setValue(
-				'creation',
-				$qb->createNamedParameter(new DateTime('now'), IQueryBuilder::PARAM_DATE)
-			);
-		} catch (Exception $e) {
-		}
+		   ->setValue('token', $qb->createNamedParameter($lock->getToken()))
+		   ->setValue('creation', $qb->createNamedParameter($lock->getCreation()));
 
 		try {
 			$qb->execute();

@@ -75,6 +75,7 @@ class FileLock implements IQueryRow, JsonSerializable {
 	 */
 	public function __construct(int $timeout = 1800) {
 		$this->timeout = $timeout;
+		$this->creation = time();
 	}
 
 
@@ -195,7 +196,10 @@ class FileLock implements IQueryRow, JsonSerializable {
 	 * @return int
 	 */
 	public function getETA(): int {
-		return 1;
+		$end = $this->getCreation() + $this->getTimeout();
+		$eta = $end - time();
+
+		return ($eta < 1) ? 0 : $eta;
 	}
 
 	/**
@@ -269,6 +273,7 @@ class FileLock implements IQueryRow, JsonSerializable {
 			'userId'   => $this->getUserId(),
 			'fileId'   => $this->getFileId(),
 			'token'    => $this->getToken(),
+			'eta'      => $this->getETA(),
 			'creation' => $this->getCreation()
 		];
 	}

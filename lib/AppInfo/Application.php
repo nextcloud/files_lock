@@ -30,6 +30,7 @@
 namespace OCA\FilesLock\AppInfo;
 
 
+use OC;
 use OC\Files\Filesystem;
 use OCA\DAV\Connector\Sabre\CachingTree;
 use OCA\DAV\Connector\Sabre\ObjectTree;
@@ -40,6 +41,7 @@ use OCA\FilesLock\Service\MiscService;
 use OCA\FilesLock\Storage\LockWrapper;
 use OCP\AppFramework\App;
 use OCP\AppFramework\QueryException;
+use OCP\IUserSession;
 use OCP\SabrePluginEvent;
 use OCP\Util;
 use Sabre\DAV\Locks\Plugin;
@@ -51,6 +53,10 @@ class Application extends App {
 	const APP_NAME = 'files_lock';
 
 	const DAV_PROPERTY_LOCK = '{http://nextcloud.org/ns}lock';
+
+
+	/** @var IUserSession */
+	private $userSession;
 
 	/** @var FileService */
 	private $fileService;
@@ -74,9 +80,10 @@ class Application extends App {
 	 *
 	 */
 	public function registerHooks() {
-		$eventDispatcher = \OC::$server->getEventDispatcher();
+		$eventDispatcher = OC::$server->getEventDispatcher();
 		$c = $this->getContainer();
 		try {
+			$this->userSession = OC::$server->getUserSession();
 			$this->fileService = $c->query(FileService::class);
 			$this->lockService = $c->query(LockService::class);
 			$this->miscService = $c->query(MiscService::class);
@@ -86,7 +93,7 @@ class Application extends App {
 
 		$eventDispatcher->addListener(
 			'OCA\Files::loadAdditionalScripts',
-			function () {
+			function() {
 				Util::addScript(self::APP_NAME, 'files');
 				Util::addStyle(self::APP_NAME, 'files_lock');
 			}
@@ -107,10 +114,13 @@ class Application extends App {
 					break;
 			}
 
-			$server->on('propFind',    [$this->lockService, 'propFind']);
+			$server->on('propFind', [$this->lockService, 'propFind']);
 			$server->addPlugin(
 				new Plugin(
-					new FilesLockPlugin($this->fileService, $this->lockService, $this->miscService, $absolute)
+					new FilesLockPlugin(
+						$this->userSession, $this->fileService, $this->lockService, $this->miscService,
+						$absolute
+					)
 				)
 			);
 		}
@@ -132,8 +142,10 @@ class Application extends App {
 			return new LockWrapper(
 				[
 					'storage'      => $storage,
-					'lock_service' => $this->lockService,
 					'user_session' => $userSession,
+					'file_service' => $this->fileService,
+					'lock_service' => $this->lockService,
+					'misc_service' => $this->miscService
 				]
 			);
 		}, 10

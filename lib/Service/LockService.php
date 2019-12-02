@@ -131,7 +131,7 @@ class LockService {
 		$this->miscService->log('locking file ' . json_encode($lock), 1);
 
 		try {
-			$known = $this->locksRequest->getFromFileId($lock->getFileId());
+			$known = $this->getLockFromFileId($lock->getFileId());
 
 			throw new AlreadyLockedException('File is already locked by ' . $known->getUserId());
 		} catch (LockNotFoundException $e) {
@@ -175,7 +175,7 @@ class LockService {
 	public function unlock(FileLock $lock, bool $force = false) {
 		$this->miscService->log('unlocking file ' . json_encode($lock), 1);
 
-		$known = $this->locksRequest->getFromFileId($lock->getFileId());
+		$known = $this->getLockFromFileId($lock->getFileId());
 
 		if (!$force && $lock->getUserId() !== $known->getUserId()) {
 			throw new UnauthorizedUnlockException('File can only be unlocked by the owner of the lock');
@@ -235,53 +235,59 @@ class LockService {
 	 * @throws LockNotFoundException
 	 */
 	public function getLockFromFileId(int $fileId): FileLock {
-		return $this->locksRequest->getFromFileId($fileId);
-	}
-
-
-	/**
-	 * @param string $path
-	 * @param string $userId
-	 * @param FileLock $lock
-	 *
-	 * @return bool
-	 * @throws InvalidPathException
-	 */
-	public function isPathLocked(string $path, string $userId, &$lock = null): bool {
-		try {
-			$file = $this->fileService->getFileFromPath($path, $userId);
-
-			// FIXME: too hacky - might be an issue if we start locking folders.
-			if ($file->getId() === null) {
-				throw new NotFoundException();
-			}
-
-			return $this->isFileLocked($file->getId(), $userId, $lock);
-		} catch (NotFoundException $e) {
+		$lock = $this->locksRequest->getFromFileId($fileId);
+		if ($lock->getETA() === 0) {
+			$this->locksRequest->delete($lock);
+			throw new LockNotFoundException('lock is ignored and deleted as being too old.');
 		}
 
-		return false;
+		return $lock;
 	}
 
-	/**
-	 * @param int $fileId
-	 * @param string $userId
-	 * @param FileLock $lock
-	 *
-	 * @return bool
-	 */
-	public function isFileLocked(int $fileId, string $userId, &$lock = null): bool {
-		try {
-			$lock = $this->getLockFromFileId($fileId);
-			if ($lock->getUserId() === $userId) {
-				return false;
-			}
+//
+//	/**
+//	 * @param string $path
+//	 * @param string $userId
+//	 * @param FileLock $lock
+//	 *
+//	 * @return bool
+//	 * @throws InvalidPathException
+//	 */
+//	public function isPathLocked(string $path, string $userId, &$lock = null): bool {
+//		try {
+//			$file = $this->fileService->getFileFromPath($path, $userId);
+//
+//			// FIXME: too hacky - might be an issue if we start locking folders.
+//			if ($file->getId() === null) {
+//				throw new NotFoundException();
+//			}
+//
+//			return $this->isFileLocked($file->getId(), $userId, $lock);
+//		} catch (NotFoundException $e) {
+//		}
+//
+//		return false;
+//	}
 
-			return true;
-		} catch (LockNotFoundException $e) {
-			return false;
-		}
-	}
+//	/**
+//	 * @param int $fileId
+//	 * @param string $userId
+//	 * @param FileLock $lock
+//	 *
+//	 * @return bool
+//	 */
+//	public function isFileLocked(int $fileId, string $userId, &$lock = null): bool {
+//		try {
+//			$lock = $this->getLockFromFileId($fileId);
+//			if ($lock->getUserId() === $userId) {
+//				return false;
+//			}
+//
+//			return true;
+//		} catch (LockNotFoundException $e) {
+//			return false;
+//		}
+//	}
 
 
 	/**
