@@ -10,3 +10,8 @@ tr[data-locked='true'] .fileactions .action.action-menu.permanent {
 	position: relative;
 	opacity: 0.5;
 }
+
+.action-lockingdetails img {
+	padding: 8px !important;
+	border-radius: 50%;
+}

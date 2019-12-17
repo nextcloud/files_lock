@@ -83,6 +83,8 @@ class LockService {
 	/** @var bool */
 	private $lockRetrieved = false;
 
+	private $lockCache = null;
+
 
 	public function __construct(
 		$userId, LocksRequest $locksRequest, FileService $fileService, ConfigService $configService,
@@ -95,6 +97,23 @@ class LockService {
 		$this->miscService = $miscService;
 	}
 
+	/**
+	 * @param $node
+	 * @return getLockForNode|false
+	 */
+	private function getLockForNode($node) {
+		if ($this->lockCache[$node->getId()] !== null) {
+			return $this->lockCache[$node->getId()];
+		}
+
+		try {
+			$this->lockCache[$node->getId()] = $this->getLockFromCache($node->getId());
+		} catch (LockNotFoundException $e) {
+			$this->lockCache[$node->getId()] = false;
+		}
+
+		return $this->lockCache[$node->getId()];
+	}
 
 	/**
 	 * @param PropFind $propFind
@@ -103,21 +122,42 @@ class LockService {
 	 * @return void
 	 */
 	public function propFind(PropFind $propFind, INode $node) {
-		$propFind->handle(
-			Application::DAV_PROPERTY_LOCK, function() use ($node) {
-			try {
-				$lock = $this->getLockFromCache($node->getId());
+		$propFind->handle(Application::DAV_PROPERTY_LOCK, function() use ($node) {
+			$lock = $this->getLockForNode($node);
 
-//				if ($lock->getUserId() === $this->userId) {
-//					return false;
-//				}
-			} catch (LockNotFoundException $e) {
+			if ($lock === false) {
 				return false;
 			}
 
 			return true;
-		}
-		);
+		});
+
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER, function() use ($node) {
+			$lock = $this->getLockForNode($node);
+
+			if ($lock !== false) {
+				return $lock->getUserId();
+			}
+		});
+
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_TIME, function() use ($node) {
+			$lock = $this->getLockForNode($node);
+
+			if ($lock !== false) {
+				return $lock->getCreation();
+			}
+		});
+
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME, function() use ($node) {
+			$lock = $this->getLockForNode($node);
+
+			if ($lock !== false) {
+				$user = \OC::$server->getUserManager()->get($lock->getUserId());
+				if ($user !== null) {
+					return $user->getDisplayName();
+				}
+			}
+		});
 	}
 
 
