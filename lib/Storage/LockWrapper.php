@@ -22,23 +22,45 @@
 namespace OCA\FilesLock\Storage;
 
 use OC\Files\Storage\Wrapper\Wrapper;
+use OCA\FilesLock\Exceptions\LockNotFoundException;
+use OCA\FilesLock\Model\FileLock;
+use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
+use OCA\FilesLock\Service\MiscService;
 use OCP\Constants;
 use OCP\Files\InvalidPathException;
+use OCP\Files\NotFoundException;
 use OCP\IUserSession;
 use OCP\Lock\LockedException;
 
 class LockWrapper extends Wrapper {
+
+
+	/** @var FileService */
+	private $fileService;
+
 	/** @var LockService */
 	private $lockService;
+
+	/** @var MiscService */
+	private $miscService;
+
 	/** @var IUserSession */
 	private $userSession;
 
+
+	/**
+	 * LockWrapper constructor.
+	 *
+	 * @param $arguments
+	 */
 	public function __construct($arguments) {
 		parent::__construct($arguments);
 
-		$this->lockService = $arguments['lock_service'];
 		$this->userSession = $arguments['user_session'];
+		$this->fileService = $arguments['file_service'];
+		$this->lockService = $arguments['lock_service'];
+		$this->miscService = $arguments['misc_service'];
 	}
 
 
@@ -50,13 +72,33 @@ class LockWrapper extends Wrapper {
 	 * @throws LockedException
 	 */
 	protected function checkPermissions($path, $permissions): bool {
-		if (!$this->isLocked($path)) {
+		$viewerId = '';
+		$user = $this->userSession->getUser();
+		if ($user !== null) {
+			$viewerId = $user->getUID();
+			$ownerId = $viewerId;
+		} else {
+			$ownerId = $this->getOwner($path);
+		}
+
+		/** @var FileLock $lock */
+		if (!$this->isLocked($ownerId, $path, $viewerId, $lock)) {
+			return true;
+		}
+
+		/** @var FileLock $lock */
+		if (!$this->isLocked($path, $userId, $lock)) {
 			return true;
 		}
 
 		switch ($permissions) {
+			case Constants::PERMISSION_READ:
+				return true;
+
 			case Constants::PERMISSION_DELETE:
 			case Constants::PERMISSION_UPDATE:
+				// NC18 - TemporaryLockedException() - switch to $lock->getETA()
+				// throw new LockedException($path, null, $lock->getToken(), $lock->getOwner(), $lock->getTimeout());
 				throw new LockedException($path);
 
 			default:
@@ -65,21 +107,33 @@ class LockWrapper extends Wrapper {
 
 	}
 
+
 	/**
-	 * @param $path
+	 * @param string $ownerId
+	 * @param string $path
+	 * @param string $viewerId
+	 * @param FileLock $lock
 	 *
 	 * @return bool
 	 */
-	protected function isLocked($path): bool {
+	protected function isLocked(string $ownerId, string $path, string $viewerId, &$lock = null): bool {
 		try {
-			$user = $this->userSession->getUser();
-			$userId = '';
-			if ($user !== null) {
-				$userId = $user->getUID();
+			$file = $this->fileService->getFileFromPath($ownerId, $path);
+		} catch (NotFoundException $e) {
+			return false;
+		}
+
+		try {
+			// FIXME: too hacky - might be an issue if we start locking folders.
+			if ($file->getId() === null) {
+				return false;
 			}
 
-			return $this->lockService->isPathLocked($path, $userId);
-		} catch (InvalidPathException $e) {
+			$lock = $this->lockService->getLockFromFileId($file->getId());
+			if ($viewerId === '' || $lock->getUserId() !== $viewerId) {
+				return true;
+			}
+		} catch (LockNotFoundException | InvalidPathException | NotFoundException $e) {
 		}
 
 		return false;
@@ -172,4 +226,5 @@ class LockWrapper extends Wrapper {
 
 		return parent::file_get_contents($path);
 	}
+
 }
