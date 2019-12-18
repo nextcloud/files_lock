@@ -72,9 +72,10 @@
 							return t('files_lock', 'Locked by {0}', [ context.$file.data('lockOwnerDisplayname') ])
 						}
 					}
+					return '';
 				},
 				mime: 'file',
-				order: -140,
+				order: -141,
 				iconClass: '',
 				icon: function(fileName, context) {
 					var lockOwner = context.$file.data('lockOwner')
