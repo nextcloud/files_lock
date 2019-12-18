@@ -32,6 +32,7 @@ namespace OCA\FilesLock\Service;
 
 use daita\MySmallPhpTools\Traits\TStringTools;
 use Exception;
+use OCA\DAV\Connector\Sabre\Node as SabreNode;
 use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\AlreadyLockedException;
@@ -83,7 +84,8 @@ class LockService {
 	/** @var bool */
 	private $lockRetrieved = false;
 
-	private $lockCache = null;
+	/** @var array */
+	private $lockCache = [];
 
 
 	public function __construct(
@@ -98,21 +100,22 @@ class LockService {
 	}
 
 	/**
-	 * @param $node
-	 * @return getLockForNode|false
+	 * @param int $nodeId
+	 *
+	 * @return FileLock|bool
 	 */
-	private function getLockForNode($node) {
-		if ($this->lockCache[$node->getId()] !== null) {
-			return $this->lockCache[$node->getId()];
+	private function getLockForNodeId(int $nodeId) {
+		if (array_key_exists($nodeId, $this->lockCache) && $this->lockCache[$nodeId] !== null) {
+			return $this->lockCache[$nodeId];
 		}
 
 		try {
-			$this->lockCache[$node->getId()] = $this->getLockFromCache($node->getId());
+			$this->lockCache[$nodeId] = $this->getLockFromCache($nodeId);
 		} catch (LockNotFoundException $e) {
-			$this->lockCache[$node->getId()] = false;
+			$this->lockCache[$nodeId] = false;
 		}
 
-		return $this->lockCache[$node->getId()];
+		return $this->lockCache[$nodeId];
 	}
 
 	/**
@@ -122,42 +125,56 @@ class LockService {
 	 * @return void
 	 */
 	public function propFind(PropFind $propFind, INode $node) {
-		$propFind->handle(Application::DAV_PROPERTY_LOCK, function() use ($node) {
-			$lock = $this->getLockForNode($node);
+		if (!$node instanceof SabreNode) {
+			return;
+		}
+		$nodeId = $node->getId();
+
+		$propFind->handle(
+			Application::DAV_PROPERTY_LOCK, function() use ($nodeId) {
+			$lock = $this->getLockForNodeId($nodeId);
 
 			if ($lock === false) {
 				return false;
 			}
 
 			return true;
-		});
+		}
+		);
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER, function() use ($node) {
-			$lock = $this->getLockForNode($node);
+		$propFind->handle(
+			Application::DAV_PROPERTY_LOCK_OWNER, function() use ($nodeId) {
+			$lock = $this->getLockForNodeId($nodeId);
 
 			if ($lock !== false) {
 				return $lock->getUserId();
 			}
-		});
+		}
+		);
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_TIME, function() use ($node) {
-			$lock = $this->getLockForNode($node);
+		$propFind->handle(
+			Application::DAV_PROPERTY_LOCK_TIME, function() use ($nodeId) {
+			$lock = $this->getLockForNodeId($nodeId);
 
 			if ($lock !== false) {
 				return $lock->getCreation();
 			}
-		});
+		}
+		);
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME, function() use ($node) {
-			$lock = $this->getLockForNode($node);
+		$propFind->handle(
+			Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME, function() use ($nodeId) {
+			$lock = $this->getLockForNodeId($nodeId);
 
 			if ($lock !== false) {
-				$user = \OC::$server->getUserManager()->get($lock->getUserId());
+				$user = \OC::$server->getUserManager()
+									->get($lock->getUserId());
 				if ($user !== null) {
 					return $user->getDisplayName();
 				}
 			}
-		});
+		}
+		);
 	}
 
 
