@@ -1,5 +1,5 @@
 # Changelog
 
-### 0.7.0
+### 0.8.0
 
-First release, pre-18
+Beta release, nc18
