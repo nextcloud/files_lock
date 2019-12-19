@@ -10,7 +10,7 @@ cert_dir=$(HOME)/.nextcloud/certificates
 codecov_token_dir=$(HOME)/.nextcloud/codecov_token
 github_account=nextcloud
 branch=master
-version+=0.8.0
+version+=0.8.1
 
 all: appstore
 
@@ -41,7 +41,7 @@ clean:
 	rm -rf node_modules
 
 composer:
-	composer install
+	composer install --prefer-dist
 
 test: SHELL:=/bin/bash
 test: composer
