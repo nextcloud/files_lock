@@ -31,6 +31,7 @@ namespace OCA\FilesLock\AppInfo;
 
 require_once __DIR__ . '/autoload.php';
 
-$app = new Application();
+/** @var Application $app */
+$app = \OC::$server->query(Application::class);
 $app->registerHooks();
 
