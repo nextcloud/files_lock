@@ -30,7 +30,6 @@
 namespace OCA\FilesLock\AppInfo;
 
 
-use OC;
 use OC\Files\Filesystem;
 use OCA\DAV\Connector\Sabre\CachingTree;
 use OCA\DAV\Connector\Sabre\ObjectTree;
@@ -41,12 +40,18 @@ use OCA\FilesLock\Service\MiscService;
 use OCA\FilesLock\Storage\LockWrapper;
 use OCP\AppFramework\App;
 use OCP\AppFramework\QueryException;
+use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IUserSession;
 use OCP\SabrePluginEvent;
 use OCP\Util;
 use Sabre\DAV\Locks\Plugin;
 
 
+/**
+ * Class Application
+ *
+ * @package OCA\FilesLock\AppInfo
+ */
 class Application extends App {
 
 
@@ -57,6 +62,9 @@ class Application extends App {
 	const DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME = '{http://nextcloud.org/ns}lock-owner-displayname';
 	const DAV_PROPERTY_LOCK_TIME = '{http://nextcloud.org/ns}lock-time';
 
+
+	/** @var IEventDispatcher */
+	private $eventDispatcher;
 
 	/** @var IUserSession */
 	private $userSession;
@@ -83,10 +91,10 @@ class Application extends App {
 	 *
 	 */
 	public function registerHooks() {
-		$eventDispatcher = OC::$server->getEventDispatcher();
 		$c = $this->getContainer();
 		try {
-			$this->userSession = OC::$server->getUserSession();
+			$this->eventDispatcher = $c->query(IEventDispatcher::class);
+			$this->userSession = $c->query(IUserSession::class);
 			$this->fileService = $c->query(FileService::class);
 			$this->lockService = $c->query(LockService::class);
 			$this->miscService = $c->query(MiscService::class);
@@ -94,7 +102,7 @@ class Application extends App {
 			return;
 		}
 
-		$eventDispatcher->addListener(
+		$this->eventDispatcher->addListener(
 			'OCA\Files::loadAdditionalScripts',
 			function() {
 				Util::addScript(self::APP_NAME, 'files');
@@ -103,7 +111,7 @@ class Application extends App {
 		);
 
 
-		$eventDispatcher->addListener(
+		$this->eventDispatcher->addListener(
 			'OCA\DAV\Connector\Sabre::addPlugin', function(SabrePluginEvent $e) {
 			$server = $e->getServer();
 			$absolute = false;
@@ -136,16 +144,12 @@ class Application extends App {
 	 * @internal
 	 */
 	public function addStorageWrapper() {
-		$userSession = $this->getContainer()
-							->getServer()
-							->getUserSession();
-
 		Filesystem::addStorageWrapper(
-			'files_lock', function($mountPoint, $storage) use ($userSession) {
+			'files_lock', function($mountPoint, $storage) {
 			return new LockWrapper(
 				[
 					'storage'      => $storage,
-					'user_session' => $userSession,
+					'user_session' => $this->userSession,
 					'file_service' => $this->fileService,
 					'lock_service' => $this->lockService,
 					'misc_service' => $this->miscService

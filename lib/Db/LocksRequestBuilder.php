@@ -34,7 +34,6 @@ use daita\MySmallPhpTools\Exceptions\RowNotFoundException;
 use daita\MySmallPhpTools\Traits\TArrayTools;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
-use OCA\FilesLock\Service\ConfigService;
 
 
 /**

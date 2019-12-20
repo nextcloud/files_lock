@@ -29,9 +29,16 @@
 
 namespace OCA\FilesLock\AppInfo;
 
+use OC;
+use OCP\AppFramework\QueryException;
+
 require_once __DIR__ . '/autoload.php';
 
 /** @var Application $app */
-$app = \OC::$server->query(Application::class);
-$app->registerHooks();
+try {
+	$app = OC::$server->query(Application::class);
+	$app->registerHooks();
+} catch (QueryException $e) {
+	OC::$server->getLogger()->log(1, 'failed to load Application');
+}
 

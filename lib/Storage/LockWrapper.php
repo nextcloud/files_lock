@@ -86,11 +86,6 @@ class LockWrapper extends Wrapper {
 			return true;
 		}
 
-		/** @var FileLock $lock */
-		if (!$this->isLocked($path, $userId, $lock)) {
-			return true;
-		}
-
 		switch ($permissions) {
 			case Constants::PERMISSION_READ:
 				return true;

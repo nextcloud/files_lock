@@ -44,6 +44,7 @@ use OCP\Files\InvalidPathException;
 use OCP\Files\Node;
 use OCP\Files\NotFoundException;
 use OCP\IUser;
+use OCP\IUserManager;
 use Sabre\DAV\INode;
 use Sabre\DAV\PropFind;
 
@@ -64,6 +65,9 @@ class LockService {
 
 	/** @var string */
 	private $userId;
+
+	/** @var IUserManager */
+	private $userManager;
 
 	/** @var LocksRequest */
 	private $locksRequest;
@@ -89,10 +93,11 @@ class LockService {
 
 
 	public function __construct(
-		$userId, LocksRequest $locksRequest, FileService $fileService, ConfigService $configService,
-		MiscService $miscService
+		$userId, IUserManager $userManager, LocksRequest $locksRequest, FileService $fileService,
+		ConfigService $configService, MiscService $miscService
 	) {
 		$this->userId = $userId;
+		$this->userManager = $userManager;
 		$this->locksRequest = $locksRequest;
 		$this->fileService = $fileService;
 		$this->configService = $configService;
@@ -149,6 +154,8 @@ class LockService {
 			if ($lock !== false) {
 				return $lock->getUserId();
 			}
+
+			return null;
 		}
 		);
 
@@ -159,6 +166,8 @@ class LockService {
 			if ($lock !== false) {
 				return $lock->getCreation();
 			}
+
+			return 0;
 		}
 		);
 
@@ -167,12 +176,13 @@ class LockService {
 			$lock = $this->getLockForNodeId($nodeId);
 
 			if ($lock !== false) {
-				$user = \OC::$server->getUserManager()
-									->get($lock->getUserId());
+				$user = $this->userManager->get($lock->getUserId());
 				if ($user !== null) {
 					return $user->getDisplayName();
 				}
 			}
+
+			return null;
 		}
 		);
 	}
