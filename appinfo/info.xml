@@ -6,7 +6,7 @@
 	<summary>Temporary lock your files</summary>
 	<description><![CDATA[
 
-Allow your users to temporary locks their files to avoid conflicts while working in a Collaboration environment.
+Allow your users to temporary locks their files to avoid conflicts while working on shared files.
 
 ]]>
 	</description>
@@ -26,7 +26,7 @@ Allow your users to temporary locks their files to avoid conflicts while working
 	<website>https://github.com/nextcloud/files_lock</website>
 	<bugs>https://github.com/nextcloud/files_lock/issues</bugs>
 	<repository>https://github.com/nextcloud/files_lock.git</repository>
-	<screenshot>https://raw.githubusercontent.com/nextcloud/files_lock/master/screenshots/v0.7.0.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nextcloud/files_lock/master/screenshots/0.7.0.png</screenshot>
 
 	<background-jobs>
 		<job>OCA\FilesLock\Cron\Unlock</job>
