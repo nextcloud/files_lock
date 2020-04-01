@@ -1,7 +1,7 @@
 OC.L10N.register(
     "files_lock",
     {
-    "Unlock file" : "Fitxategia desblokeatu",
+    "Unlock file" : "Desblokeatu fitxategia",
     "Lock file" : "Fitxategia blokeatu",
     "Locked by {0}" : "{0}-k blokeatuta",
     "Temporary Files Lock" : "Aldi baterako fitxategien blokeoak",
