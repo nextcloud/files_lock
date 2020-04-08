@@ -2,11 +2,11 @@
 <info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	  xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
 	<id>files_lock</id>
-	<name>Temporary Files Lock</name>
+	<name>Temporary files lock</name>
 	<summary>Temporary lock your files</summary>
 	<description><![CDATA[
 
-Allow your users to temporary locks their files to avoid conflicts while working on shared files.
+Allow your users to temporary lock their files to avoid conflicts while working on shared files.
 
 ]]>
 	</description>
