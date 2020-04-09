@@ -4,7 +4,6 @@ OC.L10N.register(
     "Unlock file" : "Atrakinti failą",
     "Lock file" : "Užrakinti failą",
     "Locked by {0}" : "Užrakino {0}",
-    "Temporary Files Lock" : "Laikinasis failų užraktas",
     "Temporary lock your files" : "Laikinai užrakinti savo failus"
 },
 "nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);");
