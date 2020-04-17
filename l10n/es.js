@@ -4,6 +4,8 @@ OC.L10N.register(
     "Unlock file" : "Desbloquear archivo",
     "Lock file" : "Bloquear archivo",
     "Locked by {0}" : "Bloqueado por {0}",
-    "Temporary lock your files" : "Bloquea temporalmente tus archivos"
+    "Temporary files lock" : "Bloqueo temporal de archivos",
+    "Temporary lock your files" : "Bloquea temporalmente tus archivos",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Permitir que tus usuarios bloqueen temporalmente sus archivos para evitar conflictos mientras trabajan con archivos compartidos."
 },
 "nplurals=2; plural=(n != 1);");
