@@ -1,5 +1,11 @@
 # Changelog
 
+
+### 0.8.3
+
+- throw ManuallyLockedException with ETA.
+
+
 ### 0.8.2
 
 - compat NC19
