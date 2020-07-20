@@ -32,6 +32,7 @@ use OCP\Files\InvalidPathException;
 use OCP\Files\NotFoundException;
 use OCP\IUserSession;
 use OCP\Lock\LockedException;
+use OCP\Lock\ManuallyLockedException;
 
 class LockWrapper extends Wrapper {
 
@@ -92,9 +93,10 @@ class LockWrapper extends Wrapper {
 
 			case Constants::PERMISSION_DELETE:
 			case Constants::PERMISSION_UPDATE:
-				// NC18 - TemporaryLockedException() - switch to $lock->getETA()
-				// throw new LockedException($path, null, $lock->getToken(), $lock->getOwner(), $lock->getTimeout());
-				throw new LockedException($path);
+//			throw new LockedException($path);
+				throw new ManuallyLockedException(
+					$path, null, $lock->getToken(), $lock->getUserId(), $lock->getETA()
+				);
 
 			default:
 				return false;
