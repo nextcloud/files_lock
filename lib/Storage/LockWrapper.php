@@ -93,7 +93,6 @@ class LockWrapper extends Wrapper {
 
 			case Constants::PERMISSION_DELETE:
 			case Constants::PERMISSION_UPDATE:
-//			throw new LockedException($path);
 				throw new ManuallyLockedException(
 					$path, null, $lock->getToken(), $lock->getUserId(), $lock->getETA()
 				);
