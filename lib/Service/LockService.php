@@ -310,51 +310,6 @@ class LockService {
 		return $lock;
 	}
 
-//
-//	/**
-//	 * @param string $path
-//	 * @param string $userId
-//	 * @param FileLock $lock
-//	 *
-//	 * @return bool
-//	 * @throws InvalidPathException
-//	 */
-//	public function isPathLocked(string $path, string $userId, &$lock = null): bool {
-//		try {
-//			$file = $this->fileService->getFileFromPath($path, $userId);
-//
-//			// FIXME: too hacky - might be an issue if we start locking folders.
-//			if ($file->getId() === null) {
-//				throw new NotFoundException();
-//			}
-//
-//			return $this->isFileLocked($file->getId(), $userId, $lock);
-//		} catch (NotFoundException $e) {
-//		}
-//
-//		return false;
-//	}
-
-//	/**
-//	 * @param int $fileId
-//	 * @param string $userId
-//	 * @param FileLock $lock
-//	 *
-//	 * @return bool
-//	 */
-//	public function isFileLocked(int $fileId, string $userId, &$lock = null): bool {
-//		try {
-//			$lock = $this->getLockFromFileId($fileId);
-//			if ($lock->getUserId() === $userId) {
-//				return false;
-//			}
-//
-//			return true;
-//		} catch (LockNotFoundException $e) {
-//			return false;
-//		}
-//	}
-
 
 	/**
 	 * @param FileLock $lock
@@ -372,11 +327,17 @@ class LockService {
 	 * @param FileLock[] $locks
 	 */
 	public function removeLocks(array $locks) {
+		if (empty($locks)) {
+			return;
+		}
+		
 		$ids = array_map(
 			function(FileLock $lock) {
 				return $lock->getId();
 			}, $locks
 		);
+
+		$this->notice('removing locks', false, ['ids' => $ids]);
 
 		$this->locksRequest->removeIds($ids);
 	}
