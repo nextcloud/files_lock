@@ -330,7 +330,7 @@ class LockService {
 		if (empty($locks)) {
 			return;
 		}
-		
+
 		$ids = array_map(
 			function(FileLock $lock) {
 				return $lock->getId();

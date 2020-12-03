@@ -1,6 +1,11 @@
 # Changelog
 
 
+### 20.0.0
+
+- compat nc20
+
+
 ### 19.0.0
 
 - upgrade of lib
