@@ -1,6 +1,11 @@
 # Changelog
 
 
+### 19.0.0
+
+- upgrade of lib
+
+
 ### 0.8.3
 
 - throw ManuallyLockedException with ETA.
