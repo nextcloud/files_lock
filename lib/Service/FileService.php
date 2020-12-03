@@ -50,15 +50,10 @@ class FileService {
 	/** @var IRootFolder */
 	private $rootFolder;
 
-	/** @var MiscService */
-	private $miscService;
 
-
-	public function __construct(IUserSession $userSession, IRootFolder $rootFolder, MiscService $miscService
-	) {
+	public function __construct(IUserSession $userSession, IRootFolder $rootFolder) {
 		$this->userSession = $userSession;
 		$this->rootFolder = $rootFolder;
-		$this->miscService = $miscService;
 	}
 
 

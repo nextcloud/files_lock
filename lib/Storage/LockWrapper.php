@@ -26,7 +26,6 @@ use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
-use OCA\FilesLock\Service\MiscService;
 use OCP\Constants;
 use OCP\Files\InvalidPathException;
 use OCP\Files\NotFoundException;
@@ -43,9 +42,6 @@ class LockWrapper extends Wrapper {
 	/** @var LockService */
 	private $lockService;
 
-	/** @var MiscService */
-	private $miscService;
-
 	/** @var IUserSession */
 	private $userSession;
 
@@ -61,7 +57,6 @@ class LockWrapper extends Wrapper {
 		$this->userSession = $arguments['user_session'];
 		$this->fileService = $arguments['file_service'];
 		$this->lockService = $arguments['lock_service'];
-		$this->miscService = $arguments['misc_service'];
 	}
 
 

@@ -30,21 +30,29 @@
 namespace OCA\FilesLock\AppInfo;
 
 
+use Closure;
 use OC\Files\Filesystem;
 use OCA\DAV\Connector\Sabre\CachingTree;
 use OCA\DAV\Connector\Sabre\ObjectTree;
+use OCA\Files\Event\LoadAdditionalScriptsEvent;
+use OCA\FilesLock\Listeners\LoadAdditionalScripts;
 use OCA\FilesLock\Plugins\FilesLockPlugin;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
-use OCA\FilesLock\Service\MiscService;
 use OCA\FilesLock\Storage\LockWrapper;
 use OCP\AppFramework\App;
-use OCP\AppFramework\QueryException;
-use OCP\EventDispatcher\IEventDispatcher;
+use OCP\AppFramework\Bootstrap\IBootContext;
+use OCP\AppFramework\Bootstrap\IBootstrap;
+use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCP\IServerContainer;
 use OCP\IUserSession;
 use OCP\SabrePluginEvent;
 use OCP\Util;
 use Sabre\DAV\Locks\Plugin;
+use Throwable;
+
+
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 
 /**
@@ -52,19 +60,17 @@ use Sabre\DAV\Locks\Plugin;
  *
  * @package OCA\FilesLock\AppInfo
  */
-class Application extends App {
+class Application extends App implements IBootstrap {
 
 
-	const APP_NAME = 'files_lock';
+	const APP_ID = 'files_lock';
+
 
 	const DAV_PROPERTY_LOCK = '{http://nextcloud.org/ns}lock';
 	const DAV_PROPERTY_LOCK_OWNER = '{http://nextcloud.org/ns}lock-owner';
 	const DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME = '{http://nextcloud.org/ns}lock-owner-displayname';
 	const DAV_PROPERTY_LOCK_TIME = '{http://nextcloud.org/ns}lock-time';
 
-
-	/** @var IEventDispatcher */
-	private $eventDispatcher;
 
 	/** @var IUserSession */
 	private $userSession;
@@ -75,43 +81,47 @@ class Application extends App {
 	/** @var LockService */
 	private $lockService;
 
-	/** @var MiscService */
-	private $miscService;
-
 
 	/**
 	 * @param array $params
 	 */
 	public function __construct(array $params = array()) {
-		parent::__construct(self::APP_NAME, $params);
+		parent::__construct(self::APP_ID, $params);
 	}
 
 
 	/**
-	 *
+	 * @param IRegistrationContext $context
 	 */
-	public function registerHooks() {
-		$c = $this->getContainer();
-		try {
-			$this->eventDispatcher = $c->query(IEventDispatcher::class);
-			$this->userSession = $c->query(IUserSession::class);
-			$this->fileService = $c->query(FileService::class);
-			$this->lockService = $c->query(LockService::class);
-			$this->miscService = $c->query(MiscService::class);
-		} catch (QueryException $e) {
-			return;
-		}
-
-		$this->eventDispatcher->addListener(
-			'OCA\Files::loadAdditionalScripts',
-			function() {
-				Util::addScript(self::APP_NAME, 'files');
-				Util::addStyle(self::APP_NAME, 'files_lock');
-			}
+	public function register(IRegistrationContext $context): void {
+		$context->registerEventListener(
+			LoadAdditionalScriptsEvent::class,
+			LoadAdditionalScripts::class
 		);
+	}
 
 
-		$this->eventDispatcher->addListener(
+	/**
+	 * @param IBootContext $context
+	 *
+	 * @throws Throwable
+	 */
+	public function boot(IBootContext $context): void {
+		$context->injectFn(Closure::fromCallable([$this, 'registerHooks']));
+	}
+
+
+	/**
+	 * @param IServerContainer $container
+	 */
+	public function registerHooks(IServerContainer $container) {
+		$eventDispatcher = \OC::$server->getEventDispatcher();
+
+		$this->userSession = $container->get(IUserSession::class);
+		$this->fileService = $container->get(FileService::class);
+		$this->lockService = $container->get(LockService::class);
+
+		$eventDispatcher->addListener(
 			'OCA\DAV\Connector\Sabre::addPlugin', function(SabrePluginEvent $e) {
 			$server = $e->getServer();
 			$absolute = false;
@@ -128,10 +138,7 @@ class Application extends App {
 			$server->on('propFind', [$this->lockService, 'propFind']);
 			$server->addPlugin(
 				new Plugin(
-					new FilesLockPlugin(
-						$this->userSession, $this->fileService, $this->lockService, $this->miscService,
-						$absolute
-					)
+					new FilesLockPlugin($this->userSession, $this->fileService, $this->lockService, $absolute)
 				)
 			);
 		}
@@ -151,8 +158,7 @@ class Application extends App {
 					'storage'      => $storage,
 					'user_session' => $this->userSession,
 					'file_service' => $this->fileService,
-					'lock_service' => $this->lockService,
-					'misc_service' => $this->miscService
+					'lock_service' => $this->lockService
 				]
 			);
 		}, 10

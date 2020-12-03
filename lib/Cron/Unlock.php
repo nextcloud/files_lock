@@ -33,7 +33,6 @@ namespace OCA\FilesLock\Cron;
 use OC\BackgroundJob\TimedJob;
 use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Service\LockService;
-use OCA\FilesLock\Service\MiscService;
 use OCP\AppFramework\QueryException;
 
 
@@ -47,9 +46,6 @@ class Unlock extends TimedJob {
 
 	/** @var LockService */
 	private $lockService;
-
-	/** @var MiscService */
-	private $miscService;
 
 
 	/**
@@ -71,7 +67,6 @@ class Unlock extends TimedJob {
 		$c = $app->getContainer();
 
 		$this->lockService = $c->query(LockService::class);
-		$this->miscService = $c->query(MiscService::class);
 
 		$this->manageTimeoutLock();
 	}

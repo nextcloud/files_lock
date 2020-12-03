@@ -41,7 +41,6 @@ use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Service\ConfigService;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
-use OCA\FilesLock\Service\MiscService;
 use OCP\Files\InvalidPathException;
 use OCP\Files\NotFoundException;
 use OCP\IUserManager;
@@ -71,9 +70,6 @@ class Lock extends Base {
 	/** @var ConfigService */
 	private $configService;
 
-	/** @var MiscService */
-	private $miscService;
-
 
 	/**
 	 * CacheUpdate constructor.
@@ -83,11 +79,10 @@ class Lock extends Base {
 	 * @param LockService $lockService
 	 * @param LocksRequest $locksRequest
 	 * @param ConfigService $configService
-	 * @param MiscService $miscService
 	 */
 	public function __construct(
 		IUserManager $userManager, LocksRequest $locksRequest, FileService $fileService,
-		LockService $lockService, ConfigService $configService, MiscService $miscService
+		LockService $lockService, ConfigService $configService
 	) {
 		parent::__construct();
 
@@ -96,7 +91,6 @@ class Lock extends Base {
 		$this->fileService = $fileService;
 		$this->lockService = $lockService;
 		$this->configService = $configService;
-		$this->miscService = $miscService;
 	}
 
 

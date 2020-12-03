@@ -30,6 +30,7 @@
 namespace OCA\FilesLock\Service;
 
 
+use daita\MySmallPhpTools\Traits\Nextcloud\nc20\TNC20Logger;
 use daita\MySmallPhpTools\Traits\TStringTools;
 use Exception;
 use OCA\DAV\Connector\Sabre\Node as SabreNode;
@@ -61,6 +62,7 @@ class LockService {
 
 
 	use TStringTools;
+	use TNC20Logger;
 
 
 	/** @var string */
@@ -78,9 +80,6 @@ class LockService {
 	/** @var ConfigService */
 	private $configService;
 
-	/** @var MiscService */
-	private $miscService;
-
 
 	/** @var array */
 	private $locks = [];
@@ -94,14 +93,15 @@ class LockService {
 
 	public function __construct(
 		$userId, IUserManager $userManager, LocksRequest $locksRequest, FileService $fileService,
-		ConfigService $configService, MiscService $miscService
+		ConfigService $configService
 	) {
 		$this->userId = $userId;
 		$this->userManager = $userManager;
 		$this->locksRequest = $locksRequest;
 		$this->fileService = $fileService;
 		$this->configService = $configService;
-		$this->miscService = $miscService;
+
+		$this->setup('app', 'files_lock');
 	}
 
 	/**
@@ -195,7 +195,7 @@ class LockService {
 	 */
 	public function lock(FileLock $lock) {
 		$this->generateToken($lock);
-		$this->miscService->log('locking file ' . json_encode($lock), 1);
+		$this->notice('locking file', false, ['fileLock' => $lock]);
 
 		try {
 			$known = $this->getLockFromFileId($lock->getFileId());
@@ -240,10 +240,9 @@ class LockService {
 	 * @throws UnauthorizedUnlockException
 	 */
 	public function unlock(FileLock $lock, bool $force = false) {
-		$this->miscService->log('unlocking file ' . json_encode($lock), 1);
+		$this->notice('unlocking file', false, ['fileLock' => $lock]);
 
 		$known = $this->getLockFromFileId($lock->getFileId());
-
 		if (!$force && $lock->getUserId() !== $known->getUserId()) {
 			throw new UnauthorizedUnlockException('File can only be unlocked by the owner of the lock');
 		}
@@ -279,10 +278,10 @@ class LockService {
 	public function getDeprecatedLocks(): array {
 		$timeout = (int)$this->configService->getAppValue(ConfigService::LOCK_TIMEOUT);
 		if ($timeout === 0) {
-			$timeout = $this->configService->defaults[ConfigService::LOCK_TIMEOUT];
-			$this->miscService->log(
-				'ConfigService::LOCK_TIMEOUT is not numerical, using default (' . $timeout . ')', 1
+			$this->notice(
+				'ConfigService::LOCK_TIMEOUT is not numerical, using default', true, ['current' => $timeout]
 			);
+			$timeout = $this->configService->defaults[ConfigService::LOCK_TIMEOUT];
 		}
 
 		try {

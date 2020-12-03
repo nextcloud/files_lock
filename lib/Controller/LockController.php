@@ -35,7 +35,6 @@ use Exception;
 use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
-use OCA\FilesLock\Service\MiscService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
@@ -62,9 +61,6 @@ class LockController extends Controller {
 	/** @var LockService */
 	private $lockService;
 
-	/** @var MiscService */
-	private $miscService;
-
 
 	/**
 	 * LockController constructor.
@@ -73,17 +69,14 @@ class LockController extends Controller {
 	 * @param IUserSession $userSession
 	 * @param FileService $fileService
 	 * @param LockService $lockService
-	 * @param MiscService $miscService
 	 */
 	public function __construct(
-		IRequest $request, IUserSession $userSession, FileService $fileService, LockService $lockService,
-		MiscService $miscService
+		IRequest $request, IUserSession $userSession, FileService $fileService, LockService $lockService
 	) {
-		parent::__construct(Application::APP_NAME, $request);
+		parent::__construct(Application::APP_ID, $request);
 		$this->userSession = $userSession;
 		$this->fileService = $fileService;
 		$this->lockService = $lockService;
-		$this->miscService = $miscService;
 	}
 
 

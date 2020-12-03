@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 
 /**
@@ -8,7 +10,7 @@
  * later. See the COPYING file.
  *
  * @author Maxence Lange <maxence@artificial-owl.com>
- * @copyright 2019
+ * @copyright 2020
  * @license GNU AGPL version 3 or any later version
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,12 +29,35 @@
  */
 
 
-namespace OCA\FilesLock\AppInfo;
+namespace OCA\FilesLock\Listeners;
 
 
-$composerDir = __DIR__ . '/../vendor/';
+use OCA\Files\Event\LoadAdditionalScriptsEvent;
+use OCA\FilesLock\AppInfo\Application;
+use OCP\EventDispatcher\Event;
+use OCP\EventDispatcher\IEventListener;
+use OCP\Util;
 
-if (is_dir($composerDir) && file_exists($composerDir . 'autoload.php')) {
-	require_once $composerDir . 'autoload.php';
+
+/**
+ * Class LoadAdditionalScripts
+ *
+ * @package OCA\FilesLock\Listeners
+ */
+class LoadAdditionalScripts implements IEventListener {
+
+
+	/**
+	 * @param Event $event
+	 */
+	public function handle(Event $event): void {
+		if (!($event instanceof LoadAdditionalScriptsEvent)) {
+			return;
+		}
+
+		Util::addScript(Application::APP_ID, 'files');
+		Util::addStyle(Application::APP_ID, 'files_lock');
+	}
+
 }
 

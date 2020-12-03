@@ -56,8 +56,6 @@ class ConfigService {
 	/** @var IRequest */
 	private $request;
 
-	/** @var MiscService */
-	private $miscService;
 
 	/**
 	 * ConfigService constructor.
@@ -66,16 +64,12 @@ class ConfigService {
 	 * @param IConfig $config
 	 * @param IRequest $request
 	 * @param string $userId
-	 * @param MiscService $miscService
 	 */
-	public function __construct(
-		$appName, IConfig $config, IRequest $request, $userId, MiscService $miscService
-	) {
+	public function __construct($appName, IConfig $config, IRequest $request, $userId) {
 		$this->appName = $appName;
 		$this->config = $config;
 		$this->request = $request;
 		$this->userId = $userId;
-		$this->miscService = $miscService;
 	}
 
 
@@ -134,7 +128,7 @@ class ConfigService {
 	 *
 	 */
 	public function unsetAppConfig() {
-		$this->config->deleteAppValues(Application::APP_NAME);
+		$this->config->deleteAppValues(Application::APP_ID);
 	}
 
 }
