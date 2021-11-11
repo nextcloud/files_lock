@@ -30,8 +30,8 @@
 namespace OCA\FilesLock\Model;
 
 
-use daita\MySmallPhpTools\IQueryRow;
-use daita\MySmallPhpTools\Traits\TArrayTools;
+use OCA\FilesLock\Tools\Db\IQueryRow;
+use OCA\FilesLock\Tools\Traits\TArrayTools;
 use JsonSerializable;
 use Sabre\DAV\Locks\LockInfo;
 
@@ -240,13 +240,17 @@ class FileLock implements IQueryRow, JsonSerializable {
 
 	/**
 	 * @param array $data
+	 *
+	 * @return IQueryRow
 	 */
-	public function importFromDatabase(array $data) {
+	public function importFromDatabase(array $data):IQueryRow {
 		$this->setId($this->getInt('id', $data));
 		$this->setUserId($this->get('user_id', $data));
 		$this->setFileId($this->getInt('file_id', $data));
 		$this->setToken($this->get('token', $data));
 		$this->setCreation($this->getInt('creation', $data));
+
+		return $this;
 	}
 
 

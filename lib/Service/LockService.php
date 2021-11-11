@@ -30,8 +30,6 @@
 namespace OCA\FilesLock\Service;
 
 
-use daita\MySmallPhpTools\Traits\Nextcloud\nc20\TNC20Logger;
-use daita\MySmallPhpTools\Traits\TStringTools;
 use Exception;
 use OCA\DAV\Connector\Sabre\Node as SabreNode;
 use OCA\FilesLock\AppInfo\Application;
@@ -41,9 +39,12 @@ use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Exceptions\NotFileException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
+use OCA\FilesLock\Tools\Traits\TLogger;
+use OCA\FilesLock\Tools\Traits\TStringTools;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Node;
 use OCP\Files\NotFoundException;
+use OCP\IL10N;
 use OCP\IUser;
 use OCP\IUserManager;
 use Sabre\DAV\INode;
@@ -62,7 +63,7 @@ class LockService {
 
 
 	use TStringTools;
-	use TNC20Logger;
+	use TLogger;
 
 
 	/** @var string */
@@ -70,6 +71,9 @@ class LockService {
 
 	/** @var IUserManager */
 	private $userManager;
+
+	/** @var IL10N */
+	private $l10n;
 
 	/** @var LocksRequest */
 	private $locksRequest;
@@ -91,11 +95,24 @@ class LockService {
 	private $lockCache = [];
 
 
+	/**
+	 * @param $userId
+	 * @param IL10N $l10n
+	 * @param IUserManager $userManager
+	 * @param LocksRequest $locksRequest
+	 * @param FileService $fileService
+	 * @param ConfigService $configService
+	 */
 	public function __construct(
-		$userId, IUserManager $userManager, LocksRequest $locksRequest, FileService $fileService,
+		$userId,
+		IL10N $l10n,
+		IUserManager $userManager,
+		LocksRequest $locksRequest,
+		FileService $fileService,
 		ConfigService $configService
 	) {
 		$this->userId = $userId;
+		$this->l10n = $l10n;
 		$this->userManager = $userManager;
 		$this->locksRequest = $locksRequest;
 		$this->fileService = $fileService;
@@ -136,7 +153,7 @@ class LockService {
 		$nodeId = $node->getId();
 
 		$propFind->handle(
-			Application::DAV_PROPERTY_LOCK, function() use ($nodeId) {
+			Application::DAV_PROPERTY_LOCK, function () use ($nodeId) {
 			$lock = $this->getLockForNodeId($nodeId);
 
 			if ($lock === false) {
@@ -148,7 +165,7 @@ class LockService {
 		);
 
 		$propFind->handle(
-			Application::DAV_PROPERTY_LOCK_OWNER, function() use ($nodeId) {
+			Application::DAV_PROPERTY_LOCK_OWNER, function () use ($nodeId) {
 			$lock = $this->getLockForNodeId($nodeId);
 
 			if ($lock !== false) {
@@ -160,7 +177,7 @@ class LockService {
 		);
 
 		$propFind->handle(
-			Application::DAV_PROPERTY_LOCK_TIME, function() use ($nodeId) {
+			Application::DAV_PROPERTY_LOCK_TIME, function () use ($nodeId) {
 			$lock = $this->getLockForNodeId($nodeId);
 
 			if ($lock !== false) {
@@ -172,7 +189,7 @@ class LockService {
 		);
 
 		$propFind->handle(
-			Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME, function() use ($nodeId) {
+			Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME, function () use ($nodeId) {
 			$lock = $this->getLockForNodeId($nodeId);
 
 			if ($lock !== false) {
@@ -244,7 +261,9 @@ class LockService {
 
 		$known = $this->getLockFromFileId($lock->getFileId());
 		if (!$force && $lock->getUserId() !== $known->getUserId()) {
-			throw new UnauthorizedUnlockException('File can only be unlocked by the owner of the lock');
+			throw new UnauthorizedUnlockException(
+				$this->l10n->t('File can only be unlocked by the owner of the lock')
+			);
 		}
 
 		$this->locksRequest->delete($known);
@@ -332,7 +351,7 @@ class LockService {
 		}
 
 		$ids = array_map(
-			function(FileLock $lock) {
+			function (FileLock $lock) {
 				return $lock->getId();
 			}, $locks
 		);

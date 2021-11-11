@@ -30,12 +30,13 @@
 namespace OCA\FilesLock\Controller;
 
 
-use daita\MySmallPhpTools\Traits\Nextcloud\TNCDataResponse;
 use Exception;
 use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
+use OCA\FilesLock\Tools\Traits\TLogger;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
 use OCP\IUserSession;
@@ -49,7 +50,7 @@ use OCP\IUserSession;
 class LockController extends Controller {
 
 
-	use TNCDataResponse;
+	use TLogger;
 
 
 	/** @var IUserSession */
@@ -95,7 +96,7 @@ class LockController extends Controller {
 
 			$lock = $this->lockService->lockFile($file, $user);
 
-			return $this->directSuccess($lock);
+			return new DataResponse($lock, Http::STATUS_OK);
 		} catch (Exception $e) {
 			return $this->fail($e);
 		}
@@ -115,11 +116,41 @@ class LockController extends Controller {
 			$user = $this->userSession->getUser();
 			$this->lockService->unlockFile((int)$fileId, $user->getUID());
 
-			return $this->success();
+			return new DataResponse();
 		} catch (Exception $e) {
 			return $this->fail($e);
 		}
 	}
 
-}
 
+	/**
+	 * @param Exception $e
+	 * @param array $more
+	 * @param int $status
+	 *
+	 * @param bool $log
+	 *
+	 * @return DataResponse
+	 */
+	protected function fail(
+		Exception $e,
+		array $more = [],
+		int $status = Http::STATUS_INTERNAL_SERVER_ERROR,
+		bool $log = true
+	): DataResponse {
+		$data = array_merge(
+			$more,
+			[
+				'status' => -1,
+				'exception' => get_class($e),
+				'message' => $e->getMessage()
+			]
+		);
+
+		if ($log) {
+			$this->log(2, $status . ' - ' . json_encode($data));
+		}
+
+		return new DataResponse($data, $status);
+	}
+}

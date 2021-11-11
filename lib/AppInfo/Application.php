@@ -52,9 +52,6 @@ use Sabre\DAV\Locks\Plugin;
 use Throwable;
 
 
-require_once __DIR__ . '/../../vendor/autoload.php';
-
-
 /**
  * Class Application
  *
@@ -122,7 +119,7 @@ class Application extends App implements IBootstrap {
 		$this->lockService = $container->get(LockService::class);
 
 		$eventDispatcher->addListener(
-			'OCA\DAV\Connector\Sabre::addPlugin', function(SabrePluginEvent $e) {
+			'OCA\DAV\Connector\Sabre::addPlugin', function (SabrePluginEvent $e) {
 			$server = $e->getServer();
 			$absolute = false;
 			switch (get_class($server->tree)) {
@@ -152,16 +149,16 @@ class Application extends App implements IBootstrap {
 	 */
 	public function addStorageWrapper() {
 		Filesystem::addStorageWrapper(
-			'files_lock', function($mountPoint, $storage) {
+			'files_lock', function ($mountPoint, $storage) {
 			return new LockWrapper(
 				[
-					'storage'      => $storage,
+					'storage' => $storage,
 					'user_session' => $this->userSession,
 					'file_service' => $this->fileService,
 					'lock_service' => $this->lockService
 				]
 			);
-		}, 10
+		},  10
 		);
 	}
 

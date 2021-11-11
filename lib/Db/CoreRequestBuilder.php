@@ -31,10 +31,8 @@ namespace OCA\FilesLock\Db;
 
 
 use OC;
+use OC\DB\Connection;
 use OC\DB\SchemaWrapper;
-use OCA\FilesLock\Service\ConfigService;
-use OCP\IDBConnection;
-use OCP\ILogger;
 
 /**
  * Class CoreRequestBuilder
@@ -47,18 +45,9 @@ class CoreRequestBuilder {
 	const TABLE_LOCKS = 'files_lock';
 
 	/** @var array */
-	private $tables = [
+	private static $tables = [
 		self::TABLE_LOCKS,
 	];
-
-	/** @var ILogger */
-	protected $logger;
-
-	/** @var IDBConnection */
-	protected $dbConnection;
-
-	/** @var ConfigService */
-	protected $configService;
 
 
 	/** @var string */
@@ -66,53 +55,10 @@ class CoreRequestBuilder {
 
 
 	/**
-	 * CoreRequestBuilder constructor.
-	 *
-	 * @param IDBConnection $connection
-	 * @param ILogger $logger
-	 * @param ConfigService $configService
+	 * @return CoreQueryBuilder
 	 */
-	public function __construct(
-		IDBConnection $connection, ILogger $logger, ConfigService $configService
-	) {
-		$this->dbConnection = $connection;
-		$this->logger = $logger;
-		$this->configService = $configService;
-	}
-
-
-	/**
-	 * @return LocksQueryBuilder
-	 */
-	public function getQueryBuilder(): LocksQueryBuilder {
-		$qb = new LocksQueryBuilder(
-			$this->dbConnection,
-			OC::$server->getSystemConfig(),
-			$this->logger
-		);
-
-		return $qb;
-	}
-
-
-	/**
-	 * @return IDBConnection
-	 */
-	public function getConnection(): IDBConnection {
-		return $this->dbConnection;
-	}
-
-
-	/**
-	 * this just empty all tables from the app.
-	 */
-	public function emptyAll() {
-		foreach ($this->tables as $table) {
-			$qb = $this->dbConnection->getQueryBuilder();
-			$qb->delete($table);
-
-			$qb->execute();
-		}
+	public function getQueryBuilder(): CoreQueryBuilder {
+		return new CoreQueryBuilder();
 	}
 
 
@@ -120,18 +66,20 @@ class CoreRequestBuilder {
 	 *
 	 */
 	public function uninstall() {
-		$this->dropAll();
+		$this->uninstallAppTables();
 		$this->removeFromJobs();;
 		$this->removeFromMigrations();
 	}
 
 
 	/**
-	 * this just empty all tables from the app.
+	 *
 	 */
-	public function dropAll() {
-		$schema = new SchemaWrapper($this->dbConnection);
-		foreach ($this->tables as $table) {
+	public function uninstallAppTables() {
+		$dbConn = OC::$server->get(Connection::class);
+		$schema = new SchemaWrapper($dbConn);
+
+		foreach (array_keys(self::$tables) as $table) {
 			if ($schema->hasTable($table)) {
 				$schema->dropTable($table);
 			}

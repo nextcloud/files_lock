@@ -10,7 +10,7 @@ cert_dir=$(HOME)/.nextcloud/certificates
 codecov_token_dir=$(HOME)/.nextcloud/codecov_token
 github_account=nextcloud
 branch=master
-version+=21.0.0
+version+=20.1.0
 
 all: appstore
 
@@ -40,18 +40,15 @@ clean:
 	rm -rf $(build_dir)
 	rm -rf node_modules
 
-composer:
-	composer install --prefer-dist
-
 test: SHELL:=/bin/bash
-test: composer
+test:
 	phpunit --coverage-clover=coverage.xml --configuration=tests/phpunit.xml tests
 	@if [ -f $(codecov_token_dir)/$(app_name) ]; then \
 		bash <(curl -s https://codecov.io/bash) -t @$(codecov_token_dir)/$(app_name) ; \
 	fi
 
 
-appstore: composer clean
+appstore: clean
 	mkdir -p $(sign_dir)
 	rsync -a \
 	--exclude=/build \
@@ -61,8 +58,6 @@ appstore: composer clean
 	--exclude=/tests \
 	--exclude=.git \
 	--exclude=/.github \
-	--exclude=/composer.json \
-	--exclude=/composer.lock \
 	--exclude=/l10n/l10n.pl \
 	--exclude=/CONTRIBUTING.md \
 	--exclude=/issue_template.md \
@@ -72,7 +67,6 @@ appstore: composer clean
 	--exclude=/.scrutinizer.yml \
 	--exclude=/.travis.yml \
 	--exclude=/Makefile \
-	--exclude=/vendor/picocms/pico/index.php \
 	$(project_dir)/ $(sign_dir)/$(app_name)
 	tar -czf $(build_dir)/$(app_name)-$(version).tar.gz \
 		-C $(sign_dir) $(app_name)
