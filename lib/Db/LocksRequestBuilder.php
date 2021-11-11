@@ -30,10 +30,11 @@
 namespace OCA\FilesLock\Db;
 
 
-use daita\MySmallPhpTools\Exceptions\RowNotFoundException;
-use daita\MySmallPhpTools\Traits\TArrayTools;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
+use OCA\FilesLock\Service\ConfigService;
+use OCA\FilesLock\Tools\Exceptions\RowNotFoundException;
+use OCA\FilesLock\Tools\Traits\TArrayTools;
 
 
 /**
@@ -47,12 +48,20 @@ class LocksRequestBuilder extends CoreRequestBuilder {
 	use TArrayTools;
 
 
+	/** @var ConfigService */
+	private $configService;
+
+
+	public function __construct(ConfigService $configService) {
+		$this->configService = $configService;
+	}
+
 	/**
 	 * Base of the Sql Insert request
 	 *
-	 * @return LocksQueryBuilder
+	 * @return CoreQueryBuilder
 	 */
-	protected function getLocksInsertSql(): LocksQueryBuilder {
+	protected function getLocksInsertSql(): CoreQueryBuilder {
 		$qb = $this->getQueryBuilder();
 		$qb->insert(self::TABLE_LOCKS);
 
@@ -63,9 +72,9 @@ class LocksRequestBuilder extends CoreRequestBuilder {
 	/**
 	 * Base of the Sql Update request
 	 *
-	 * @return LocksQueryBuilder
+	 * @return CoreQueryBuilder
 	 */
-	protected function getLocksUpdateSql(): LocksQueryBuilder {
+	protected function getLocksUpdateSql(): CoreQueryBuilder {
 		$qb = $this->getQueryBuilder();
 		$qb->update(self::TABLE_LOCKS);
 
@@ -76,12 +85,11 @@ class LocksRequestBuilder extends CoreRequestBuilder {
 	/**
 	 * Base of the Sql Select request for Shares
 	 *
-	 * @return LocksQueryBuilder
+	 * @return CoreQueryBuilder
 	 */
-	protected function getLocksSelectSql(): LocksQueryBuilder {
+	protected function getLocksSelectSql(): CoreQueryBuilder {
 		$qb = $this->getQueryBuilder();
 
-		/** @noinspection PhpMethodParametersCountMismatchInspection */
 		$qb->select('l.id', 'l.user_id', 'l.file_id', 'l.token', 'l.creation')
 		   ->from(self::TABLE_LOCKS, 'l');
 
@@ -94,9 +102,9 @@ class LocksRequestBuilder extends CoreRequestBuilder {
 	/**
 	 * Base of the Sql Delete request
 	 *
-	 * @return LocksQueryBuilder
+	 * @return CoreQueryBuilder
 	 */
-	protected function getLocksDeleteSql(): LocksQueryBuilder {
+	protected function getLocksDeleteSql(): CoreQueryBuilder {
 		$qb = $this->getQueryBuilder();
 		$qb->delete(self::TABLE_LOCKS);
 
@@ -105,12 +113,12 @@ class LocksRequestBuilder extends CoreRequestBuilder {
 
 
 	/**
-	 * @param LocksQueryBuilder $qb
+	 * @param CoreQueryBuilder $qb
 	 *
 	 * @return FileLock
 	 * @throws LockNotFoundException
 	 */
-	protected function getLockFromRequest(LocksQueryBuilder $qb): FileLock {
+	protected function getLockFromRequest(CoreQueryBuilder $qb): FileLock {
 		/** @var FileLock $result */
 		try {
 			$result = $qb->getRow([$this, 'parseLockSelectSql']);
@@ -123,11 +131,11 @@ class LocksRequestBuilder extends CoreRequestBuilder {
 
 
 	/**
-	 * @param LocksQueryBuilder $qb
+	 * @param CoreQueryBuilder $qb
 	 *
 	 * @return FileLock[]
 	 */
-	public function getLocksFromRequest(LocksQueryBuilder $qb): array {
+	public function getLocksFromRequest(CoreQueryBuilder $qb): array {
 		/** @var FileLock[] $result */
 		$result = $qb->getRows([$this, 'parseLockSelectSql']);
 
