@@ -10,7 +10,7 @@ Allow your users to temporary lock their files to avoid conflicts while working 
 
 ]]>
 	</description>
-	<version>20.0.0</version>
+	<version>21.0.0</version>
 	<licence>agpl</licence>
 	<author>Maxence Lange</author>
 	<namespace>FilesLock</namespace>
@@ -37,7 +37,7 @@ Allow your users to temporary lock their files to avoid conflicts while working 
 	</commands>
 
 	<dependencies>
-		<nextcloud min-version="20" max-version="20"/>
+		<nextcloud min-version="21" max-version="23"/>
 	</dependencies>
 
 </info>
