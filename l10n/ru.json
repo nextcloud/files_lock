@@ -2,6 +2,7 @@
     "Unlock file" : "Разблокировать файл",
     "Lock file" : "Заблокировать файл",
     "Locked by {0}" : "Файл заблокирован {0}",
+    "File can only be unlocked by the owner of the lock" : "Файл может быть разблокирован только тем, кто установил блокировку",
     "Temporary files lock" : "Временная блокировка файлов",
     "Temporary lock your files" : "Временная блокировка файлов",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Разрешить пользователям временно блокировать файлы во избежание конфликтов при совместной работе с файлами."
