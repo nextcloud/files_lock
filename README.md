@@ -1,5 +1,4 @@
-### the Files Lock app
-
+# Temporary files lock
 
 ![](screenshots/0.7.0.png)
 
@@ -25,3 +24,88 @@ Administrators can also lock files using the `./occ` command:
 
 ![](screenshots/cli.png)
 
+## API
+
+### Fetching lock details
+
+WebDAV returns the following additional properties if requests through a `PROPFIND`:
+
+- `{http://nextcloud.org/ns}lock`: `true` if the file is locked, otherwise `false`
+- `{http://nextcloud.org/ns}lock-owner`: User id of the lock owner
+- `{http://nextcloud.org/ns}lock-owner-displayname`: Display name of the lock owner
+- `{http://nextcloud.org/ns}lock-time`: Timestamp of the log creation time
+
+### Locking a file
+
+`PUT /apps/files_lock/lock/{fileId}`
+
+```bash
+curl -X PUT 'http://admin:admin@nextcloud.local/ocs/v2.php/apps/files_lock/lock/123' -H 'OCS-APIREQUEST: true'`
+```
+
+#### Success
+```
+<?xml version="1.0"?>
+<ocs>
+ <meta>
+  <status>ok</status>
+  <statuscode>200</statuscode>
+  <message>OK</message>
+ </meta>
+</ocs>
+```
+
+#### Failure
+```
+<?xml version="1.0"?>
+<ocs>
+ <meta>
+  <status>failure</status>
+  <statuscode>500</statuscode>
+  <message/>
+ </meta>
+ <data>
+  <status>-1</status>
+  <exception>OCA\FilesLock\Exceptions\AlreadyLockedException</exception>
+  <message>File is already locked by admin</message>
+ </data>
+</ocs>
+```
+
+
+### Unlocking a file
+
+`DELETE /apps/files_lock/lock/{fileId}`
+
+```bash
+curl -X DELETE 'http://admin:admin@nextcloud.local/ocs/v2.php/apps/files_lock/lock/123' -H 'OCS-APIREQUEST: true'
+```
+
+#### Success
+```
+<?xml version="1.0"?>
+<ocs>
+ <meta>
+  <status>ok</status>
+  <statuscode>200</statuscode>
+  <message>OK</message>
+ </meta>
+</ocs>
+```
+
+#### Failure
+```
+<?xml version="1.0"?>
+<ocs>
+ <meta>
+  <status>failure</status>
+  <statuscode>500</statuscode>
+  <message/>
+ </meta>
+ <data>
+  <status>-1</status>
+  <exception>OCA\FilesLock\Exceptions\LockNotFoundException</exception>
+  <message></message>
+ </data>
+</ocs>
+```
