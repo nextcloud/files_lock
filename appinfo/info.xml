@@ -10,12 +10,13 @@ Allow your users to temporary lock their files to avoid conflicts while working 
 
 ]]>
 	</description>
-	<version>20.1.0</version>
+	<version>20.1.0-1</version>
 	<licence>agpl</licence>
 	<author>Maxence Lange</author>
 	<namespace>FilesLock</namespace>
 	<types>
 		<filesystem/>
+		<dav/>
 	</types>
 	<documentation>
 		<admin>https://github.com/nextcloud/files_lock/blob/master/README.md</admin>
@@ -35,6 +36,12 @@ Allow your users to temporary lock their files to avoid conflicts while working 
 	<commands>
 		<command>OCA\FilesLock\Command\Lock</command>
 	</commands>
+
+	<sabre>
+		<plugins>
+			<plugin>OCA\FilesLock\DAV\LockPlugin</plugin>
+		</plugins>
+	</sabre>
 
 	<dependencies>
 		<nextcloud min-version="21" max-version="24"/>

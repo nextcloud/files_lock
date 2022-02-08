@@ -33,6 +33,7 @@ namespace OCA\FilesLock\Model;
 use OCA\FilesLock\Tools\Db\IQueryRow;
 use OCA\FilesLock\Tools\Traits\TArrayTools;
 use JsonSerializable;
+use OCP\AppFramework\Utility\ITimeFactory;
 use Sabre\DAV\Locks\LockInfo;
 
 /**
@@ -46,6 +47,14 @@ class FileLock implements IQueryRow, JsonSerializable {
 	use TArrayTools;
 
 	public const ETA_INFINITE = -1;
+
+	public const LOCK_TYPE_USER = 0;
+	public const LOCK_TYPE_APP = 1;
+	private const LOCK_TYPE_DAV = 2; // Not in use but reserved for WebDAV implementation
+
+
+	public const LOCK_SCOPE_EXCLUSIVE = 0;
+	private const LOCK_SCOPE_SHARED = 1; // Not in use but reserved for WebDAV implementation
 
 
 	/** @var int */
@@ -69,6 +78,9 @@ class FileLock implements IQueryRow, JsonSerializable {
 	/** @var int */
 	private $creation = 0;
 
+	/** @var int */
+	private $lockType = self::LOCK_TYPE_USER;
+
 
 	/**
 	 * FileLock constructor.
@@ -77,7 +89,7 @@ class FileLock implements IQueryRow, JsonSerializable {
 	 */
 	public function __construct(int $timeout = 1800) {
 		$this->timeout = $timeout;
-		$this->creation = time();
+		$this->creation = \OC::$server->get(ITimeFactory::class)->getTime();
 	}
 
 
@@ -202,8 +214,7 @@ class FileLock implements IQueryRow, JsonSerializable {
 			return self::ETA_INFINITE;
 		}
 		$end = $this->getCreation() + $this->getTimeout();
-		$eta = $end - time();
-
+		$eta = $end - \OC::$server->get(ITimeFactory::class)->getTime();
 		return ($eta < 1) ? 0 : $eta;
 	}
 
@@ -222,6 +233,15 @@ class FileLock implements IQueryRow, JsonSerializable {
 	public function setCreation(int $creation): self {
 		$this->creation = $creation;
 
+		return $this;
+	}
+
+	public function getLockType(): int {
+		return $this->lockType;
+	}
+
+	public function setLockType(int $lockType): self {
+		$this->lockType = $lockType;
 		return $this;
 	}
 
@@ -254,6 +274,7 @@ class FileLock implements IQueryRow, JsonSerializable {
 		$this->setFileId($this->getInt('file_id', $data));
 		$this->setToken($this->get('token', $data));
 		$this->setCreation($this->getInt('creation', $data));
+		$this->setLockType($this->getInt('type', $data));
 
 		return $this;
 	}
@@ -269,6 +290,7 @@ class FileLock implements IQueryRow, JsonSerializable {
 		$this->setFileId($this->getInt('fileId', $data));
 		$this->setToken($this->get('token', $data));
 		$this->setCreation($this->getInt('creation', $data));
+		$this->setLockType($this->getInt('type', $data));
 	}
 
 
@@ -283,7 +305,8 @@ class FileLock implements IQueryRow, JsonSerializable {
 			'fileId'   => $this->getFileId(),
 			'token'    => $this->getToken(),
 			'eta'      => $this->getETA(),
-			'creation' => $this->getCreation()
+			'creation' => $this->getCreation(),
+			'type'     => $this->getLockType(),
 		];
 	}
 

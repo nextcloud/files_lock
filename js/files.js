@@ -1,9 +1,14 @@
 (function() {
 
+	var LOCK_TYPE_USER = 0;
+	var LOCK_TYPE_APP = 1;
+
 	_.extend(OC.Files.Client, {
 		PROPERTY_FILES_LOCK: '{' + OC.Files.Client.NS_NEXTCLOUD + '}lock',
 		PROPERTY_FILES_LOCK_OWNER: '{' + OC.Files.Client.NS_NEXTCLOUD + '}lock-owner',
 		PROPERTY_FILES_LOCK_OWNER_DISPLAYNAME: '{' + OC.Files.Client.NS_NEXTCLOUD + '}lock-owner-displayname',
+		PROPERTY_FILES_LOCK_OWNER_TYPE: '{' + OC.Files.Client.NS_NEXTCLOUD + '}lock-owner-type',
+		PROPERTY_FILES_LOCK_OWNER_EDITOR: '{' + OC.Files.Client.NS_NEXTCLOUD + '}lock-owner-editor',
 		PROPERTY_FILES_LOCK_TIME: '{' + OC.Files.Client.NS_NEXTCLOUD + '}lock-time'
 	})
 
@@ -18,6 +23,8 @@
 				props.push(OC.Files.Client.PROPERTY_FILES_LOCK_OWNER)
 				props.push(OC.Files.Client.PROPERTY_FILES_LOCK_OWNER_DISPLAYNAME)
 				props.push(OC.Files.Client.PROPERTY_FILES_LOCK_TIME)
+				props.push(OC.Files.Client.PROPERTY_FILES_LOCK_OWNER_TYPE)
+				props.push(OC.Files.Client.PROPERTY_FILES_LOCK_OWNER_EDITOR)
 				return props
 			}
 
@@ -27,6 +34,8 @@
 				var isLocked = props[OC.Files.Client.PROPERTY_FILES_LOCK]
 				if (!_.isUndefined(isLocked) && isLocked !== '') {
 					data.locked = isLocked === '1'
+					data.lockOwnerType = props[OC.Files.Client.PROPERTY_FILES_LOCK_OWNER_TYPE]
+					data.lockOwnerEditor = props[OC.Files.Client.PROPERTY_FILES_LOCK_OWNER_EDITOR]
 					data.lockOwner = props[OC.Files.Client.PROPERTY_FILES_LOCK_OWNER]
 					data.lockOwnerDisplayname = props[OC.Files.Client.PROPERTY_FILES_LOCK_OWNER_DISPLAYNAME]
 					data.lockTime = props[OC.Files.Client.PROPERTY_FILES_LOCK_TIME]
@@ -39,6 +48,8 @@
 				var $tr = oldCreateRow.apply(this, arguments)
 				if (fileData.locked) {
 					$tr.attr('data-locked', fileData.locked)
+					$tr.attr('data-lock-owner-type', fileData.lockOwnerType)
+					$tr.attr('data-lock-owner-editor', fileData.lockOwnerEditor)
 					$tr.attr('data-lock-owner', fileData.lockOwner)
 					$tr.attr('data-lock-owner-displayname', fileData.lockOwnerDisplayname)
 					$tr.attr('data-lock-time', fileData.lockTime)

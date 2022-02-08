@@ -94,7 +94,7 @@ class LockController extends OCSController {
 			$user = $this->userSession->getUser();
 			$file = $this->fileService->getFileFromId($user->getUID(), (int)$fileId);
 
-			$lock = $this->lockService->lockFile($file, $user);
+			$lock = $this->lockService->lockFileAsUser($file, $user);
 
 			return new DataResponse($lock, Http::STATUS_OK);
 		} catch (Exception $e) {

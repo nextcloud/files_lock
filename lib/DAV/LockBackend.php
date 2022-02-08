@@ -25,7 +25,7 @@
  */
 
 
-namespace OCA\FilesLock\Plugins;
+namespace OCA\FilesLock\DAV;
 
 
 use Exception;
@@ -34,18 +34,10 @@ use OCA\FilesLock\Service\LockService;
 use OCP\IUserSession;
 use Sabre\DAV\Locks\Backend\BackendInterface;
 use Sabre\DAV\Locks\LockInfo;
+use Sabre\DAV\Server;
 
 
-/**
- * Class AppLockPlugin
- *
- * @package OCA\DAV\Files
- */
-class FilesLockPlugin implements BackendInterface {
-
-
-	/** @var IUserSession */
-	private $userSession;
+class LockBackend implements BackendInterface {
 
 	/** @var FileService */
 	private $fileService;
@@ -56,19 +48,10 @@ class FilesLockPlugin implements BackendInterface {
 	/** @var bool */
 	private $absolute = false;
 
-
-	/**
-	 * FilesLockPlugin constructor.
-	 *
-	 * @param IUserSession $userSession
-	 * @param FileService $fileService
-	 * @param LockService $lockService
-	 * @param bool $absolute
-	 */
 	public function __construct(
-		IUserSession $userSession, FileService $fileService, LockService $lockService, bool $absolute
+		Server $server, FileService $fileService, LockService $lockService, bool $absolute
 	) {
-		$this->userSession = $userSession;
+		$this->server = $server;
 		$this->fileService = $fileService;
 		$this->lockService = $lockService;
 		$this->absolute = $absolute;
@@ -92,11 +75,6 @@ class FilesLockPlugin implements BackendInterface {
 			}
 
 			$lock = $this->lockService->getLockFromFileId($file->getId());
-
-			$user = $this->userSession->getUser();
-			if ($user !== null && $lock->getUserId() === $user->getUID()) {
-				return [];
-			}
 
 			return [$lock->toLockInfo()];
 		} catch (Exception $e) {

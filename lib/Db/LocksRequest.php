@@ -52,7 +52,8 @@ class LocksRequest extends LocksRequestBuilder {
 		$qb->setValue('user_id', $qb->createNamedParameter($lock->getUserId()))
 		   ->setValue('file_id', $qb->createNamedParameter($lock->getFileId()))
 		   ->setValue('token', $qb->createNamedParameter($lock->getToken()))
-		   ->setValue('creation', $qb->createNamedParameter($lock->getCreation()));
+		   ->setValue('creation', $qb->createNamedParameter($lock->getCreation()))
+		   ->setValue('type', $qb->createNamedParameter($lock->getLockType()));
 
 		try {
 			$qb->execute();

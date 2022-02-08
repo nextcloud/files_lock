@@ -204,7 +204,7 @@ class Lock extends Base {
 		$file = $this->fileService->getFileFromId($user->getUID(), $fileId);
 
 		$output->writeln('<info>locking ' . $file->getName() . ' to ' . $userId . '</info>');
-		$this->lockService->lockFile($file, $user);
+		$this->lockService->lockFileAsUser($file, $user);
 	}
 
 

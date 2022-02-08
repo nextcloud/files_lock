@@ -41,12 +41,18 @@ use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Tools\Traits\TLogger;
 use OCA\FilesLock\Tools\Traits\TStringTools;
+use OCP\App\IAppManager;
+use OCP\DirectEditing\IManager;
+use OCP\DirectEditing\RegisterDirectEditorEvent;
+use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Node;
 use OCP\Files\NotFoundException;
 use OCP\IL10N;
 use OCP\IUser;
 use OCP\IUserManager;
+use OCP\Notification\IApp;
+use OCP\PreConditionNotMetException;
 use Sabre\DAV\INode;
 use Sabre\DAV\PropFind;
 
@@ -66,50 +72,28 @@ class LockService {
 	use TLogger;
 
 
-	/** @var string */
-	private $userId;
+	private ?string $userId;
+	private IUserManager $userManager;
+	private IL10N $l10n;
+	private LocksRequest $locksRequest;
+	private FileService $fileService;
+	private ConfigService $configService;
+	private IAppManager $appManager;
 
-	/** @var IUserManager */
-	private $userManager;
-
-	/** @var IL10N */
-	private $l10n;
-
-	/** @var LocksRequest */
-	private $locksRequest;
-
-	/** @var FileService */
-	private $fileService;
-
-	/** @var ConfigService */
-	private $configService;
+	private array $locks = [];
+	private bool $lockRetrieved = false;
+	private array $lockCache = [];
+	private ?string $appInScope;
 
 
-	/** @var array */
-	private $locks = [];
-
-	/** @var bool */
-	private $lockRetrieved = false;
-
-	/** @var array */
-	private $lockCache = [];
-
-
-	/**
-	 * @param $userId
-	 * @param IL10N $l10n
-	 * @param IUserManager $userManager
-	 * @param LocksRequest $locksRequest
-	 * @param FileService $fileService
-	 * @param ConfigService $configService
-	 */
 	public function __construct(
 		$userId,
 		IL10N $l10n,
 		IUserManager $userManager,
 		LocksRequest $locksRequest,
 		FileService $fileService,
-		ConfigService $configService
+		ConfigService $configService,
+		IAppManager $appManager
 	) {
 		$this->userId = $userId;
 		$this->l10n = $l10n;
@@ -117,6 +101,7 @@ class LockService {
 		$this->locksRequest = $locksRequest;
 		$this->fileService = $fileService;
 		$this->configService = $configService;
+		$this->appManager = $appManager;
 
 		$this->setup('app', 'files_lock');
 	}
@@ -126,7 +111,7 @@ class LockService {
 	 *
 	 * @return FileLock|bool
 	 */
-	private function getLockForNodeId(int $nodeId) {
+	public function getLockForNodeId(int $nodeId) {
 		if (array_key_exists($nodeId, $this->lockCache) && $this->lockCache[$nodeId] !== null) {
 			return $this->lockCache[$nodeId];
 		}
@@ -138,70 +123,6 @@ class LockService {
 		}
 
 		return $this->lockCache[$nodeId];
-	}
-
-	/**
-	 * @param PropFind $propFind
-	 * @param INode $node
-	 *
-	 * @return void
-	 */
-	public function propFind(PropFind $propFind, INode $node) {
-		if (!$node instanceof SabreNode) {
-			return;
-		}
-		$nodeId = $node->getId();
-
-		$propFind->handle(
-			Application::DAV_PROPERTY_LOCK, function () use ($nodeId) {
-			$lock = $this->getLockForNodeId($nodeId);
-
-			if ($lock === false) {
-				return false;
-			}
-
-			return true;
-		}
-		);
-
-		$propFind->handle(
-			Application::DAV_PROPERTY_LOCK_OWNER, function () use ($nodeId) {
-			$lock = $this->getLockForNodeId($nodeId);
-
-			if ($lock !== false) {
-				return $lock->getUserId();
-			}
-
-			return null;
-		}
-		);
-
-		$propFind->handle(
-			Application::DAV_PROPERTY_LOCK_TIME, function () use ($nodeId) {
-			$lock = $this->getLockForNodeId($nodeId);
-
-			if ($lock !== false) {
-				return $lock->getCreation();
-			}
-
-			return 0;
-		}
-		);
-
-		$propFind->handle(
-			Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME, function () use ($nodeId) {
-			$lock = $this->getLockForNodeId($nodeId);
-
-			if ($lock !== false) {
-				$user = $this->userManager->get($lock->getUserId());
-				if ($user !== null) {
-					return $user->getDisplayName();
-				}
-			}
-
-			return null;
-		}
-		);
 	}
 
 
@@ -234,7 +155,7 @@ class LockService {
 	 * @throws NotFileException
 	 * @throws NotFoundException
 	 */
-	public function lockFile(Node $file, IUser $user): FileLock {
+	public function lockFileAsUser(Node $file, IUser $user): FileLock {
 		if ($file->getType() !== Node::TYPE_FILE) {
 			throw new NotFileException('Must be a file, seems to be a folder.');
 		}
@@ -248,7 +169,6 @@ class LockService {
 		return $lock;
 	}
 
-
 	/**
 	 * @param FileLock $lock
 	 * @param bool $force
@@ -260,7 +180,7 @@ class LockService {
 		$this->notice('unlocking file', false, ['fileLock' => $lock]);
 
 		$known = $this->getLockFromFileId($lock->getFileId());
-		if (!$force && $lock->getUserId() !== $known->getUserId()) {
+		if (!$force && ($lock->getUserId() !== $known->getUserId() || $lock->getLockType() !== $known->getLockType())) {
 			throw new UnauthorizedUnlockException(
 				$this->l10n->t('File can only be unlocked by the owner of the lock')
 			);

@@ -24,6 +24,7 @@ namespace OCA\FilesLock\Storage;
 use OC\Files\Storage\Wrapper\Wrapper;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
+use OCA\FilesLock\Service\AppLockService;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\Constants;
@@ -121,7 +122,14 @@ class LockWrapper extends Wrapper {
 			}
 
 			$lock = $this->lockService->getLockFromFileId($file->getId());
-			if ($viewerId === '' || $lock->getUserId() !== $viewerId) {
+			// TODO: double check empty viewer id condition
+			if ($viewerId === '') {
+				return true;
+			}
+			if ($lock->getLockType() === FileLock::LOCK_TYPE_USER && $lock->getUserId() !== $viewerId) {
+				return true;
+			}
+			if ($lock->getLockType() === FileLock::LOCK_TYPE_APP && $lock->getUserId() !== \OC::$server->get(AppLockService::class)->getAppInScope()) {
 				return true;
 			}
 		} catch (LockNotFoundException | InvalidPathException | NotFoundException $e) {
