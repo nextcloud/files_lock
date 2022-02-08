@@ -26,6 +26,19 @@ Administrators can also lock files using the `./occ` command:
 
 ## API
 
+### Capability
+
+If locking is available the app will expose itself through the capabilties endpoint under the files key:
+```
+curl http://admin:admin@nextcloud.local/ocs/v1.php/cloud/capabilities\?format\=json -H 'OCS-APIRequest: true' \
+	| jq .ocs.data.capabilities.files
+{
+  ...
+  "locking": "1.0",
+  ...
+}
+```
+
 ### Fetching lock details
 
 WebDAV returns the following additional properties if requests through a `PROPFIND`:
