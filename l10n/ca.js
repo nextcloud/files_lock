@@ -7,6 +7,6 @@ OC.L10N.register(
     "File can only be unlocked by the owner of the lock" : "Només l'usuari propietari del blocatge pot desblocar el fitxer",
     "Temporary files lock" : "Blocatge temporal dels fitxers",
     "Temporary lock your files" : "Bloqueu temporalment els fitxers",
-    "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Permeteu als usuaris bloquejar temporalment els fitxers per a evitar conflictes en treballar en fitxers compartits."
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Permeteu als usuaris blocar temporalment els fitxers per a evitar conflictes en treballar en fitxers compartits."
 },
 "nplurals=2; plural=(n != 1);");
