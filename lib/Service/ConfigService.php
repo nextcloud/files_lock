@@ -41,7 +41,7 @@ class ConfigService {
 	const LOCK_TIMEOUT = 'lock_timeout';
 
 	public $defaults = [
-		self::LOCK_TIMEOUT => '30'
+		self::LOCK_TIMEOUT => '0'
 	];
 
 	/** @var string */

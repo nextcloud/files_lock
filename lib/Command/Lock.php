@@ -38,6 +38,7 @@ use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Exceptions\NotFileException;
 use OCA\FilesLock\Exceptions\SuccessException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
+use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\ConfigService;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
@@ -122,7 +123,7 @@ class Lock extends Base {
 	 * @throws NotFileException
 	 * @throws InvalidPathException
 	 */
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$fileId = (int)$input->getArgument('file_id');
 		$userId = $input->getArgument('user_id');
 
@@ -136,7 +137,7 @@ class Lock extends Base {
 			$this->getStatus($input, $output, $fileId);
 			$this->unlockFile($input, $output, $fileId);
 		} catch (SuccessException $e) {
-			return;
+			return 0;
 		}
 
 		if ($userId === '') {
@@ -144,6 +145,8 @@ class Lock extends Base {
 		}
 
 		$this->lockFile($input, $output, $fileId, $userId);
+
+		return 0;
 	}
 
 
@@ -164,6 +167,14 @@ class Lock extends Base {
 			$output->writeln(
 				'File #' . $fileId . ' is <comment>locked</comment> by ' . $lock->getUserId()
 			);
+			$output->writeln(
+				' - Locked at: ' . date('c', $lock->getCreation())
+			);
+			if ($lock->getETA() !== FileLock::ETA_INFINITE) {
+				$output->writeln(
+					' - Expiry in seconds: ' . $lock->getETA()
+				);
+			}
 		} catch (LockNotFoundException $e) {
 			$output->writeln('File #' . $fileId . ' is <info>not locked<info>');
 		}
