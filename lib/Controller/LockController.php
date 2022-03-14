@@ -35,9 +35,9 @@ use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCA\FilesLock\Tools\Traits\TLogger;
-use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
+use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 use OCP\IUserSession;
 
@@ -47,7 +47,7 @@ use OCP\IUserSession;
  *
  * @package OCA\FilesLock\Controller
  */
-class LockController extends Controller {
+class LockController extends OCSController {
 
 
 	use TLogger;

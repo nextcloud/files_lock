@@ -116,7 +116,7 @@
 			if (locked !== undefined && locked) {
 				$.ajax({
 					method: 'DELETE',
-					url: OC.generateUrl('/apps/files_lock/lock/' + fileId)
+					url: OC.linkToOCS('/apps/files_lock/lock', 2) + fileId
 				}).done(function(res) {
 					model.set('locked', false)
 				}).fail(function(res) {
@@ -125,7 +125,7 @@
 			} else {
 				$.ajax({
 					method: 'PUT',
-					url: OC.generateUrl('/apps/files_lock/lock/' + fileId)
+					url: OC.linkToOCS('/apps/files_lock/lock', 2) + fileId
 				}).done(function(res) {
 					model.set('locked', true)
 					model.set('lockOwner', OC.getCurrentUser().uid)

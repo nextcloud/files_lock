@@ -35,6 +35,7 @@ use OC\Files\Filesystem;
 use OCA\DAV\Connector\Sabre\CachingTree;
 use OCA\DAV\Connector\Sabre\ObjectTree;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
+use OCA\FilesLock\Capability;
 use OCA\FilesLock\Listeners\LoadAdditionalScripts;
 use OCA\FilesLock\Plugins\FilesLockPlugin;
 use OCA\FilesLock\Service\FileService;
@@ -91,6 +92,7 @@ class Application extends App implements IBootstrap {
 	 * @param IRegistrationContext $context
 	 */
 	public function register(IRegistrationContext $context): void {
+		$context->registerCapability(Capability::class);
 		$context->registerEventListener(
 			LoadAdditionalScriptsEvent::class,
 			LoadAdditionalScripts::class
