@@ -34,6 +34,7 @@ use OCA\FilesLock\Tools\Db\IQueryRow;
 use OCA\FilesLock\Tools\Traits\TArrayTools;
 use JsonSerializable;
 use OCP\AppFramework\Utility\ITimeFactory;
+use OCP\Files\Lock\ILock;
 use Sabre\DAV\Locks\LockInfo;
 
 /**
@@ -41,21 +42,12 @@ use Sabre\DAV\Locks\LockInfo;
  *
  * @package OCA\FilesLock\Service
  */
-class FileLock implements IQueryRow, JsonSerializable {
+class FileLock implements ILock, IQueryRow, JsonSerializable {
 
 
 	use TArrayTools;
 
 	public const ETA_INFINITE = -1;
-
-	public const LOCK_TYPE_USER = 0;
-	public const LOCK_TYPE_APP = 1;
-	private const LOCK_TYPE_DAV = 2; // Not in use but reserved for WebDAV implementation
-
-
-	public const LOCK_SCOPE_EXCLUSIVE = 0;
-	private const LOCK_SCOPE_SHARED = 1; // Not in use but reserved for WebDAV implementation
-
 
 	/** @var int */
 	private $id = 0;
@@ -79,7 +71,7 @@ class FileLock implements IQueryRow, JsonSerializable {
 	private $creation = 0;
 
 	/** @var int */
-	private $lockType = self::LOCK_TYPE_USER;
+	private $lockType = ILock::TYPE_USER;
 
 
 	/**
@@ -134,7 +126,7 @@ class FileLock implements IQueryRow, JsonSerializable {
 	/**
 	 * @return string
 	 */
-	public function getUserId(): string {
+	public function getOwner(): string {
 		return $this->userId;
 	}
 
@@ -213,7 +205,7 @@ class FileLock implements IQueryRow, JsonSerializable {
 		if ($this->getTimeout() <= 0) {
 			return self::ETA_INFINITE;
 		}
-		$end = $this->getCreation() + $this->getTimeout();
+		$end = $this->getCreatedAt() + $this->getTimeout();
 		$eta = $end - \OC::$server->get(ITimeFactory::class)->getTime();
 		return ($eta < 1) ? 0 : $eta;
 	}
@@ -221,7 +213,7 @@ class FileLock implements IQueryRow, JsonSerializable {
 	/**
 	 * @return int
 	 */
-	public function getCreation(): int {
+	public function getCreatedAt(): int {
 		return $this->creation;
 	}
 
@@ -251,10 +243,10 @@ class FileLock implements IQueryRow, JsonSerializable {
 	 */
 	public function toLockInfo(): LockInfo {
 		$lock = new LockInfo();
-		$lock->owner = $this->getUserId();
+		$lock->owner = $this->getOwner();
 		$lock->token = $this->getToken();
 		$lock->timeout = $this->getTimeout();
-		$lock->created = $this->getCreation();
+		$lock->created = $this->getCreatedAt();
 		$lock->scope = LockInfo::EXCLUSIVE;
 		$lock->depth = 1;
 		$lock->uri = $this->getUri();
@@ -275,6 +267,7 @@ class FileLock implements IQueryRow, JsonSerializable {
 		$this->setToken($this->get('token', $data));
 		$this->setCreation($this->getInt('creation', $data));
 		$this->setLockType($this->getInt('type', $data));
+		$this->setTimeout($this->getInt('ttl', $data));
 
 		return $this;
 	}
@@ -291,6 +284,7 @@ class FileLock implements IQueryRow, JsonSerializable {
 		$this->setToken($this->get('token', $data));
 		$this->setCreation($this->getInt('creation', $data));
 		$this->setLockType($this->getInt('type', $data));
+		$this->setTimeout($this->getInt('ttl', $data));
 	}
 
 
@@ -301,14 +295,17 @@ class FileLock implements IQueryRow, JsonSerializable {
 		return [
 			'id'       => $this->getId(),
 			'uri'      => $this->getUri(),
-			'userId'   => $this->getUserId(),
+			'userId'   => $this->getOwner(),
 			'fileId'   => $this->getFileId(),
 			'token'    => $this->getToken(),
 			'eta'      => $this->getETA(),
-			'creation' => $this->getCreation(),
+			'creation' => $this->getCreatedAt(),
 			'type'     => $this->getLockType(),
 		];
 	}
 
+	public function __toString(): string {
+		return $this->getToken();
+	}
 }
 

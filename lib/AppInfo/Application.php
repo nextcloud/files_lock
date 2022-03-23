@@ -37,6 +37,7 @@ use OCA\DAV\Connector\Sabre\ObjectTree;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\FilesLock\Capability;
 use OCA\FilesLock\Listeners\LoadAdditionalScripts;
+use OCA\FilesLock\LockProvider;
 use OCA\FilesLock\Plugins\FilesLockBackend;
 use OCA\FilesLock\Plugins\LockPlugin;
 use OCA\FilesLock\Service\FileService;
@@ -46,6 +47,7 @@ use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCP\Files\Lock\ILockManager;
 use OCP\IServerContainer;
 use OCP\IUserSession;
 use OCP\SabrePluginEvent;
@@ -71,6 +73,8 @@ class Application extends App implements IBootstrap {
 	const DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME = '{http://nextcloud.org/ns}lock-owner-displayname';
 	const DAV_PROPERTY_LOCK_EDITOR = '{http://nextcloud.org/ns}lock-owner-editor';
 	const DAV_PROPERTY_LOCK_TIME = '{http://nextcloud.org/ns}lock-time';
+	const DAV_PROPERTY_LOCK_TIMEOUT = '{http://nextcloud.org/ns}lock-timeout';
+	const DAV_PROPERTY_LOCK_TOKEN = '{http://nextcloud.org/ns}lock-token';
 
 
 	/** @var IUserSession */
@@ -81,6 +85,8 @@ class Application extends App implements IBootstrap {
 
 	/** @var LockService */
 	private $lockService;
+
+	private ILockManager $lockManager;
 
 
 	/**
@@ -110,6 +116,10 @@ class Application extends App implements IBootstrap {
 	 */
 	public function boot(IBootContext $context): void {
 		$context->injectFn(Closure::fromCallable([$this, 'registerHooks']));
+
+		$context->injectFn(function (ILockManager $lockManager) use ($context) {
+			$lockManager->registerLockProvider($context->getAppContainer()->get(LockProvider::class));
+		});
 	}
 
 
@@ -122,6 +132,7 @@ class Application extends App implements IBootstrap {
 		$this->userSession = $container->get(IUserSession::class);
 		$this->fileService = $container->get(FileService::class);
 		$this->lockService = $container->get(LockService::class);
+		$this->lockManager = $container->get(ILockManager::class);
 
 		Util::connectHook('OC_Filesystem', 'preSetup', $this, 'addStorageWrapper');
 	}
@@ -135,6 +146,7 @@ class Application extends App implements IBootstrap {
 			return new LockWrapper(
 				[
 					'storage' => $storage,
+					'lock_manager' => $this->lockManager,
 					'user_session' => $this->userSession,
 					'file_service' => $this->fileService,
 					'lock_service' => $this->lockService

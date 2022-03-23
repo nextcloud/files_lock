@@ -31,10 +31,7 @@ namespace OCA\FilesLock\Service;
 
 
 use Exception;
-use OCA\DAV\Connector\Sabre\Node as SabreNode;
-use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Db\LocksRequest;
-use OCA\FilesLock\Exceptions\AlreadyLockedException;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Exceptions\NotFileException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
@@ -45,16 +42,17 @@ use OCP\App\IAppManager;
 use OCP\DirectEditing\IManager;
 use OCP\DirectEditing\RegisterDirectEditorEvent;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\Files\FileInfo;
 use OCP\Files\InvalidPathException;
+use OCP\Files\Lock\ILock;
+use OCP\Files\Lock\LockScope;
+use OCP\Files\Lock\OwnerLockedException;
 use OCP\Files\Node;
 use OCP\Files\NotFoundException;
 use OCP\IL10N;
 use OCP\IUser;
 use OCP\IUserManager;
-use OCP\Notification\IApp;
 use OCP\PreConditionNotMetException;
-use Sabre\DAV\INode;
-use Sabre\DAV\PropFind;
 
 
 /**
@@ -79,11 +77,14 @@ class LockService {
 	private FileService $fileService;
 	private ConfigService $configService;
 	private IAppManager $appManager;
+	private IManager $directEditingManager;
+	private IEventDispatcher $eventDispatcher;
+
 
 	private array $locks = [];
 	private bool $lockRetrieved = false;
 	private array $lockCache = [];
-	private ?string $appInScope;
+	private ?array $directEditors = null;
 
 
 	public function __construct(
@@ -93,7 +94,9 @@ class LockService {
 		LocksRequest $locksRequest,
 		FileService $fileService,
 		ConfigService $configService,
-		IAppManager $appManager
+		IAppManager $appManager,
+		IManager $directEditingManager,
+		IEventDispatcher $eventDispatcher
 	) {
 		$this->userId = $userId;
 		$this->l10n = $l10n;
@@ -102,6 +105,8 @@ class LockService {
 		$this->fileService = $fileService;
 		$this->configService = $configService;
 		$this->appManager = $appManager;
+		$this->directEditingManager = $directEditingManager;
+		$this->eventDispatcher = $eventDispatcher;
 
 		$this->setup('app', 'files_lock');
 	}
@@ -127,21 +132,27 @@ class LockService {
 
 
 	/**
-	 * @param FileLock $lock
-	 *
-	 * @throws AlreadyLockedException
+	 * @throws OwnerLockedException
 	 */
-	public function lock(FileLock $lock) {
-		$this->generateToken($lock);
-		$this->notice('locking file', false, ['fileLock' => $lock]);
-
+	public function lock(FileLock $lock): FileLock {
 		try {
 			$known = $this->getLockFromFileId($lock->getFileId());
-
-			throw new AlreadyLockedException('File is already locked by ' . $known->getUserId());
+			if ($known->getLockType() === $lock->getLockType() && $known->getOwner() === $lock->getOwner()) {
+				$known->setTimeout(
+					$known->getTimeout() - $known->getETA() + $this->configService->getTimeoutSeconds()
+				);
+				$this->notice('extending existing lock', false, ['fileLock' => $known]);
+				$this->locksRequest->update($known);
+				return $known;
+			}
+			throw new OwnerLockedException($known);
 		} catch (LockNotFoundException $e) {
+			$this->generateToken($lock);
+			$lock->setCreation(time());
+			$this->notice('locking file', false, ['fileLock' => $lock]);
 			$this->locksRequest->save($lock);
 		}
+		return $lock;
 	}
 
 
@@ -150,13 +161,13 @@ class LockService {
 	 * @param IUser $user
 	 *
 	 * @return FileLock
-	 * @throws AlreadyLockedException
 	 * @throws InvalidPathException
 	 * @throws NotFileException
 	 * @throws NotFoundException
+	 * @throws OwnerLockedException
 	 */
 	public function lockFileAsUser(Node $file, IUser $user): FileLock {
-		if ($file->getType() !== Node::TYPE_FILE) {
+		if ($file->getType() !== FileInfo::TYPE_FILE) {
 			throw new NotFileException('Must be a file, seems to be a folder.');
 		}
 
@@ -164,50 +175,100 @@ class LockService {
 		$lock->setUserId($user->getUID());
 		$lock->setFileId($file->getId());
 
+		return $this->lock($lock);
+	}
+
+	/**
+	 * @throws InvalidPathException
+	 * @throws NotFileException
+	 * @throws NotFoundException
+	 * @throws PreConditionNotMetException
+	 * @throws OwnerLockedException
+	 */
+	public function lockFileByUserId(Node $file, string $userId): FileLock {
+		$user = $this->userManager->get($userId);
+		if ($user) {
+			return $this->lockFileAsUser($file, $user);
+		}
+
+		throw new PreConditionNotMetException('No user found' . $userId);
+	}
+
+
+	/**
+	 * @throws InvalidPathException
+	 * @throws NotFileException
+	 * @throws NotFoundException
+	 * @throws OwnerLockedException
+	 */
+	public function lockFileAsApp(Node $file, string $appId): FileLock {
+		if ($file->getType() !== FileInfo::TYPE_FILE) {
+			throw new NotFileException('Must be a file, seems to be a folder.');
+		}
+
+		$lock = new FileLock($this->configService->getTimeoutSeconds());
+		$lock->setLockType(ILock::TYPE_APP);
+		$lock->setUserId($appId);
+		$lock->setFileId($file->getId());
+
 		$this->lock($lock);
 
 		return $lock;
 	}
 
+	public function getAppName(string $appId): ?string {
+		$appInfo = $this->appManager->getAppInfo($appId);
+		return $appInfo['name'] ?? null;
+	}
+
+	public function getDirectEditorForAppId(string $appId): ?string {
+		if (!$this->directEditors) {
+			$this->eventDispatcher->dispatchTyped(new RegisterDirectEditorEvent($this->directEditingManager));
+			$this->directEditors = $this->directEditingManager->getEditors();
+		}
+		$editor = current(array_filter($this->directEditors, function ($editor) use ($appId) {
+			return $editor->getId() === $appId;
+		}));
+		return $editor ? $editor->getId() : null;
+	}
+
+
 	/**
-	 * @param FileLock $lock
-	 * @param bool $force
-	 *
+	 * @throws InvalidPathException
 	 * @throws LockNotFoundException
+	 * @throws NotFoundException
 	 * @throws UnauthorizedUnlockException
 	 */
-	public function unlock(FileLock $lock, bool $force = false) {
+	public function unlock(LockScope $lock, bool $force = false): FileLock {
 		$this->notice('unlocking file', false, ['fileLock' => $lock]);
 
-		$known = $this->getLockFromFileId($lock->getFileId());
-		if (!$force && ($lock->getUserId() !== $known->getUserId() || $lock->getLockType() !== $known->getLockType())) {
+		$known = $this->getLockFromFileId($lock->getNode()->getId());
+		if (!$force && ($lock->getOwner() !== $known->getOwner() || $lock->getType() !== $known->getLockType())) {
 			throw new UnauthorizedUnlockException(
 				$this->l10n->t('File can only be unlocked by the owner of the lock')
 			);
 		}
 
 		$this->locksRequest->delete($known);
+
+		return $known;
 	}
 
 
 	/**
-	 * @param int $fileId
-	 * @param string $userId
-	 *
-	 * @param bool $force
-	 *
-	 * @return FileLock
+	 * @throws InvalidPathException
 	 * @throws LockNotFoundException
+	 * @throws NotFoundException
 	 * @throws UnauthorizedUnlockException
 	 */
 	public function unlockFile(int $fileId, string $userId, bool $force = false): FileLock {
-		$lock = new FileLock();
-		$lock->setUserId($userId);
-		$lock->setFileId($fileId);
-
-		$this->unlock($lock, $force);
-
-		return $lock;
+		$node = $this->fileService->getFileFromId($userId, $fileId);
+		$lock = new LockScope(
+			$node,
+			ILock::TYPE_USER,
+			$userId,
+		);
+		return $this->unlock($lock, $force);
 	}
 
 

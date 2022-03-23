@@ -33,7 +33,6 @@ namespace OCA\FilesLock\Command;
 use OC\Core\Command\Base;
 use OC\User\NoUserException;
 use OCA\FilesLock\Db\LocksRequest;
-use OCA\FilesLock\Exceptions\AlreadyLockedException;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Exceptions\NotFileException;
 use OCA\FilesLock\Exceptions\SuccessException;
@@ -119,7 +118,6 @@ class Lock extends Base {
 	 * @throws NoUserException
 	 * @throws NotFoundException
 	 * @throws UnauthorizedUnlockException
-	 * @throws AlreadyLockedException
 	 * @throws NotFileException
 	 * @throws InvalidPathException
 	 */
@@ -165,7 +163,7 @@ class Lock extends Base {
 		try {
 			$lock = $this->lockService->getLockFromFileId($fileId);
 			$output->writeln(
-				'File #' . $fileId . ' is <comment>locked</comment> by ' . $lock->getUserId()
+				'File #' . $fileId . ' is <comment>locked</comment> by ' . $lock->getOwner()
 			);
 			$output->writeln(
 				' - Locked at: ' . date('c', $lock->getCreation())
@@ -189,7 +187,6 @@ class Lock extends Base {
 	 * @param int $fileId
 	 * @param string|null $userId
 	 *
-	 * @throws AlreadyLockedException
 	 * @throws InvalidPathException
 	 * @throws NoUserException
 	 * @throws NotFileException

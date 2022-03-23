@@ -49,18 +49,29 @@ class LocksRequest extends LocksRequestBuilder {
 	 */
 	public function save(FileLock $lock) {
 		$qb = $this->getLocksInsertSql();
-		$qb->setValue('user_id', $qb->createNamedParameter($lock->getUserId()))
+		$qb->setValue('user_id', $qb->createNamedParameter($lock->getOwner()))
 		   ->setValue('file_id', $qb->createNamedParameter($lock->getFileId()))
 		   ->setValue('token', $qb->createNamedParameter($lock->getToken()))
-		   ->setValue('creation', $qb->createNamedParameter($lock->getCreation()))
-		   ->setValue('type', $qb->createNamedParameter($lock->getLockType()));
+		   ->setValue('creation', $qb->createNamedParameter($lock->getCreatedAt()))
+		   ->setValue('type', $qb->createNamedParameter($lock->getLockType()))
+		   ->setValue('ttl', $qb->createNamedParameter($lock->getTimeout()));
 
 		try {
 			$qb->execute();
 		} catch (UniqueConstraintViolationException $e) {
 		}
+	}
 
-		$lock->setCreation(time());
+	public function update(FileLock $lock) {
+		$qb = $this->getLocksUpdateSql();
+		$qb->set('token', $qb->createNamedParameter($lock->getToken()))
+			->set('ttl', $qb->createNamedParameter($lock->getTimeout()))
+			->where($qb->expr()->eq('id', $qb->createNamedParameter($lock->getId())));
+
+		try {
+			$qb->executeStatement();
+		} catch (UniqueConstraintViolationException $e) {
+		}
 	}
 
 
