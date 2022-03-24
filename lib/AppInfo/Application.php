@@ -35,6 +35,7 @@ use OC\Files\Filesystem;
 use OCA\DAV\Connector\Sabre\CachingTree;
 use OCA\DAV\Connector\Sabre\ObjectTree;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
+use OCA\Files_Sharing\Event\BeforeTemplateRenderedEvent;
 use OCA\FilesLock\Capability;
 use OCA\FilesLock\Listeners\LoadAdditionalScripts;
 use OCA\FilesLock\Plugins\FilesLockPlugin;
@@ -97,6 +98,8 @@ class Application extends App implements IBootstrap {
 			LoadAdditionalScriptsEvent::class,
 			LoadAdditionalScripts::class
 		);
+		$context->registerEventListener(BeforeTemplateRenderedEvent::class, LoadAdditionalScripts::class);
+
 	}
 
 

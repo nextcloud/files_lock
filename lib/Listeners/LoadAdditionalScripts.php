@@ -33,6 +33,7 @@ namespace OCA\FilesLock\Listeners;
 
 
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
+use OCA\Files_Sharing\Event\BeforeTemplateRenderedEvent;
 use OCA\FilesLock\AppInfo\Application;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
@@ -51,7 +52,7 @@ class LoadAdditionalScripts implements IEventListener {
 	 * @param Event $event
 	 */
 	public function handle(Event $event): void {
-		if (!($event instanceof LoadAdditionalScriptsEvent)) {
+		if (!($event instanceof LoadAdditionalScriptsEvent) && !($event instanceof BeforeTemplateRenderedEvent)) {
 			return;
 		}
 
