@@ -38,6 +38,8 @@ use OCA\FilesLock\Tools\Traits\TLogger;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
+use OCP\Files\Lock\ILock;
+use OCP\Files\Lock\LockScope;
 use OCP\IRequest;
 use OCP\IUserSession;
 
@@ -94,7 +96,9 @@ class LockController extends OCSController {
 			$user = $this->userSession->getUser();
 			$file = $this->fileService->getFileFromId($user->getUID(), (int)$fileId);
 
-			$lock = $this->lockService->lockFileAsUser($file, $user);
+			$lock = $this->lockService->lock(new LockScope(
+				$file, ILock::TYPE_USER, $user->getUID()
+			));
 
 			return new DataResponse($lock, Http::STATUS_OK);
 		} catch (Exception $e) {

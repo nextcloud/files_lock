@@ -42,6 +42,8 @@ use OCA\FilesLock\Service\ConfigService;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\Files\InvalidPathException;
+use OCP\Files\Lock\ILock;
+use OCP\Files\Lock\LockScope;
 use OCP\Files\NotFoundException;
 use OCP\IUserManager;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
@@ -201,7 +203,9 @@ class Lock extends Base {
 		$file = $this->fileService->getFileFromId($user->getUID(), $fileId);
 
 		$output->writeln('<info>locking ' . $file->getName() . ' to ' . $userId . '</info>');
-		$this->lockService->lockFileAsUser($file, $user);
+		$this->lockService->lock(new LockScope(
+			$file, ILock::TYPE_USER, $userId
+		));
 	}
 
 
@@ -220,7 +224,7 @@ class Lock extends Base {
 
 		$output->writeln('<info>unlocking File #' . $fileId);
 		try {
-			$this->lockService->unlockFile($fileId, '', true);
+			$this->lockService->unlockFile($fileId, $input->getArgument('user_id'), true);
 		} catch (LockNotFoundException $e) {
 		}
 

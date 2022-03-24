@@ -33,7 +33,6 @@ namespace OCA\FilesLock\Service;
 use Exception;
 use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
-use OCA\FilesLock\Exceptions\NotFileException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Tools\Traits\TLogger;
@@ -42,17 +41,13 @@ use OCP\App\IAppManager;
 use OCP\DirectEditing\IManager;
 use OCP\DirectEditing\RegisterDirectEditorEvent;
 use OCP\EventDispatcher\IEventDispatcher;
-use OCP\Files\FileInfo;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockScope;
 use OCP\Files\Lock\OwnerLockedException;
-use OCP\Files\Node;
 use OCP\Files\NotFoundException;
 use OCP\IL10N;
-use OCP\IUser;
 use OCP\IUserManager;
-use OCP\PreConditionNotMetException;
 
 
 /**
@@ -130,14 +125,15 @@ class LockService {
 		return $this->lockCache[$nodeId];
 	}
 
-
-	/**
-	 * @throws OwnerLockedException
-	 */
-	public function lock(FileLock $lock): FileLock {
+	public function lock(LockScope $lockScope): FileLock {
 		try {
-			$known = $this->getLockFromFileId($lock->getFileId());
-			if ($known->getLockType() === $lock->getLockType() && $known->getOwner() === $lock->getOwner()) {
+			$known = $this->getLockFromFileId($lockScope->getNode()->getId());
+
+			// Extend lock expiry if matching
+			if (
+				$known->getLockType() === $lockScope->getType() &&
+				$known->getOwner() === $lockScope->getOwner()
+			) {
 				$known->setTimeout(
 					$known->getTimeout() - $known->getETA() + $this->configService->getTimeoutSeconds()
 				);
@@ -145,75 +141,17 @@ class LockService {
 				$this->locksRequest->update($known);
 				return $known;
 			}
+
 			throw new OwnerLockedException($known);
 		} catch (LockNotFoundException $e) {
+			$lock = FileLock::fromLockScope($lockScope, $this->configService->getTimeoutSeconds());
 			$this->generateToken($lock);
 			$lock->setCreation(time());
 			$this->notice('locking file', false, ['fileLock' => $lock]);
 			$this->locksRequest->save($lock);
+			$this->propagateEtag($lockScope);
+			return $lock;
 		}
-		return $lock;
-	}
-
-
-	/**
-	 * @param Node $file
-	 * @param IUser $user
-	 *
-	 * @return FileLock
-	 * @throws InvalidPathException
-	 * @throws NotFileException
-	 * @throws NotFoundException
-	 * @throws OwnerLockedException
-	 */
-	public function lockFileAsUser(Node $file, IUser $user): FileLock {
-		if ($file->getType() !== FileInfo::TYPE_FILE) {
-			throw new NotFileException('Must be a file, seems to be a folder.');
-		}
-
-		$lock = new FileLock($this->configService->getTimeoutSeconds());
-		$lock->setUserId($user->getUID());
-		$lock->setFileId($file->getId());
-
-		return $this->lock($lock);
-	}
-
-	/**
-	 * @throws InvalidPathException
-	 * @throws NotFileException
-	 * @throws NotFoundException
-	 * @throws PreConditionNotMetException
-	 * @throws OwnerLockedException
-	 */
-	public function lockFileByUserId(Node $file, string $userId): FileLock {
-		$user = $this->userManager->get($userId);
-		if ($user) {
-			return $this->lockFileAsUser($file, $user);
-		}
-
-		throw new PreConditionNotMetException('No user found' . $userId);
-	}
-
-
-	/**
-	 * @throws InvalidPathException
-	 * @throws NotFileException
-	 * @throws NotFoundException
-	 * @throws OwnerLockedException
-	 */
-	public function lockFileAsApp(Node $file, string $appId): FileLock {
-		if ($file->getType() !== FileInfo::TYPE_FILE) {
-			throw new NotFileException('Must be a file, seems to be a folder.');
-		}
-
-		$lock = new FileLock($this->configService->getTimeoutSeconds());
-		$lock->setLockType(ILock::TYPE_APP);
-		$lock->setUserId($appId);
-		$lock->setFileId($file->getId());
-
-		$this->lock($lock);
-
-		return $lock;
 	}
 
 	public function getAppName(string $appId): ?string {
@@ -250,7 +188,7 @@ class LockService {
 		}
 
 		$this->locksRequest->delete($known);
-
+		$this->propagateEtag($lock);
 		return $known;
 	}
 
@@ -262,12 +200,24 @@ class LockService {
 	 * @throws UnauthorizedUnlockException
 	 */
 	public function unlockFile(int $fileId, string $userId, bool $force = false): FileLock {
+		$lock = $this->getLockForNodeId($fileId);
+		if (!$lock) {
+			throw new LockNotFoundException();
+		}
+
+		$type = ILock::TYPE_USER;
+		if ($force) {
+			$userId = $lock->getOwner();
+			$type = $lock->getLockType();
+		}
+
 		$node = $this->fileService->getFileFromId($userId, $fileId);
 		$lock = new LockScope(
 			$node,
-			ILock::TYPE_USER,
+			$type,
 			$userId,
 		);
+		$this->propagateEtag($lock);
 		return $this->unlock($lock, $force);
 	}
 
@@ -281,7 +231,7 @@ class LockService {
 			$this->notice(
 				'ConfigService::LOCK_TIMEOUT is not numerical, using default', true, ['current' => $timeout]
 			);
-			$timeout = $this->configService->defaults[ConfigService::LOCK_TIMEOUT];
+			$timeout = (int)$this->configService->defaults[ConfigService::LOCK_TIMEOUT];
 		}
 
 		try {
@@ -341,5 +291,11 @@ class LockService {
 
 		$this->locksRequest->removeIds($ids);
 	}
+
+	private function propagateEtag(LockScope $lockScope): void {
+		$node = $lockScope->getNode();
+		$node->getStorage()->getUpdater()->propagate($node->getPath(), $node->getMTime());
+	}
+
 }
 

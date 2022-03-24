@@ -6,6 +6,7 @@ use OCA\FilesLock\Service\LockService;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\ILockProvider;
 use OCP\Files\Lock\LockScope;
+use OCP\Files\Lock\OwnerLockedException;
 use OCP\PreConditionNotMetException;
 
 class LockProvider implements ILockProvider {
@@ -24,17 +25,16 @@ class LockProvider implements ILockProvider {
 		return [];
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function lock(LockScope $lockInfo): ILock {
-		if ($lockInfo->getType() === ILock::TYPE_USER) {
-			return $this->lockService->lockFileByUserId($lockInfo->getNode(), $lockInfo->getOwner());
-		}
-		if ($lockInfo->getType() === ILock::TYPE_APP) {
-			return $this->lockService->lockFileAsApp($lockInfo->getNode(), $lockInfo->getOwner());
-		}
-
-		throw new PreConditionNotMetException('Invalid type');
+		return $this->lockService->lock($lockInfo);
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function unlock(LockScope $lockInfo) {
 		try {
 			$this->lockService->getLockFromFileId($lockInfo->getNode()->getId());
