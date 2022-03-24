@@ -5,6 +5,12 @@
         "nextcloud/coding-standard": "^1.0",
         "psalm/phar": "^4.22"
     },
+	"config": {
+		"platform": {
+			"php": "7.4"
+		}
+	},
+
     "license": "AGPL",
     "require": {
       "php": "^7.4|^8.0"
