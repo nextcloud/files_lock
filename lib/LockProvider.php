@@ -35,7 +35,7 @@ class LockProvider implements ILockProvider {
 	/**
 	 * @inheritdoc
 	 */
-	public function unlock(LockScope $lockInfo) {
+	public function unlock(LockScope $lockInfo): void {
 		try {
 			$this->lockService->getLockFromFileId($lockInfo->getNode()->getId());
 		} catch (Exceptions\LockNotFoundException $e) {

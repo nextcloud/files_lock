@@ -132,11 +132,11 @@ class LockWrapper extends Wrapper {
 			}
 
 			$lockScope = $this->lockManager->getLockInScope();
-			if ($lock->getLockType() === ILock::TYPE_USER && $lock->getOwner() !== $viewerId) {
+			if ($lock->getType() === ILock::TYPE_USER && $lock->getOwner() !== $viewerId) {
 				return true;
 			}
-			if ($lock->getLockType() === ILock::TYPE_APP) {
-				if (!$lockScope || $lockScope->getType() !== $lock->getLockType() || $lockScope->getOwner() !== $lock->getOwner()) {
+			if ($lock->getType() === ILock::TYPE_APP) {
+				if (!$lockScope || $lockScope->getType() !== $lock->getType() || $lockScope->getOwner() !== $lock->getOwner()) {
 					return true;
 				}
 			}

@@ -74,7 +74,7 @@ class LockPlugin extends SabreLockPlugin {
 				return null;
 			}
 
-			if ($lock->getLockType() !== ILock::TYPE_USER) {
+			if ($lock->getType() !== ILock::TYPE_USER) {
 				return null;
 			}
 
@@ -108,7 +108,7 @@ class LockPlugin extends SabreLockPlugin {
 				return null;
 			}
 
-			if ($lock->getLockType() === ILock::TYPE_APP) {
+			if ($lock->getType() === ILock::TYPE_APP) {
 				return $this->lockService->getAppName($lock->getOwner());
 			}
 
@@ -127,12 +127,12 @@ class LockPlugin extends SabreLockPlugin {
 				return null;
 			}
 
-			return $lock->getLockType();
+			return $lock->getType();
 		});
 
 		$propFind->handle(Application::DAV_PROPERTY_LOCK_EDITOR, function () use ($nodeId) {
 			$lock = $this->lockService->getLockForNodeId($nodeId);
-			if ($lock === false || $lock->getLockType() !== ILock::TYPE_APP) {
+			if ($lock === false || $lock->getType() !== ILock::TYPE_APP) {
 				return null;
 			}
 
@@ -223,7 +223,7 @@ class LockPlugin extends SabreLockPlugin {
 	private function getLockProperties(?FileLock $lock): array {
 		return [
 			Application::DAV_PROPERTY_LOCK => (bool)$lock,
-			Application::DAV_PROPERTY_LOCK_OWNER_TYPE => $lock ? $lock->getLockType() : null,
+			Application::DAV_PROPERTY_LOCK_OWNER_TYPE => $lock ? $lock->getType() : null,
 			Application::DAV_PROPERTY_LOCK_OWNER => $lock ? $lock->getOwner() : null,
 			Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME => $lock ? $this->getLockDisplayName($lock) : null,
 			Application::DAV_PROPERTY_LOCK_EDITOR => $lock ? $lock->getOwner() : null,

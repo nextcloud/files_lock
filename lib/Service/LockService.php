@@ -131,7 +131,7 @@ class LockService {
 
 			// Extend lock expiry if matching
 			if (
-				$known->getLockType() === $lockScope->getType() &&
+				$known->getType() === $lockScope->getType() &&
 				$known->getOwner() === $lockScope->getOwner()
 			) {
 				$known->setTimeout(
@@ -181,7 +181,7 @@ class LockService {
 		$this->notice('unlocking file', false, ['fileLock' => $lock]);
 
 		$known = $this->getLockFromFileId($lock->getNode()->getId());
-		if (!$force && ($lock->getOwner() !== $known->getOwner() || $lock->getType() !== $known->getLockType())) {
+		if (!$force && ($lock->getOwner() !== $known->getOwner() || $lock->getType() !== $known->getType())) {
 			throw new UnauthorizedUnlockException(
 				$this->l10n->t('File can only be unlocked by the owner of the lock')
 			);
@@ -208,7 +208,7 @@ class LockService {
 		$type = ILock::TYPE_USER;
 		if ($force) {
 			$userId = $lock->getOwner();
-			$type = $lock->getLockType();
+			$type = $lock->getType();
 		}
 
 		$node = $this->fileService->getFileFromId($userId, $fileId);

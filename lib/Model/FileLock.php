@@ -237,7 +237,15 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $this;
 	}
 
-	public function getLockType(): int {
+	public function getDepth(): int {
+		return ILock::LOCK_DEPTH_ZERO;
+	}
+
+	public function getScope(): int {
+		return ILock::LOCK_EXCLUSIVE;
+	}
+
+	public function getType(): int {
 		return $this->lockType;
 	}
 
@@ -309,7 +317,7 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 			'token'    => $this->getToken(),
 			'eta'      => $this->getETA(),
 			'creation' => $this->getCreatedAt(),
-			'type'     => $this->getLockType(),
+			'type'     => $this->getType(),
 		];
 	}
 
