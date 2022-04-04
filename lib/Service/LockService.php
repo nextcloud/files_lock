@@ -132,7 +132,7 @@ class LockService {
 		}
 
 		try {
-			$this->lockCache[$nodeId] = $this->getLockFromCache($nodeId);
+			$this->lockCache[$nodeId] = $this->getLockFromFileId($nodeId);
 		} catch (LockNotFoundException $e) {
 			$this->lockCache[$nodeId] = false;
 		}
@@ -360,29 +360,5 @@ class LockService {
 
 		$this->locksRequest->removeIds($ids);
 	}
-
-
-	/**
-	 * @param $nodeId
-	 *
-	 * @return FileLock
-	 * @throws LockNotFoundException
-	 */
-	private function getLockFromCache(int $nodeId): FileLock {
-		if (!$this->lockRetrieved) {
-			$this->locks = $this->locksRequest->getAll();
-			$this->lockRetrieved = true;
-		}
-
-		foreach ($this->locks as $lock) {
-			if ($lock->getFileId() === $nodeId) {
-				return $lock;
-			}
-		}
-
-		throw new LockNotFoundException();
-	}
-
-
 }
 
