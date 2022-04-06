@@ -13,7 +13,7 @@ use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
-use OCP\Files\Lock\LockScope;
+use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
 use OCP\Files\NotFoundException;
 use OCP\IUserManager;
@@ -164,7 +164,7 @@ class LockPlugin extends SabreLockPlugin {
 
 			try {
 				$file = $this->fileService->getFileFromAbsoluteUri($this->server->getRequestUri());
-				$lockInfo = $this->lockService->lock(new LockScope(
+				$lockInfo = $this->lockService->lock(new LockContext(
 					$file, ILock::TYPE_USER, $this->userSession->getUser()->getUID()
 				));
 				$response->setStatus(200);
@@ -196,7 +196,7 @@ class LockPlugin extends SabreLockPlugin {
 
 			try {
 				$file = $this->fileService->getFileFromAbsoluteUri($this->server->getRequestUri());
-				$this->lockService->unlock(new LockScope(
+				$this->lockService->unlock(new LockContext(
 					$file, ILock::TYPE_USER, $this->userSession->getUser()->getUID()
 				));
 				$response->setStatus(200);

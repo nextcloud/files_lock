@@ -43,7 +43,7 @@ use OCP\DirectEditing\RegisterDirectEditorEvent;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
-use OCP\Files\Lock\LockScope;
+use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
 use OCP\Files\NotFoundException;
 use OCP\IL10N;
@@ -125,7 +125,7 @@ class LockService {
 		return $this->lockCache[$nodeId];
 	}
 
-	public function lock(LockScope $lockScope): FileLock {
+	public function lock(LockContext $lockScope): FileLock {
 		try {
 			$known = $this->getLockFromFileId($lockScope->getNode()->getId());
 
@@ -177,7 +177,7 @@ class LockService {
 	 * @throws NotFoundException
 	 * @throws UnauthorizedUnlockException
 	 */
-	public function unlock(LockScope $lock, bool $force = false): FileLock {
+	public function unlock(LockContext $lock, bool $force = false): FileLock {
 		$this->notice('unlocking file', false, ['fileLock' => $lock]);
 
 		$known = $this->getLockFromFileId($lock->getNode()->getId());
@@ -212,7 +212,7 @@ class LockService {
 		}
 
 		$node = $this->fileService->getFileFromId($userId, $fileId);
-		$lock = new LockScope(
+		$lock = new LockContext(
 			$node,
 			$type,
 			$userId,

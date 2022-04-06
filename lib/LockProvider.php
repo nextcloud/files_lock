@@ -5,7 +5,7 @@ namespace OCA\FilesLock;
 use OCA\FilesLock\Service\LockService;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\ILockProvider;
-use OCP\Files\Lock\LockScope;
+use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
 use OCP\PreConditionNotMetException;
 
@@ -28,14 +28,14 @@ class LockProvider implements ILockProvider {
 	/**
 	 * @inheritdoc
 	 */
-	public function lock(LockScope $lockInfo): ILock {
+	public function lock(LockContext $lockInfo): ILock {
 		return $this->lockService->lock($lockInfo);
 	}
 
 	/**
 	 * @inheritdoc
 	 */
-	public function unlock(LockScope $lockInfo): void {
+	public function unlock(LockContext $lockInfo): void {
 		try {
 			$this->lockService->getLockFromFileId($lockInfo->getNode()->getId());
 		} catch (Exceptions\LockNotFoundException $e) {

@@ -25,7 +25,7 @@ use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Files\IRootFolder;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\ILockManager;
-use OCP\Files\Lock\LockScope;
+use OCP\Files\Lock\LockContext;
 use OCP\Lock\ManuallyLockedException;
 use OCP\Share\IShare;
 use Test\TestCase;
@@ -76,7 +76,7 @@ class LockFeatureTest extends TestCase {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('testfile', 'AAA');
 		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
-		$this->lockManager->lock(new LockScope($file, ILock::TYPE_USER, self::TEST_USER1));
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
 		$file->putContent('BBB');
 
 		$file = $this->loginAndGetUserFolder(self::TEST_USER2)
@@ -94,7 +94,7 @@ class LockFeatureTest extends TestCase {
 		$file->putContent('DDD');
 		self::assertEquals('DDD', $file->getContent());
 
-		$this->lockManager->unlock(new LockScope($file, ILock::TYPE_USER, self::TEST_USER1));
+		$this->lockManager->unlock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
 		$file = $this->loginAndGetUserFolder(self::TEST_USER2)
 			->get('testfile');
 		$file->putContent('EEE');
@@ -104,7 +104,7 @@ class LockFeatureTest extends TestCase {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('testfile', 'AAA');
 		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
-		$this->lockManager->lock(new LockScope($file, ILock::TYPE_USER, self::TEST_USER1));
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
 		$file->putContent('BBB');
 
 		$file = $this->loginAndGetUserFolder(self::TEST_USER2)
@@ -127,7 +127,7 @@ class LockFeatureTest extends TestCase {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('testfile2', 'AAA');
 		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
-		$scope = new LockScope($file, ILock::TYPE_APP, 'collaborative_app');
+		$scope = new LockContext($file, ILock::TYPE_APP, 'collaborative_app');
 		$this->lockManager->lock($scope);
 		try {
 			$file->putContent('BBB');
@@ -154,7 +154,7 @@ class LockFeatureTest extends TestCase {
 	public function testLockDifferentApps() {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('testfile3', 'AAA');
-		$scope = new LockScope($file, ILock::TYPE_APP, 'collaborative_app');
+		$scope = new LockContext($file, ILock::TYPE_APP, 'collaborative_app');
 		$this->lockManager->lock($scope);
 
 		$this->lockManager->runInScope($scope, function () use ($file) {
@@ -163,7 +163,7 @@ class LockFeatureTest extends TestCase {
 			self::assertEquals('EEE', $file->getContent());
 		});
 
-		$otherAppScope = new LockScope($file, ILock::TYPE_APP, 'other_app');
+		$otherAppScope = new LockContext($file, ILock::TYPE_APP, 'other_app');
 		$this->lockManager->runInScope($otherAppScope, function () use ($file) {
 			self::assertEquals('other_app', $this->lockManager->getLockInScope()->getOwner());
 			try {

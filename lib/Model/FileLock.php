@@ -35,7 +35,7 @@ use OCA\FilesLock\Tools\Traits\TArrayTools;
 use JsonSerializable;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Files\Lock\ILock;
-use OCP\Files\Lock\LockScope;
+use OCP\Files\Lock\LockContext;
 use Sabre\DAV\Locks\LockInfo;
 
 /**
@@ -85,7 +85,7 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		$this->creation = \OC::$server->get(ITimeFactory::class)->getTime();
 	}
 
-	public static function fromLockScope(LockScope $lockScope, int $timeout): FileLock {
+	public static function fromLockScope(LockContext $lockScope, int $timeout): FileLock {
 		$lock = new FileLock($timeout);
 		$lock->setUserId($lockScope->getOwner());
 		$lock->setLockType($lockScope->getType());

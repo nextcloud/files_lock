@@ -43,7 +43,7 @@ use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
-use OCP\Files\Lock\LockScope;
+use OCP\Files\Lock\LockContext;
 use OCP\Files\NotFoundException;
 use OCP\IUserManager;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
@@ -203,7 +203,7 @@ class Lock extends Base {
 		$file = $this->fileService->getFileFromId($user->getUID(), $fileId);
 
 		$output->writeln('<info>locking ' . $file->getName() . ' to ' . $userId . '</info>');
-		$this->lockService->lock(new LockScope(
+		$this->lockService->lock(new LockContext(
 			$file, ILock::TYPE_USER, $userId
 		));
 	}
