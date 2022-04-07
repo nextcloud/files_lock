@@ -292,9 +292,12 @@ class LockService {
 		$this->locksRequest->removeIds($ids);
 	}
 
-	private function propagateEtag(LockScope $lockScope): void {
-		$node = $lockScope->getNode();
-		$node->getStorage()->getUpdater()->propagate($node->getPath(), $node->getMTime());
+	private function propagateEtag(LockContext $lockContext): void {
+		$node = $lockContext->getNode();
+		$node->getStorage()->getCache()->update($node->getId(), [
+			'etag' => uniqid(),
+		]);
+		$node->getStorage()->getUpdater()->propagate($node->getInternalPath(), $node->getMTime());
 	}
 
 }
