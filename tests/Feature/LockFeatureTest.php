@@ -100,6 +100,89 @@ class LockFeatureTest extends TestCase {
 		$file->putContent('EEE');
 		self::assertEquals('EEE', $file->getContent());
 	}
+
+	public function testLockEtag() {
+		$this->loginAndGetUserFolder(self::TEST_USER1)
+			->newFile('etag_test', 'etag_test');
+
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
+			->get('etag_test');
+		$oldEtag = $file->getEtag();
+		$oldRootEtag = $this->loginAndGetUserFolder(self::TEST_USER1)->getEtag();
+
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
+			->get('etag_test');
+		$newRootEtag = $this->loginAndGetUserFolder(self::TEST_USER1)->getEtag();
+
+		self::assertNotEquals($oldRootEtag, $newRootEtag);
+		self::assertNotEquals($oldEtag, $file->getEtag());
+	}
+
+	public function testUnlockEtag() {
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
+			->newFile('etag_test', 'etag_test');
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
+			->get('etag_test');
+		$oldEtag = $file->getEtag();
+		$oldRootEtag = $this->loginAndGetUserFolder(self::TEST_USER1)->getEtag();
+
+		$this->lockManager->unlock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
+			->get('etag_test');
+		$newRootEtag = $this->loginAndGetUserFolder(self::TEST_USER1)->getEtag();
+
+		self::assertNotEquals($oldRootEtag, $newRootEtag);
+		self::assertNotEquals($oldEtag, $file->getEtag());
+	}
+
+	public function testLockEtagShare() {
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
+			->newFile('etag_test', 'etag_test');
+		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
+
+		$file = $this->loginAndGetUserFolder(self::TEST_USER2)
+			->get('etag_test');
+		$oldEtag = $file->getEtag();
+		$oldRootEtag = $this->loginAndGetUserFolder(self::TEST_USER2)->getEtag();
+
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+
+		$file = $this->loginAndGetUserFolder(self::TEST_USER2)
+			->get('etag_test');
+		$newRootEtag = $this->loginAndGetUserFolder(self::TEST_USER2)->getEtag();
+
+		self::assertNotEquals($oldRootEtag, $newRootEtag);
+		self::assertNotEquals($oldEtag, $file->getEtag());
+	}
+
+
+	public function testUnlockEtagShare() {
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
+			->newFile('etag_test', 'etag_test');
+		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
+
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+
+		$file = $this->loginAndGetUserFolder(self::TEST_USER2)
+			->get('etag_test');
+		$oldEtag = $file->getEtag();
+		$oldRootEtag = $this->loginAndGetUserFolder(self::TEST_USER2)->getEtag();
+
+		$this->lockManager->unlock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+
+		$file = $this->loginAndGetUserFolder(self::TEST_USER2)
+			->get('etag_test');
+		$newRootEtag = $this->loginAndGetUserFolder(self::TEST_USER2)->getEtag();
+
+		self::assertNotEquals($oldRootEtag, $newRootEtag);
+		self::assertNotEquals($oldEtag, $file->getEtag());
+	}
+
 	public function testLockUserExpire() {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('testfile', 'AAA');
