@@ -14,4 +14,5 @@ tr[data-locked='true'] .fileactions .action.action-menu.permanent {
 .action-lockingdetails img {
 	padding: 8px !important;
 	border-radius: 50%;
+	filter: none !important;
 }
