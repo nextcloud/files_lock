@@ -108,6 +108,11 @@ The response will give back the updated properties after obtaining the lock with
 </d:prop>
 ```
 
+#### Error status codes
+
+- 423 Unable to unlock, if the lock is owned by another user
+
+
 
 
 ### WebDAV: Manually unlock a file
@@ -137,9 +142,10 @@ curl -X UNLOCK \
 
 ```
 
-#### Error types
+#### Error status codes
 
-- 423 Locked
+- 412 Unable to unlock because the file is not locked
+- 423 Unable to unlock, if the lock is owned by another user
 
 ### OCS: Locking a file
 

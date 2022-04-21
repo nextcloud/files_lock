@@ -11,6 +11,7 @@ use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
+use OCP\AppFramework\Http;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
@@ -200,9 +201,9 @@ class LockPlugin extends SabreLockPlugin {
 					)
 				);
 			} catch (LockNotFoundException $e) {
-				$response->setStatus(403);
+				$response->setStatus(Http::STATUS_PRECONDITION_FAILED);
 			} catch (UnauthorizedUnlockException $e) {
-				$response->setStatus(403);
+				$response->setStatus(Http::STATUS_LOCKED);
 			} catch (InvalidPathException $e) {
 			} catch (NotFoundException $e) {
 			}
