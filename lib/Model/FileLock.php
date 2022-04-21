@@ -74,6 +74,9 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 	/** @var int */
 	private $lockType = ILock::TYPE_USER;
 
+	/** @var array */
+	private $metadata = [];
+
 
 	/**
 	 * FileLock constructor.
@@ -254,6 +257,11 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $this;
 	}
 
+	public function setMetadata(array $metadata): self {
+		$this->metadata = $metadata;
+		return $this;
+	}
+
 
 	/**
 	 * @return LockInfo
@@ -309,7 +317,7 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 	 * @return array
 	 */
 	public function jsonSerialize(): array {
-		return [
+		return array_merge([
 			'id'       => $this->getId(),
 			'uri'      => $this->getUri(),
 			'userId'   => $this->getOwner(),
@@ -318,7 +326,7 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 			'eta'      => $this->getETA(),
 			'creation' => $this->getCreatedAt(),
 			'type'     => $this->getType(),
-		];
+		], $this->metadata);
 	}
 
 	public function __toString(): string {

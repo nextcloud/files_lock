@@ -260,6 +260,25 @@ class LockService {
 		return $lock;
 	}
 
+	public function getMetadata(ILock $lock): array {
+		if ($lock->getType() === ILock::TYPE_USER) {
+			return [
+				'displayName' => $this->userManager->get($lock->getOwner())->getDisplayName()
+			];
+		}
+		if ($lock->getType() === ILock::TYPE_APP) {
+			return [
+				'displayName' => $this->getAppName($lock->getOwner())
+			];
+		}
+		if ($lock->getType() === ILock::TYPE_TOKEN) {
+			return [
+				'displayName' => $lock->getOwner()
+			];
+		}
+		return [];
+	}
+
 
 	/**
 	 * @param FileLock $lock

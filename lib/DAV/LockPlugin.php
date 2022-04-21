@@ -108,16 +108,9 @@ class LockPlugin extends SabreLockPlugin {
 				return null;
 			}
 
-			if ($lock->getType() === ILock::TYPE_APP) {
-				return $this->lockService->getAppName($lock->getOwner());
-			}
+			$metadata = $this->lockService->getMetadata($lock);
 
-			$user = $this->userManager->get($lock->getOwner());
-			if ($user !== null) {
-				return $user->getDisplayName();
-			}
-
-			return null;
+			return $metadata['displayName'] ?? null;
 		});
 
 		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_TYPE, function () use ($nodeId) {
