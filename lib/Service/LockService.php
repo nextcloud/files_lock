@@ -159,18 +159,6 @@ class LockService {
 		return $appInfo['name'] ?? null;
 	}
 
-	public function getDirectEditorForAppId(string $appId): ?string {
-		if (!$this->directEditors) {
-			$this->eventDispatcher->dispatchTyped(new RegisterDirectEditorEvent($this->directEditingManager));
-			$this->directEditors = $this->directEditingManager->getEditors();
-		}
-		$editor = current(array_filter($this->directEditors, function ($editor) use ($appId) {
-			return $editor->getId() === $appId;
-		}));
-		return $editor ? $editor->getId() : null;
-	}
-
-
 	/**
 	 * @throws InvalidPathException
 	 * @throws LockNotFoundException
