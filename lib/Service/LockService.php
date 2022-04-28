@@ -39,7 +39,6 @@ use OCA\FilesLock\Tools\Traits\TLogger;
 use OCA\FilesLock\Tools\Traits\TStringTools;
 use OCP\App\IAppManager;
 use OCP\DirectEditing\IManager;
-use OCP\DirectEditing\RegisterDirectEditorEvent;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
@@ -72,7 +71,6 @@ class LockService {
 	private FileService $fileService;
 	private ConfigService $configService;
 	private IAppManager $appManager;
-	private IManager $directEditingManager;
 	private IEventDispatcher $eventDispatcher;
 
 
@@ -90,7 +88,6 @@ class LockService {
 		FileService $fileService,
 		ConfigService $configService,
 		IAppManager $appManager,
-		IManager $directEditingManager,
 		IEventDispatcher $eventDispatcher
 	) {
 		$this->userId = $userId;
@@ -100,7 +97,6 @@ class LockService {
 		$this->fileService = $fileService;
 		$this->configService = $configService;
 		$this->appManager = $appManager;
-		$this->directEditingManager = $directEditingManager;
 		$this->eventDispatcher = $eventDispatcher;
 
 		$this->setup('app', 'files_lock');
