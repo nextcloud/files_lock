@@ -23,6 +23,7 @@
 
 use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Service\ConfigService;
+use OC\Files\Lock\LockManager;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Files\IRootFolder;
 use OCP\Files\Lock\ILock;
@@ -41,7 +42,7 @@ class LockFeatureTest extends TestCase {
 	public const TEST_USER1 = "test-user1";
 	public const TEST_USER2 = "test-user2";
 
-	private \OC\Files\Lock\LockManager $lockManager;
+	private LockManager $lockManager;
 	private IRootFolder $rootFolder;
 	private ?int $time = null;
 

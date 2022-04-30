@@ -124,8 +124,7 @@ class LockService {
 
 			// Extend lock expiry if matching
 			if (
-				$known->getType() === $lockScope->getType() &&
-				$known->getOwner() === $lockScope->getOwner()
+				$known->getType() === $lockScope->getType() && $known->getOwner() === $lockScope->getOwner()
 			) {
 				$known->setTimeout(
 					$known->getTimeout() - $known->getETA() + $this->configService->getTimeoutSeconds()
@@ -150,6 +149,10 @@ class LockService {
 		}
 	}
 
+	public function update(FileLock $lock) {
+		$this->locksRequest->update($lock);
+	}
+
 	public function getAppName(string $appId): ?string {
 		$appInfo = $this->appManager->getAppInfo($appId);
 		return $appInfo['name'] ?? null;
@@ -165,16 +168,41 @@ class LockService {
 		$this->notice('unlocking file', false, ['fileLock' => $lock]);
 
 		$known = $this->getLockFromFileId($lock->getNode()->getId());
-		if (!$force && ($lock->getOwner() !== $known->getOwner() || $lock->getType() !== $known->getType())) {
-			throw new UnauthorizedUnlockException(
-				$this->l10n->t('File can only be unlocked by the owner of the lock')
-			);
+		if (!$force) {
+			$this->canUnlock($lock, $known);
 		}
 
 		$this->locksRequest->delete($known);
 		$this->propagateEtag($lock);
 		$this->injectMetadata($known);
 		return $known;
+	}
+
+	public function canUnlock(LockContext $request, FileLock $current): void {
+		$isSameUser = $current->getOwner() === $this->userId;
+		$isSameToken = $request->getOwner() === $current->getToken();
+		$isSameOwner = $request->getOwner() === $current->getOwner();
+		$isSameType = $request->getType() === $current->getType();
+
+		// Check the token for token based locks
+		if ($request->getType() === ILock::TYPE_TOKEN) {
+			if ($isSameToken || $isSameUser) {
+				return;
+			}
+
+			throw new UnauthorizedUnlockException(
+				$this->l10n->t('File can only be unlocked by providing a valid owner lock token')
+			);
+		}
+
+		// Otherwise, we check if the owner (user id OR app id) for a match
+		if ($isSameOwner && $isSameType) {
+			return;
+		}
+
+		throw new UnauthorizedUnlockException(
+			$this->l10n->t('File can only be unlocked by the owner of the lock')
+		);
 	}
 
 
@@ -254,7 +282,8 @@ class LockService {
 			$displayName = $this->getAppName($lock->getOwner()) ?? null;
 		}
 		if ($lock->getType() === ILock::TYPE_TOKEN) {
-			$displayName = $lock->getOwner();
+			$user = $this->userManager->get($lock->getOwner());
+			$displayName = $user ? $user->getDisplayName(): $lock->getDisplayName();
 		}
 
 		$lock->setDisplayName($displayName);

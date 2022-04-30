@@ -33,8 +33,13 @@ use Exception;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\Files\Lock\ILock;
+use OCP\Files\Lock\LockContext;
+use OCP\Files\Lock\OwnerLockedException;
+use OCP\Files\NotFoundException;
+use Sabre\DAV\Exception\NotFound;
 use Sabre\DAV\Locks\Backend\BackendInterface;
 use Sabre\DAV\Locks\LockInfo;
+use Sabre\DAV\Node;
 use Sabre\DAV\Server;
 
 class LockBackend implements BackendInterface {
@@ -68,15 +73,11 @@ class LockBackend implements BackendInterface {
 		$locks = [];
 		try {
 			// TODO: check parent
-			if ($this->absolute) {
-				$file = $this->fileService->getFileFromAbsoluteUri($uri);
-			} else {
-				$file = $this->fileService->getFileFromUri($uri);
-			}
-
+			$file = $this->getFileFromUri($uri);
 			$lock = $this->lockService->getLockFromFileId($file->getId());
 
-			if ($lock->getType() === ILock::TYPE_USER && $lock->getOwner() === \OC::$server->getUserSession()->getUser()->getUID()) {
+			$userLock = $this->server->httpRequest->getHeader('X-User-Lock');
+			if ($userLock && $lock->getType() === ILock::TYPE_USER && $lock->getOwner() === \OC::$server->getUserSession()->getUser()->getUID()) {
 				return [];
 			}
 
@@ -96,7 +97,25 @@ class LockBackend implements BackendInterface {
 	 * @return bool
 	 */
 	public function lock($uri, LockInfo $lockInfo): bool {
-		return true;
+		try {
+			$file = $this->getFileFromUri($uri);
+			$lock = $this->lockService->lock(new LockContext(
+				$file,
+				ILock::TYPE_TOKEN,
+				$lockInfo->token
+			));
+			$lock->setUserId(\OC::$server->getUserSession()->getUser()->getUID());
+			$lock->setTimeout($lockInfo->timeout);
+			$lock->setToken($lockInfo->token);
+			$lock->setDisplayName($lockInfo->owner);
+			$lock->setScope($lockInfo->scope);
+			$this->lockService->update($lock);
+			return true;
+		} catch (NotFoundException $e) {
+			return true;
+		} catch (OwnerLockedException $e) {
+			return false;
+		}
 	}
 
 
@@ -109,6 +128,27 @@ class LockBackend implements BackendInterface {
 	 * @return bool
 	 */
 	public function unlock($uri, LockInfo $lockInfo): bool {
+		try {
+			$file = $this->getFileFromUri($uri);
+		} catch (NotFoundException $e) {
+			return true;
+		}
+		$this->lockService->unlock(new LockContext(
+			$file,
+			ILock::TYPE_TOKEN,
+			$lockInfo->token
+		));
 		return true;
+	}
+
+	/**
+	 * @throws NotFoundException
+	 */
+	private function getFileFromUri(string $uri) {
+		if ($this->absolute) {
+			return $this->fileService->getFileFromAbsoluteUri($uri);
+		}
+
+		return $this->fileService->getFileFromUri($uri);
 	}
 }

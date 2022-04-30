@@ -58,6 +58,7 @@ class LocksRequest extends LocksRequestBuilder {
 
 		try {
 			$qb->execute();
+			$lock->setId($qb->getLastInsertId());
 		} catch (UniqueConstraintViolationException $e) {
 		}
 	}
@@ -66,11 +67,15 @@ class LocksRequest extends LocksRequestBuilder {
 		$qb = $this->getLocksUpdateSql();
 		$qb->set('token', $qb->createNamedParameter($lock->getToken()))
 			->set('ttl', $qb->createNamedParameter($lock->getTimeout()))
+			->set('user_id', $qb->createNamedParameter($lock->getOwner()))
+			->set('owner', $qb->createNamedParameter($lock->getDisplayName()))
+			->set('scope', $qb->createNamedParameter($lock->getScope()))
 			->where($qb->expr()->eq('id', $qb->createNamedParameter($lock->getId())));
 
 		try {
 			$qb->executeStatement();
 		} catch (UniqueConstraintViolationException $e) {
+			throw $e;
 		}
 	}
 

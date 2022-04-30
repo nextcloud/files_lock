@@ -76,6 +76,9 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 
 	private ?string $displayName = null;
 
+	private string $owner = '';
+	private $scope = ILock::LOCK_EXCLUSIVE;
+
 	/**
 	 * FileLock constructor.
 	 *
@@ -243,7 +246,13 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 	}
 
 	public function getScope(): int {
-		return ILock::LOCK_EXCLUSIVE;
+		return $this->scope;
+	}
+
+	public function setScope(int $scope): self {
+		$this->scope = $scope;
+
+		return $this;
 	}
 
 	public function getType(): int {
@@ -294,6 +303,7 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		$this->setCreation($this->getInt('creation', $data));
 		$this->setLockType($this->getInt('type', $data));
 		$this->setTimeout($this->getInt('ttl', $data));
+		$this->setDisplayName($this->get('owner', $data));
 
 		return $this;
 	}
@@ -311,6 +321,7 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		$this->setCreation($this->getInt('creation', $data));
 		$this->setLockType($this->getInt('type', $data));
 		$this->setTimeout($this->getInt('ttl', $data));
+		$this->setDisplayName($this->get('owner', $data));
 	}
 
 

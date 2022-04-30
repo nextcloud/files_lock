@@ -3,6 +3,7 @@
 namespace OCA\FilesLock\DAV;
 
 use OCA\DAV\Connector\Sabre\CachingTree;
+use OCA\DAV\Connector\Sabre\FakeLockerPlugin;
 use OCA\DAV\Connector\Sabre\Node as SabreNode;
 use OCA\DAV\Connector\Sabre\ObjectTree;
 use OCA\FilesLock\AppInfo\Application;
@@ -38,6 +39,14 @@ class LockPlugin extends SabreLockPlugin {
 	}
 
 	public function initialize(Server $server) {
+		$fakePlugin = $server->getPlugins()[FakeLockerPlugin::class] ?? null;
+		if ($fakePlugin) {
+			$server->removeListener('method:LOCK', [$fakePlugin, 'fakeLockProvider']);
+			$server->removeListener('method:UNLOCK', [$server->getPlugins()[FakeLockerPlugin::class], 'fakeUnlockProvider']);
+			$server->removeListener('propFind', [$server->getPlugins()[FakeLockerPlugin::class], 'propFind']);
+			$server->removeListener('validateTokens', [$server->getPlugins()[FakeLockerPlugin::class], 'validateTokens']);
+		}
+
 		$absolute = false;
 		switch (get_class($server->tree)) {
 			case ObjectTree::class:
@@ -72,7 +81,7 @@ class LockPlugin extends SabreLockPlugin {
 				return null;
 			}
 
-			if ($lock->getType() !== ILock::TYPE_USER) {
+			if ($lock->getType() === ILock::TYPE_APP) {
 				return null;
 			}
 
