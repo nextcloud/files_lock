@@ -10,10 +10,11 @@ By default, files locked using this app will be unlocked after 30 minutes.
 
 ### Settings
 
-Administrators can change the time of the maximum lock time (30) using the command:
+Administrators can change the time of the maximum lock time in minutes (30) using the command:
 
 `./occ config:app:set --value '30' files_lock lock_timeout`
 
+Locks have no expiry by default.
 
 
 ### More commands

@@ -45,6 +45,8 @@ class FileLock implements IQueryRow, JsonSerializable {
 
 	use TArrayTools;
 
+	public const ETA_INFINITE = -1;
+
 
 	/** @var int */
 	private $id = 0;
@@ -196,6 +198,9 @@ class FileLock implements IQueryRow, JsonSerializable {
 	 * @return int
 	 */
 	public function getETA(): int {
+		if ($this->getTimeout() <= 0) {
+			return self::ETA_INFINITE;
+		}
 		$end = $this->getCreation() + $this->getTimeout();
 		$eta = $end - time();
 
