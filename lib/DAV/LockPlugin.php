@@ -106,9 +106,9 @@ class LockPlugin extends SabreLockPlugin {
 				return null;
 			}
 
-			$metadata = $this->lockService->getMetadata($lock);
+			$this->lockService->injectMetadata($lock);
 
-			return $metadata['displayName'] ?? null;
+			return $lock->getDisplayName();
 		});
 
 		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_TYPE, function () use ($nodeId) {
@@ -226,7 +226,7 @@ class LockPlugin extends SabreLockPlugin {
 
 	private function getLockProperties(?FileLock $lock): array {
 		return [
-			Application::DAV_PROPERTY_LOCK => (bool)$lock,
+			Application::DAV_PROPERTY_LOCK => $lock !== null,
 			Application::DAV_PROPERTY_LOCK_OWNER_TYPE => $lock ? $lock->getType() : null,
 			Application::DAV_PROPERTY_LOCK_OWNER => $lock ? $lock->getOwner() : null,
 			Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME => $lock ? $this->getLockDisplayName($lock) : null,

@@ -30,6 +30,7 @@
 namespace OCA\FilesLock\Cron;
 
 
+use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
 use OCA\FilesLock\Service\LockService;
 
@@ -37,10 +38,12 @@ class Unlock extends TimedJob {
 
 	private LockService $lockService;
 
-	public function __construct(LockService $lockService) {
+	public function __construct(ITimeFactory $timeFactory, LockService $lockService) {
+		parent::__construct($timeFactory);
+
 		$this->lockService = $lockService;
 
-		$this->setInterval(1);
+		$this->setInterval(12 * 60);
 	}
 
 	protected function run($argument): void {

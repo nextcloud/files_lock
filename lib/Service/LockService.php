@@ -132,11 +132,11 @@ class LockService {
 				);
 				$this->notice('extending existing lock', false, ['fileLock' => $known]);
 				$this->locksRequest->update($known);
-				$known->setMetadata($this->getMetadata($known));
+				$this->injectMetadata($known);
 				return $known;
 			}
 
-			$known->setMetadata($this->getMetadata($known));
+			$this->injectMetadata($known);
 			throw new OwnerLockedException($known);
 		} catch (LockNotFoundException $e) {
 			$lock = FileLock::fromLockScope($lockScope, $this->configService->getTimeoutSeconds());
@@ -145,7 +145,7 @@ class LockService {
 			$this->notice('locking file', false, ['fileLock' => $lock]);
 			$this->locksRequest->save($lock);
 			$this->propagateEtag($lockScope);
-			$lock->setMetadata($this->getMetadata($lock));
+			$this->injectMetadata($lock);
 			return $lock;
 		}
 	}
@@ -173,7 +173,7 @@ class LockService {
 
 		$this->locksRequest->delete($known);
 		$this->propagateEtag($lock);
-		$known->setMetadata($this->getMetadata($known));
+		$this->injectMetadata($known);
 		return $known;
 	}
 
@@ -245,25 +245,21 @@ class LockService {
 		return $lock;
 	}
 
-	public function getMetadata(ILock $lock): array {
+	public function injectMetadata(FileLock $lock): FileLock {
+		$displayName = null;
 		if ($lock->getType() === ILock::TYPE_USER) {
-			return [
-				'displayName' => $this->userManager->get($lock->getOwner())->getDisplayName()
-			];
+			$displayName = $this->userManager->get($lock->getOwner())->getDisplayName();
 		}
 		if ($lock->getType() === ILock::TYPE_APP) {
-			return [
-				'displayName' => $this->getAppName($lock->getOwner())
-			];
+			$displayName = $this->getAppName($lock->getOwner());
 		}
 		if ($lock->getType() === ILock::TYPE_TOKEN) {
-			return [
-				'displayName' => $lock->getOwner()
-			];
+			$displayName = $lock->getOwner();
 		}
-		return [];
-	}
 
+		$lock->setDisplayName($displayName);
+		return $lock;
+	}
 
 	/**
 	 * @param FileLock $lock

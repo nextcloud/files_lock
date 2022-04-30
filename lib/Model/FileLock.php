@@ -74,9 +74,7 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 	/** @var int */
 	private $lockType = ILock::TYPE_USER;
 
-	/** @var array */
-	private $metadata = [];
-
+	private ?string $displayName = null;
 
 	/**
 	 * FileLock constructor.
@@ -257,18 +255,21 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $this;
 	}
 
-	public function setMetadata(array $metadata): self {
-		$this->metadata = $metadata;
+	public function setDisplayName(string $displayName): self {
+		$this->displayName = $displayName;
 		return $this;
 	}
 
+	public function getDisplayName(): ?string {
+		return $this->displayName;
+	}
 
 	/**
 	 * @return LockInfo
 	 */
 	public function toLockInfo(): LockInfo {
 		$lock = new LockInfo();
-		$lock->owner = $this->getOwner();
+		$lock->owner = $this->getDisplayName();
 		$lock->token = $this->getToken();
 		$lock->timeout = $this->getTimeout();
 		$lock->created = $this->getCreatedAt();
@@ -317,16 +318,17 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 	 * @return array
 	 */
 	public function jsonSerialize(): array {
-		return array_merge([
+		return [
 			'id'       => $this->getId(),
 			'uri'      => $this->getUri(),
 			'userId'   => $this->getOwner(),
+			'displayName' => $this->getDisplayName(),
 			'fileId'   => $this->getFileId(),
 			'token'    => $this->getToken(),
 			'eta'      => $this->getETA(),
 			'creation' => $this->getCreatedAt(),
 			'type'     => $this->getType(),
-		], $this->metadata);
+		];
 	}
 
 	public function __toString(): string {
