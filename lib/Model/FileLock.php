@@ -255,7 +255,7 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $this;
 	}
 
-	public function setDisplayName(string $displayName): self {
+	public function setDisplayName(?string $displayName): self {
 		$this->displayName = $displayName;
 		return $this;
 	}
