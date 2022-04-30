@@ -21,6 +21,8 @@
  *
  */
 
+use OCA\FilesLock\AppInfo\Application;
+use OCA\FilesLock\Service\ConfigService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Files\IRootFolder;
 use OCP\Files\Lock\ILock;
@@ -184,14 +186,15 @@ class LockFeatureTest extends TestCase {
 	}
 
 	public function testLockUserExpire() {
+		\OC::$server->getConfig()->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, 30);
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
-			->newFile('testfile', 'AAA');
+			->newFile('testfile-expire', 'AAA');
 		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
 		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
 		$file->putContent('BBB');
 
 		$file = $this->loginAndGetUserFolder(self::TEST_USER2)
-			->get('testfile');
+			->get('testfile-expire');
 		try {
 			$file->putContent('CCC');
 			$this->fail('Expected to throw a ManuallyLockedException');
@@ -203,7 +206,36 @@ class LockFeatureTest extends TestCase {
 		$this->toTheFuture(3600);
 		$file->putContent('CCC');
 		self::assertEquals('CCC', $file->getContent());
+	}
 
+	public function testLockUserInfinite() {
+		\OC::$server->getConfig()->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, 0);
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
+			->newFile('testfile-infinite', 'AAA');
+		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+		$file->putContent('BBB');
+
+		$file = $this->loginAndGetUserFolder(self::TEST_USER2)
+			->get('testfile-infinite');
+		try {
+			$file->putContent('CCC');
+			$this->fail('Expected to throw a ManuallyLockedException');
+		} catch (ManuallyLockedException $e) {
+			self::assertInstanceOf(ManuallyLockedException::class, $e);
+			self::assertEquals('BBB', $file->getContent());
+		}
+
+		$this->toTheFuture(3600);
+		$file = $this->loginAndGetUserFolder(self::TEST_USER2)
+			->get('testfile-infinite');
+		try {
+			$file->putContent('DDD');
+			$this->fail('Expected to throw a ManuallyLockedException');
+		} catch (ManuallyLockedException $e) {
+			self::assertInstanceOf(ManuallyLockedException::class, $e);
+			self::assertEquals('BBB', $file->getContent());
+		}
 	}
 
 	public function testLockApp() {
