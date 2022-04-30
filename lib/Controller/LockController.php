@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 
 /**
@@ -29,9 +31,11 @@
 
 namespace OCA\FilesLock\Controller;
 
-
 use Exception;
 use OCA\FilesLock\AppInfo\Application;
+use OCA\FilesLock\Exceptions\LockNotFoundException;
+use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
+use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCA\FilesLock\Tools\Traits\TLogger;
@@ -40,9 +44,9 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
+use OCP\Files\Lock\OwnerLockedException;
 use OCP\IRequest;
 use OCP\IUserSession;
-
 
 /**
  * Class LockController
@@ -50,29 +54,13 @@ use OCP\IUserSession;
  * @package OCA\FilesLock\Controller
  */
 class LockController extends OCSController {
-
-
 	use TLogger;
 
+	private IUserSession $userSession;
+	private FileService $fileService;
+	private LockService $lockService;
+	private int $ocsVersion;
 
-	/** @var IUserSession */
-	private $userSession;
-
-	/** @var FileService */
-	private $fileService;
-
-	/** @var LockService */
-	private $lockService;
-
-
-	/**
-	 * LockController constructor.
-	 *
-	 * @param IRequest $request
-	 * @param IUserSession $userSession
-	 * @param FileService $fileService
-	 * @param LockService $lockService
-	 */
 	public function __construct(
 		IRequest $request, IUserSession $userSession, FileService $fileService, LockService $lockService
 	) {
@@ -80,6 +68,17 @@ class LockController extends OCSController {
 		$this->userSession = $userSession;
 		$this->fileService = $fileService;
 		$this->lockService = $lockService;
+
+		// We need to overload some implementation from the OCSController here
+		// to be able to push a custom message and data when returning other
+		// HTTP status codes than 200 OK
+		$this->registerResponder('json', function ($data) {
+			return $this->buildOCSResponse('json', $data);
+		});
+
+		$this->registerResponder('xml', function ($data) {
+			return $this->buildOCSResponse('xml', $data);
+		});
 	}
 
 
@@ -101,11 +100,12 @@ class LockController extends OCSController {
 			));
 
 			return new DataResponse($lock, Http::STATUS_OK);
+		} catch (OwnerLockedException $e) {
+			return new DataResponse($e->getLock(), Http::STATUS_LOCKED);
 		} catch (Exception $e) {
 			return $this->fail($e);
 		}
 	}
-
 
 	/**
 	 * @NoAdminRequired
@@ -121,10 +121,50 @@ class LockController extends OCSController {
 			$this->lockService->unlockFile((int)$fileId, $user->getUID());
 
 			return new DataResponse();
+		} catch (LockNotFoundException $e) {
+			$response = new DataResponse();
+			$response->setStatus(Http::STATUS_PRECONDITION_FAILED);
+			return $response;
+		} catch (UnauthorizedUnlockException $e) {
+			$lock = $this->lockService->getLockFromFileId((int)$fileId);
+			$response = new DataResponse();
+			$response->setStatus(Http::STATUS_LOCKED);
+			$response->setData($lock);
+			return $response;
 		} catch (Exception $e) {
 			return $this->fail($e);
 		}
 	}
+
+
+	public function setOCSVersion($version) {
+		$this->ocsVersion = $version;
+	}
+
+	private function buildOCSResponse($format, DataResponse $data) {
+		$message = null;
+		if ($data->getStatus() === Http::STATUS_LOCKED) {
+			/** @var FileLock $lock */
+			$lock = $data->getData();
+			$message = 'File is currently locked by ' . $lock->getOwner();
+		}
+		if ($data->getStatus() === Http::STATUS_PRECONDITION_FAILED) {
+			/** @var FileLock $lock */
+			$lock = $data->getData();
+			$message = 'File is not locked';
+		}
+
+		$containedData = $data->getData();
+		if ($containedData instanceof FileLock) {
+			$data->setData($data->getData()->jsonSerialize());
+		}
+
+		if ($this->ocsVersion === 1) {
+			return new \OC\AppFramework\OCS\V1Response($data, $format, $message);
+		}
+		return new \OC\AppFramework\OCS\V2Response($data, $format, $message);
+	}
+
 
 
 	/**

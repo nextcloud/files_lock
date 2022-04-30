@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 
 /**
@@ -29,7 +31,6 @@
 
 namespace OCA\FilesLock\Service;
 
-
 use Exception;
 use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
@@ -38,7 +39,6 @@ use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Tools\Traits\TLogger;
 use OCA\FilesLock\Tools\Traits\TStringTools;
 use OCP\App\IAppManager;
-use OCP\DirectEditing\IManager;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
@@ -48,16 +48,13 @@ use OCP\Files\NotFoundException;
 use OCP\IL10N;
 use OCP\IUserManager;
 
-
 /**
  * Class LockService
  *
  * @package OCA\FilesLock\Service
  */
 class LockService {
-
-
-	const PREFIX = 'files_lock';
+	public const PREFIX = 'files_lock';
 
 
 	use TStringTools;
@@ -135,9 +132,11 @@ class LockService {
 				);
 				$this->notice('extending existing lock', false, ['fileLock' => $known]);
 				$this->locksRequest->update($known);
+				$known->setMetadata($this->getMetadata($known));
 				return $known;
 			}
 
+			$known->setMetadata($this->getMetadata($known));
 			throw new OwnerLockedException($known);
 		} catch (LockNotFoundException $e) {
 			$lock = FileLock::fromLockScope($lockScope, $this->configService->getTimeoutSeconds());
@@ -146,6 +145,7 @@ class LockService {
 			$this->notice('locking file', false, ['fileLock' => $lock]);
 			$this->locksRequest->save($lock);
 			$this->propagateEtag($lockScope);
+			$lock->setMetadata($this->getMetadata($lock));
 			return $lock;
 		}
 	}
@@ -173,6 +173,7 @@ class LockService {
 
 		$this->locksRequest->delete($known);
 		$this->propagateEtag($lock);
+		$known->setMetadata($this->getMetadata($known));
 		return $known;
 	}
 
@@ -302,6 +303,4 @@ class LockService {
 		]);
 		$node->getStorage()->getUpdater()->propagate($node->getInternalPath(), $node->getMTime());
 	}
-
 }
-

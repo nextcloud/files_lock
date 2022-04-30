@@ -12,11 +12,9 @@ use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\AppFramework\Http;
-use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
-use OCP\Files\NotFoundException;
 use OCP\IUserManager;
 use OCP\IUserSession;
 use Sabre\DAV\INode;
@@ -27,7 +25,6 @@ use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 
 class LockPlugin extends SabreLockPlugin {
-
 	private LockService $lockService;
 	private FileService $fileService;
 	private IUserManager $userManager;
@@ -204,10 +201,21 @@ class LockPlugin extends SabreLockPlugin {
 				);
 			} catch (LockNotFoundException $e) {
 				$response->setStatus(Http::STATUS_PRECONDITION_FAILED);
+				$response->setBody(
+					$this->server->xml->write(
+						'{DAV:}prop',
+						$this->getLockProperties(null)
+					)
+				);
 			} catch (UnauthorizedUnlockException $e) {
+				$lock = $this->lockService->getLockFromFileId($file->getId());
 				$response->setStatus(Http::STATUS_LOCKED);
-			} catch (InvalidPathException $e) {
-			} catch (NotFoundException $e) {
+				$response->setBody(
+					$this->server->xml->write(
+						'{DAV:}prop',
+						$this->getLockProperties($lock)
+					)
+				);
 			}
 
 			return false;

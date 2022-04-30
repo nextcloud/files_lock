@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 
 /**
@@ -27,15 +29,13 @@
 
 namespace OCA\FilesLock\DAV;
 
-
 use Exception;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
-use OCP\IUserSession;
+use OCP\Files\Lock\ILock;
 use Sabre\DAV\Locks\Backend\BackendInterface;
 use Sabre\DAV\Locks\LockInfo;
 use Sabre\DAV\Server;
-
 
 class LockBackend implements BackendInterface {
 
@@ -64,7 +64,7 @@ class LockBackend implements BackendInterface {
 	 *
 	 * @return LockInfo[]
 	 */
-	function getLocks($uri, $returnChildLocks): array {
+	public function getLocks($uri, $returnChildLocks): array {
 		$locks = [];
 		try {
 			// TODO: check parent
@@ -75,6 +75,10 @@ class LockBackend implements BackendInterface {
 			}
 
 			$lock = $this->lockService->getLockFromFileId($file->getId());
+
+			if ($lock->getType() === ILock::TYPE_USER && $lock->getOwner() === \OC::$server->getUserSession()->getUser()->getUID()) {
+				return [];
+			}
 
 			return [$lock->toLockInfo()];
 		} catch (Exception $e) {
@@ -91,7 +95,7 @@ class LockBackend implements BackendInterface {
 	 *
 	 * @return bool
 	 */
-	function lock($uri, LockInfo $lockInfo): bool {
+	public function lock($uri, LockInfo $lockInfo): bool {
 		return true;
 	}
 
@@ -104,17 +108,7 @@ class LockBackend implements BackendInterface {
 	 *
 	 * @return bool
 	 */
-	function unlock($uri, LockInfo $lockInfo): bool {
+	public function unlock($uri, LockInfo $lockInfo): bool {
 		return true;
 	}
-
-
 }
-
-
-
-
-
-
-
-
