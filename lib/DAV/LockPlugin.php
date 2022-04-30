@@ -3,6 +3,7 @@
 namespace OCA\FilesLock\DAV;
 
 use OCA\DAV\Connector\Sabre\CachingTree;
+use OCA\DAV\Connector\Sabre\FakeLockerPlugin;
 use OCA\DAV\Connector\Sabre\Node as SabreNode;
 use OCA\DAV\Connector\Sabre\ObjectTree;
 use OCA\FilesLock\AppInfo\Application;
@@ -17,6 +18,10 @@ use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
 use OCP\IUserManager;
 use OCP\IUserSession;
+use Sabre\DAV\Exception\BadRequest;
+use Sabre\DAV\Exception\ConflictingLock;
+use Sabre\DAV\Exception\Locked;
+use Sabre\DAV\Exception\LockTokenMatchesRequestUri;
 use Sabre\DAV\INode;
 use Sabre\DAV\Locks\Plugin as SabreLockPlugin;
 use Sabre\DAV\PropFind;
@@ -38,6 +43,14 @@ class LockPlugin extends SabreLockPlugin {
 	}
 
 	public function initialize(Server $server) {
+		$fakePlugin = $server->getPlugins()[FakeLockerPlugin::class] ?? null;
+		if ($fakePlugin) {
+			$server->removeListener('method:LOCK', [$fakePlugin, 'fakeLockProvider']);
+			$server->removeListener('method:UNLOCK', [$fakePlugin, 'fakeUnlockProvider']);
+			$server->removeListener('propFind', [$fakePlugin, 'propFind']);
+			$server->removeListener('validateTokens', [$fakePlugin, 'validateTokens']);
+		}
+
 		$absolute = false;
 		switch (get_class($server->tree)) {
 			case ObjectTree::class:
@@ -72,7 +85,7 @@ class LockPlugin extends SabreLockPlugin {
 				return null;
 			}
 
-			if ($lock->getType() !== ILock::TYPE_USER) {
+			if ($lock->getType() === ILock::TYPE_APP) {
 				return null;
 			}
 
@@ -221,7 +234,12 @@ class LockPlugin extends SabreLockPlugin {
 			return false;
 		}
 
-		return parent::httpUnlock($request, $response);
+		try {
+			return parent::httpUnlock($request, $response);
+		} catch (LockTokenMatchesRequestUri $e) {
+			// Skip logging with wrong lock token
+			return false;
+		}
 	}
 
 	private function getLockProperties(?FileLock $lock): array {
