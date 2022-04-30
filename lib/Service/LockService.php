@@ -251,7 +251,7 @@ class LockService {
 			$displayName = $this->userManager->get($lock->getOwner())->getDisplayName();
 		}
 		if ($lock->getType() === ILock::TYPE_APP) {
-			$displayName = $this->getAppName($lock->getOwner());
+			$displayName = $this->getAppName($lock->getOwner()) ?? null;
 		}
 		if ($lock->getType() === ILock::TYPE_TOKEN) {
 			$displayName = $lock->getOwner();
