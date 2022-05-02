@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="4.x-dev@">
+  <file src="lib/AppInfo/Application.php">
+    <UndefinedClass occurrences="1">
+      <code>LoadAdditionalScriptsEvent</code>
+    </UndefinedClass>
+  </file>
+  <file src="lib/DAV/LockBackend.php">
+    <UndefinedThisPropertyAssignment occurrences="1">
+      <code>$this-&gt;server</code>
+    </UndefinedThisPropertyAssignment>
+    <UndefinedThisPropertyFetch occurrences="1">
+      <code>$this-&gt;server</code>
+    </UndefinedThisPropertyFetch>
+  </file>
+  <file src="lib/DAV/LockPlugin.php">
+    <UndefinedClass occurrences="4">
+      <code>CachingTree</code>
+      <code>FakeLockerPlugin</code>
+      <code>ObjectTree</code>
+      <code>SabreNode</code>
+    </UndefinedClass>
+  </file>
+  <file src="lib/Db/CoreQueryBuilder.php">
+    <MissingDependency occurrences="1">
+      <code>ExtendedQueryBuilder</code>
+    </MissingDependency>
+  </file>
+  <file src="lib/Db/CoreRequestBuilder.php">
+    <MissingDependency occurrences="9">
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>CoreQueryBuilder</code>
+    </MissingDependency>
+  </file>
+  <file src="lib/Db/LocksRequest.php">
+    <MissingDependency occurrences="24">
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+      <code>$qb</code>
+    </MissingDependency>
+    <UndefinedClass occurrences="1">
+      <code>UniqueConstraintViolationException</code>
+    </UndefinedClass>
+  </file>
+  <file src="lib/Db/LocksRequestBuilder.php">
+    <MissingDependency occurrences="6">
+      <code>CoreQueryBuilder</code>
+      <code>CoreQueryBuilder</code>
+      <code>CoreQueryBuilder</code>
+      <code>CoreQueryBuilder</code>
+      <code>CoreQueryBuilder</code>
+      <code>CoreQueryBuilder</code>
+    </MissingDependency>
+  </file>
+  <file src="lib/Listeners/LoadAdditionalScripts.php">
+    <UndefinedClass occurrences="1">
+      <code>LoadAdditionalScriptsEvent</code>
+    </UndefinedClass>
+  </file>
+  <file src="lib/LockProvider.php">
+    <RedundantCondition occurrences="2">
+      <code>$lock</code>
+      <code>$lock</code>
+    </RedundantCondition>
+  </file>
+  <file src="lib/Service/FileService.php">
+    <MissingDependency occurrences="6">
+      <code>$this-&gt;rootFolder</code>
+      <code>$this-&gt;rootFolder</code>
+      <code>$this-&gt;rootFolder</code>
+      <code>$this-&gt;rootFolder</code>
+      <code>IRootFolder</code>
+      <code>IRootFolder</code>
+    </MissingDependency>
+  </file>
+  <file src="lib/Tools/Traits/TArrayTools.php">
+    <TypeDoesNotContainNull occurrences="7">
+      <code>$arr === null</code>
+      <code>$arr === null</code>
+      <code>$arr === null</code>
+      <code>$arr === null</code>
+      <code>$arr === null</code>
+      <code>$arr === null</code>
+      <code>$arr === null</code>
+    </TypeDoesNotContainNull>
+  </file>
+  <file src="lib/Tools/Traits/TSetup.php">
+    <MismatchingDocblockParamType occurrences="2">
+      <code>string</code>
+      <code>string</code>
+    </MismatchingDocblockParamType>
+    <MismatchingDocblockReturnType occurrences="1">
+      <code>string</code>
+    </MismatchingDocblockReturnType>
+  </file>
+</files>
