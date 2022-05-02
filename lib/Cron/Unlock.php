@@ -30,52 +30,27 @@
 namespace OCA\FilesLock\Cron;
 
 
-use OC\BackgroundJob\TimedJob;
-use OCA\FilesLock\AppInfo\Application;
+use OCP\AppFramework\Utility\ITimeFactory;
+use OCP\BackgroundJob\TimedJob;
 use OCA\FilesLock\Service\LockService;
-use OCP\AppFramework\QueryException;
 
-
-/**
- * Class Unlock
- *
- * @package OCA\FilesLock\Cron
- */
 class Unlock extends TimedJob {
 
+	private LockService $lockService;
 
-	/** @var LockService */
-	private $lockService;
+	public function __construct(ITimeFactory $timeFactory, LockService $lockService) {
+		parent::__construct($timeFactory);
 
+		$this->lockService = $lockService;
 
-	/**
-	 * Unlock constructor.
-	 */
-	public function __construct() {
-//		$this->setInterval(12 * 60); // 12 minutes
-		$this->setInterval(1);
+		$this->setInterval(12 * 60);
 	}
 
-
-	/**
-	 * @param mixed $argument
-	 *
-	 * @throws QueryException
-	 */
-	protected function run($argument) {
-		$app = new Application();
-		$c = $app->getContainer();
-
-		$this->lockService = $c->query(LockService::class);
-
+	protected function run($argument): void {
 		$this->manageTimeoutLock();
 	}
 
-
-	/**
-	 *
-	 */
-	private function manageTimeoutLock() {
+	private function manageTimeoutLock(): void {
 		$this->lockService->removeLocks($this->lockService->getDeprecatedLocks());
 	}
 

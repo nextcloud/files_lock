@@ -37,7 +37,9 @@ use OCA\DAV\Connector\Sabre\ObjectTree;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\FilesLock\Capability;
 use OCA\FilesLock\Listeners\LoadAdditionalScripts;
-use OCA\FilesLock\Plugins\FilesLockPlugin;
+use OCA\FilesLock\LockProvider;
+use OCA\FilesLock\Plugins\FilesLockBackend;
+use OCA\FilesLock\Plugins\LockPlugin;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCA\FilesLock\Storage\LockWrapper;
@@ -45,6 +47,7 @@ use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCP\Files\Lock\ILockManager;
 use OCP\IServerContainer;
 use OCP\IUserSession;
 use OCP\SabrePluginEvent;
@@ -65,9 +68,13 @@ class Application extends App implements IBootstrap {
 
 
 	const DAV_PROPERTY_LOCK = '{http://nextcloud.org/ns}lock';
+	const DAV_PROPERTY_LOCK_OWNER_TYPE = '{http://nextcloud.org/ns}lock-owner-type';
 	const DAV_PROPERTY_LOCK_OWNER = '{http://nextcloud.org/ns}lock-owner';
 	const DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME = '{http://nextcloud.org/ns}lock-owner-displayname';
+	const DAV_PROPERTY_LOCK_EDITOR = '{http://nextcloud.org/ns}lock-owner-editor';
 	const DAV_PROPERTY_LOCK_TIME = '{http://nextcloud.org/ns}lock-time';
+	const DAV_PROPERTY_LOCK_TIMEOUT = '{http://nextcloud.org/ns}lock-timeout';
+	const DAV_PROPERTY_LOCK_TOKEN = '{http://nextcloud.org/ns}lock-token';
 
 
 	/** @var IUserSession */
@@ -78,6 +85,8 @@ class Application extends App implements IBootstrap {
 
 	/** @var LockService */
 	private $lockService;
+
+	private ILockManager $lockManager;
 
 
 	/**
@@ -107,6 +116,10 @@ class Application extends App implements IBootstrap {
 	 */
 	public function boot(IBootContext $context): void {
 		$context->injectFn(Closure::fromCallable([$this, 'registerHooks']));
+
+		$context->injectFn(function (ILockManager $lockManager) use ($context) {
+			$lockManager->registerLockProvider($context->getAppContainer()->get(LockProvider::class));
+		});
 	}
 
 
@@ -119,29 +132,7 @@ class Application extends App implements IBootstrap {
 		$this->userSession = $container->get(IUserSession::class);
 		$this->fileService = $container->get(FileService::class);
 		$this->lockService = $container->get(LockService::class);
-
-		$eventDispatcher->addListener(
-			'OCA\DAV\Connector\Sabre::addPlugin', function (SabrePluginEvent $e) {
-			$server = $e->getServer();
-			$absolute = false;
-			switch (get_class($server->tree)) {
-				case ObjectTree::class:
-					$absolute = false;
-					break;
-
-				case CachingTree::class:
-					$absolute = true;
-					break;
-			}
-
-			$server->on('propFind', [$this->lockService, 'propFind']);
-			$server->addPlugin(
-				new Plugin(
-					new FilesLockPlugin($this->userSession, $this->fileService, $this->lockService, $absolute)
-				)
-			);
-		}
-		);
+		$this->lockManager = $container->get(ILockManager::class);
 
 		Util::connectHook('OC_Filesystem', 'preSetup', $this, 'addStorageWrapper');
 	}
@@ -155,6 +146,7 @@ class Application extends App implements IBootstrap {
 			return new LockWrapper(
 				[
 					'storage' => $storage,
+					'lock_manager' => $this->lockManager,
 					'user_session' => $this->userSession,
 					'file_service' => $this->fileService,
 					'lock_service' => $this->lockService

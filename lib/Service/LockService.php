@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 
 /**
@@ -29,27 +31,22 @@
 
 namespace OCA\FilesLock\Service;
 
-
 use Exception;
-use OCA\DAV\Connector\Sabre\Node as SabreNode;
-use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Db\LocksRequest;
-use OCA\FilesLock\Exceptions\AlreadyLockedException;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
-use OCA\FilesLock\Exceptions\NotFileException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Tools\Traits\TLogger;
 use OCA\FilesLock\Tools\Traits\TStringTools;
+use OCP\App\IAppManager;
+use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\InvalidPathException;
-use OCP\Files\Node;
+use OCP\Files\Lock\ILock;
+use OCP\Files\Lock\LockContext;
+use OCP\Files\Lock\OwnerLockedException;
 use OCP\Files\NotFoundException;
 use OCP\IL10N;
-use OCP\IUser;
 use OCP\IUserManager;
-use Sabre\DAV\INode;
-use Sabre\DAV\PropFind;
-
 
 /**
  * Class LockService
@@ -57,59 +54,39 @@ use Sabre\DAV\PropFind;
  * @package OCA\FilesLock\Service
  */
 class LockService {
-
-
-	const PREFIX = 'files_lock';
+	public const PREFIX = 'files_lock';
 
 
 	use TStringTools;
 	use TLogger;
 
 
-	/** @var string */
-	private $userId;
-
-	/** @var IUserManager */
-	private $userManager;
-
-	/** @var IL10N */
-	private $l10n;
-
-	/** @var LocksRequest */
-	private $locksRequest;
-
-	/** @var FileService */
-	private $fileService;
-
-	/** @var ConfigService */
-	private $configService;
+	private ?string $userId;
+	private IUserManager $userManager;
+	private IL10N $l10n;
+	private LocksRequest $locksRequest;
+	private FileService $fileService;
+	private ConfigService $configService;
+	private IAppManager $appManager;
+	private IEventDispatcher $eventDispatcher;
 
 
-	/** @var array */
-	private $locks = [];
-
-	/** @var bool */
-	private $lockRetrieved = false;
-
-	/** @var array */
-	private $lockCache = [];
+	private array $locks = [];
+	private bool $lockRetrieved = false;
+	private array $lockCache = [];
+	private ?array $directEditors = null;
+	private bool $allowUserOverride = false;
 
 
-	/**
-	 * @param $userId
-	 * @param IL10N $l10n
-	 * @param IUserManager $userManager
-	 * @param LocksRequest $locksRequest
-	 * @param FileService $fileService
-	 * @param ConfigService $configService
-	 */
 	public function __construct(
 		$userId,
 		IL10N $l10n,
 		IUserManager $userManager,
 		LocksRequest $locksRequest,
 		FileService $fileService,
-		ConfigService $configService
+		ConfigService $configService,
+		IAppManager $appManager,
+		IEventDispatcher $eventDispatcher
 	) {
 		$this->userId = $userId;
 		$this->l10n = $l10n;
@@ -117,6 +94,8 @@ class LockService {
 		$this->locksRequest = $locksRequest;
 		$this->fileService = $fileService;
 		$this->configService = $configService;
+		$this->appManager = $appManager;
+		$this->eventDispatcher = $eventDispatcher;
 
 		$this->setup('app', 'files_lock');
 	}
@@ -126,7 +105,7 @@ class LockService {
 	 *
 	 * @return FileLock|bool
 	 */
-	private function getLockForNodeId(int $nodeId) {
+	public function getLockForNodeId(int $nodeId) {
 		if (array_key_exists($nodeId, $this->lockCache) && $this->lockCache[$nodeId] !== null) {
 			return $this->lockCache[$nodeId];
 		}
@@ -140,154 +119,124 @@ class LockService {
 		return $this->lockCache[$nodeId];
 	}
 
-	/**
-	 * @param PropFind $propFind
-	 * @param INode $node
-	 *
-	 * @return void
-	 */
-	public function propFind(PropFind $propFind, INode $node) {
-		if (!$node instanceof SabreNode) {
-			return;
-		}
-		$nodeId = $node->getId();
-
-		$propFind->handle(
-			Application::DAV_PROPERTY_LOCK, function () use ($nodeId) {
-			$lock = $this->getLockForNodeId($nodeId);
-
-			if ($lock === false) {
-				return false;
-			}
-
-			return true;
-		}
-		);
-
-		$propFind->handle(
-			Application::DAV_PROPERTY_LOCK_OWNER, function () use ($nodeId) {
-			$lock = $this->getLockForNodeId($nodeId);
-
-			if ($lock !== false) {
-				return $lock->getUserId();
-			}
-
-			return null;
-		}
-		);
-
-		$propFind->handle(
-			Application::DAV_PROPERTY_LOCK_TIME, function () use ($nodeId) {
-			$lock = $this->getLockForNodeId($nodeId);
-
-			if ($lock !== false) {
-				return $lock->getCreation();
-			}
-
-			return 0;
-		}
-		);
-
-		$propFind->handle(
-			Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME, function () use ($nodeId) {
-			$lock = $this->getLockForNodeId($nodeId);
-
-			if ($lock !== false) {
-				$user = $this->userManager->get($lock->getUserId());
-				if ($user !== null) {
-					return $user->getDisplayName();
-				}
-			}
-
-			return null;
-		}
-		);
-	}
-
-
-	/**
-	 * @param FileLock $lock
-	 *
-	 * @throws AlreadyLockedException
-	 */
-	public function lock(FileLock $lock) {
-		$this->generateToken($lock);
-		$this->notice('locking file', false, ['fileLock' => $lock]);
-
+	public function lock(LockContext $lockScope): FileLock {
 		try {
-			$known = $this->getLockFromFileId($lock->getFileId());
+			$known = $this->getLockFromFileId($lockScope->getNode()->getId());
 
-			throw new AlreadyLockedException('File is already locked by ' . $known->getUserId());
+			// Extend lock expiry if matching
+			if (
+				$known->getType() === $lockScope->getType() && ($known->getOwner() === $lockScope->getOwner() || $known->getToken() === $lockScope->getOwner())
+			) {
+				$known->setTimeout(
+					$known->getTimeout() - $known->getETA() + $this->configService->getTimeoutSeconds()
+				);
+				$this->notice('extending existing lock', false, ['fileLock' => $known]);
+				$this->locksRequest->update($known);
+				$this->injectMetadata($known);
+				return $known;
+			}
+
+			$this->injectMetadata($known);
+			throw new OwnerLockedException($known);
 		} catch (LockNotFoundException $e) {
+			$lock = FileLock::fromLockScope($lockScope, $this->configService->getTimeoutSeconds());
+			$this->generateToken($lock);
+			$lock->setCreation(time());
+			$this->notice('locking file', false, ['fileLock' => $lock]);
 			$this->locksRequest->save($lock);
+			$this->propagateEtag($lockScope);
+			$this->injectMetadata($lock);
+			return $lock;
 		}
 	}
 
+	public function update(FileLock $lock) {
+		$this->locksRequest->update($lock);
+	}
+
+	public function getAppName(string $appId): ?string {
+		$appInfo = $this->appManager->getAppInfo($appId);
+		return $appInfo['name'] ?? null;
+	}
 
 	/**
-	 * @param Node $file
-	 * @param IUser $user
-	 *
-	 * @return FileLock
-	 * @throws AlreadyLockedException
 	 * @throws InvalidPathException
-	 * @throws NotFileException
-	 * @throws NotFoundException
-	 */
-	public function lockFile(Node $file, IUser $user): FileLock {
-		if ($file->getType() !== Node::TYPE_FILE) {
-			throw new NotFileException('Must be a file, seems to be a folder.');
-		}
-
-		$lock = new FileLock($this->configService->getTimeoutSeconds());
-		$lock->setUserId($user->getUID());
-		$lock->setFileId($file->getId());
-
-		$this->lock($lock);
-
-		return $lock;
-	}
-
-
-	/**
-	 * @param FileLock $lock
-	 * @param bool $force
-	 *
 	 * @throws LockNotFoundException
+	 * @throws NotFoundException
 	 * @throws UnauthorizedUnlockException
 	 */
-	public function unlock(FileLock $lock, bool $force = false) {
+	public function unlock(LockContext $lock, bool $force = false): FileLock {
 		$this->notice('unlocking file', false, ['fileLock' => $lock]);
 
-		$known = $this->getLockFromFileId($lock->getFileId());
-		if (!$force && $lock->getUserId() !== $known->getUserId()) {
-			throw new UnauthorizedUnlockException(
-				$this->l10n->t('File can only be unlocked by the owner of the lock')
-			);
+		$known = $this->getLockFromFileId($lock->getNode()->getId());
+		if (!$force) {
+			$this->canUnlock($lock, $known);
 		}
 
 		$this->locksRequest->delete($known);
+		$this->propagateEtag($lock);
+		$this->injectMetadata($known);
+		return $known;
+	}
+
+	public function enableUserOverride(): void {
+		$this->allowUserOverride = true;
+	}
+
+	public function canUnlock(LockContext $request, FileLock $current): void {
+		$isSameUser = $current->getOwner() === $this->userId;
+		$isSameToken = $request->getOwner() === $current->getToken();
+		$isSameOwner = $request->getOwner() === $current->getOwner();
+		$isSameType = $request->getType() === $current->getType();
+
+		// Check the token for token based locks
+		if ($request->getType() === ILock::TYPE_TOKEN) {
+			if ($isSameToken || ($this->allowUserOverride && $isSameUser)) {
+				return;
+			}
+
+			throw new UnauthorizedUnlockException(
+				$this->l10n->t('File can only be unlocked by providing a valid owner lock token')
+			);
+		}
+
+		// Otherwise, we check if the owner (user id OR app id) for a match
+		if ($isSameOwner && $isSameType) {
+			return;
+		}
+
+		throw new UnauthorizedUnlockException(
+			$this->l10n->t('File can only be unlocked by the owner of the lock')
+		);
 	}
 
 
 	/**
-	 * @param int $fileId
-	 * @param string $userId
-	 *
-	 * @param bool $force
-	 *
-	 * @return FileLock
+	 * @throws InvalidPathException
 	 * @throws LockNotFoundException
+	 * @throws NotFoundException
 	 * @throws UnauthorizedUnlockException
 	 */
 	public function unlockFile(int $fileId, string $userId, bool $force = false): FileLock {
-		$lock = new FileLock();
-		$lock->setUserId($userId);
-		$lock->setFileId($fileId);
+		$lock = $this->getLockForNodeId($fileId);
+		if (!$lock) {
+			throw new LockNotFoundException();
+		}
 
-		$this->unlock($lock, $force);
+		$type = ILock::TYPE_USER;
+		if ($force) {
+			$userId = $lock->getOwner();
+			$type = $lock->getType();
+		}
 
-		return $lock;
+		$node = $this->fileService->getFileFromId($userId, $fileId);
+		$lock = new LockContext(
+			$node,
+			$type,
+			$userId,
+		);
+		$this->propagateEtag($lock);
+		return $this->unlock($lock, $force);
 	}
 
 
@@ -300,7 +249,7 @@ class LockService {
 			$this->notice(
 				'ConfigService::LOCK_TIMEOUT is not numerical, using default', true, ['current' => $timeout]
 			);
-			$timeout = $this->configService->defaults[ConfigService::LOCK_TIMEOUT];
+			$timeout = (int)$this->configService->defaults[ConfigService::LOCK_TIMEOUT];
 		}
 
 		try {
@@ -329,6 +278,24 @@ class LockService {
 		return $lock;
 	}
 
+	public function injectMetadata(FileLock $lock): FileLock {
+		$displayName = null;
+		if ($lock->getType() === ILock::TYPE_USER) {
+			$displayName = $this->userManager->get($lock->getOwner())->getDisplayName();
+		}
+		if ($lock->getType() === ILock::TYPE_APP) {
+			$displayName = $this->getAppName($lock->getOwner()) ?? null;
+		}
+		if ($lock->getType() === ILock::TYPE_TOKEN) {
+			$user = $this->userManager->get($lock->getOwner());
+			$displayName = $user ? $user->getDisplayName(): $lock->getDisplayName();
+		}
+
+		if ($displayName) {
+			$lock->setDisplayName($displayName);
+		}
+		return $lock;
+	}
 
 	/**
 	 * @param FileLock $lock
@@ -360,5 +327,12 @@ class LockService {
 
 		$this->locksRequest->removeIds($ids);
 	}
-}
 
+	private function propagateEtag(LockContext $lockContext): void {
+		$node = $lockContext->getNode();
+		$node->getStorage()->getCache()->update($node->getId(), [
+			'etag' => uniqid(),
+		]);
+		$node->getStorage()->getUpdater()->propagate($node->getInternalPath(), $node->getMTime());
+	}
+}

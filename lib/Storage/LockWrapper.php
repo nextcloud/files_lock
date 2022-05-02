@@ -24,10 +24,13 @@ namespace OCA\FilesLock\Storage;
 use OC\Files\Storage\Wrapper\Wrapper;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
+use OCA\FilesLock\Service\AppLockService;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\Constants;
 use OCP\Files\InvalidPathException;
+use OCP\Files\Lock\ILock;
+use OCP\Files\Lock\ILockManager;
 use OCP\Files\NotFoundException;
 use OCP\IUserSession;
 use OCP\Lock\LockedException;
@@ -35,6 +38,7 @@ use OCP\Lock\ManuallyLockedException;
 
 class LockWrapper extends Wrapper {
 
+	private ILockManager $lockManager;
 
 	/** @var FileService */
 	private $fileService;
@@ -54,6 +58,7 @@ class LockWrapper extends Wrapper {
 	public function __construct($arguments) {
 		parent::__construct($arguments);
 
+		$this->lockManager = $arguments['lock_manager'];
 		$this->userSession = $arguments['user_session'];
 		$this->fileService = $arguments['file_service'];
 		$this->lockService = $arguments['lock_service'];
@@ -89,7 +94,7 @@ class LockWrapper extends Wrapper {
 			case Constants::PERMISSION_DELETE:
 			case Constants::PERMISSION_UPDATE:
 				throw new ManuallyLockedException(
-					$path, null, $lock->getToken(), $lock->getUserId(), $lock->getETA()
+					$path, null, $lock->getToken(), $lock->getOwner(), $lock->getETA()
 				);
 
 			default:
@@ -121,8 +126,19 @@ class LockWrapper extends Wrapper {
 			}
 
 			$lock = $this->lockService->getLockFromFileId($file->getId());
-			if ($viewerId === '' || $lock->getUserId() !== $viewerId) {
+			// TODO: double check empty viewer id condition
+			if ($viewerId === '') {
 				return true;
+			}
+
+			$lockScope = $this->lockManager->getLockInScope();
+			if ($lock->getType() === ILock::TYPE_USER && $lock->getOwner() !== $viewerId) {
+				return true;
+			}
+			if ($lock->getType() === ILock::TYPE_APP) {
+				if (!$lockScope || $lockScope->getType() !== $lock->getType() || $lockScope->getOwner() !== $lock->getOwner()) {
+					return true;
+				}
 			}
 		} catch (LockNotFoundException | InvalidPathException | NotFoundException $e) {
 		}

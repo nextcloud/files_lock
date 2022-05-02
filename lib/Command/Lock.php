@@ -33,7 +33,6 @@ namespace OCA\FilesLock\Command;
 use OC\Core\Command\Base;
 use OC\User\NoUserException;
 use OCA\FilesLock\Db\LocksRequest;
-use OCA\FilesLock\Exceptions\AlreadyLockedException;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Exceptions\NotFileException;
 use OCA\FilesLock\Exceptions\SuccessException;
@@ -43,6 +42,8 @@ use OCA\FilesLock\Service\ConfigService;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\Files\InvalidPathException;
+use OCP\Files\Lock\ILock;
+use OCP\Files\Lock\LockContext;
 use OCP\Files\NotFoundException;
 use OCP\IUserManager;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
@@ -119,7 +120,6 @@ class Lock extends Base {
 	 * @throws NoUserException
 	 * @throws NotFoundException
 	 * @throws UnauthorizedUnlockException
-	 * @throws AlreadyLockedException
 	 * @throws NotFileException
 	 * @throws InvalidPathException
 	 */
@@ -165,7 +165,7 @@ class Lock extends Base {
 		try {
 			$lock = $this->lockService->getLockFromFileId($fileId);
 			$output->writeln(
-				'File #' . $fileId . ' is <comment>locked</comment> by ' . $lock->getUserId()
+				'File #' . $fileId . ' is <comment>locked</comment> by ' . $lock->getOwner()
 			);
 			$output->writeln(
 				' - Locked at: ' . date('c', $lock->getCreation())
@@ -189,7 +189,6 @@ class Lock extends Base {
 	 * @param int $fileId
 	 * @param string|null $userId
 	 *
-	 * @throws AlreadyLockedException
 	 * @throws InvalidPathException
 	 * @throws NoUserException
 	 * @throws NotFileException
@@ -204,7 +203,9 @@ class Lock extends Base {
 		$file = $this->fileService->getFileFromId($user->getUID(), $fileId);
 
 		$output->writeln('<info>locking ' . $file->getName() . ' to ' . $userId . '</info>');
-		$this->lockService->lockFile($file, $user);
+		$this->lockService->lock(new LockContext(
+			$file, ILock::TYPE_USER, $userId
+		));
 	}
 
 
@@ -223,7 +224,7 @@ class Lock extends Base {
 
 		$output->writeln('<info>unlocking File #' . $fileId);
 		try {
-			$this->lockService->unlockFile($fileId, '', true);
+			$this->lockService->unlockFile($fileId, $input->getArgument('user_id'), true);
 		} catch (LockNotFoundException $e) {
 		}
 
