@@ -35,6 +35,7 @@ use OCA\FilesLock\Service\LockService;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
+use OCP\Files\Node;
 use OCP\Files\NotFoundException;
 use Sabre\DAV\Locks\Backend\BackendInterface;
 use Sabre\DAV\Locks\LockInfo;
@@ -78,6 +79,8 @@ class LockBackend implements BackendInterface {
 			if ($userLock && $lock->getType() === ILock::TYPE_USER && $lock->getOwner() === \OC::$server->getUserSession()->getUser()->getUID()) {
 				return [];
 			}
+
+			$lock->setUri($uri);
 
 			return [$lock->toLockInfo()];
 		} catch (Exception $e) {
@@ -142,7 +145,7 @@ class LockBackend implements BackendInterface {
 	/**
 	 * @throws NotFoundException
 	 */
-	private function getFileFromUri(string $uri) {
+	private function getFileFromUri(string $uri): Node {
 		if ($this->absolute) {
 			return $this->fileService->getFileFromAbsoluteUri($uri);
 		}

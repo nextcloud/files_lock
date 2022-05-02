@@ -202,6 +202,7 @@ class LockPlugin extends SabreLockPlugin {
 
 			try {
 				$file = $this->fileService->getFileFromAbsoluteUri($this->server->getRequestUri());
+				$this->lockService->enableUserOverride();
 				$this->lockService->unlock(new LockContext(
 					$file, ILock::TYPE_USER, $this->userSession->getUser()->getUID()
 				));

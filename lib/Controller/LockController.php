@@ -118,6 +118,7 @@ class LockController extends OCSController {
 	public function unlocking(string $fileId): DataResponse {
 		try {
 			$user = $this->userSession->getUser();
+			$this->lockService->enableUserOverride();
 			$this->lockService->unlockFile((int)$fileId, $user->getUID());
 
 			return new DataResponse();

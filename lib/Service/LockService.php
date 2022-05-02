@@ -75,6 +75,7 @@ class LockService {
 	private bool $lockRetrieved = false;
 	private array $lockCache = [];
 	private ?array $directEditors = null;
+	private bool $allowUserOverride = false;
 
 
 	public function __construct(
@@ -178,6 +179,10 @@ class LockService {
 		return $known;
 	}
 
+	public function enableUserOverride(): void {
+		$this->allowUserOverride = true;
+	}
+
 	public function canUnlock(LockContext $request, FileLock $current): void {
 		$isSameUser = $current->getOwner() === $this->userId;
 		$isSameToken = $request->getOwner() === $current->getToken();
@@ -186,7 +191,7 @@ class LockService {
 
 		// Check the token for token based locks
 		if ($request->getType() === ILock::TYPE_TOKEN) {
-			if ($isSameToken || $isSameUser) {
+			if ($isSameToken || ($this->allowUserOverride && $isSameUser)) {
 				return;
 			}
 

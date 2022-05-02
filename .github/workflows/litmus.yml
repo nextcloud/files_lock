@@ -67,6 +67,7 @@ jobs:
           tools: phpunit
           extensions: zip, gd, mbstring, iconv, fileinfo, intl, sqlite, pdo_sqlite, mysql, pdo_mysql, pgsql, pdo_pgsql
           coverage: none
+          ini-values: zend.exception_ignore_args=0
 
       - name: Set up PHPUnit
         working-directory: apps/${{ env.APP_NAME }}

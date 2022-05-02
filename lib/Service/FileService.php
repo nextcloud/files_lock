@@ -123,7 +123,7 @@ class FileService {
 	 * @throws NotFoundException
 	 */
 	public function getFileFromAbsoluteUri(string $uri): Node {
-		list(, $userId, $path) = explode('/', ltrim($uri, '/') . '/', 3);
+		list(, $userId, $path) = explode('/', trim($uri, '/') . '/', 3);
 		$path = '/' . $path;
 		$file = $this->rootFolder->getUserFolder($userId)
 								 ->get($path);
