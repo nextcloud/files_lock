@@ -29,11 +29,7 @@
 
 namespace OCA\FilesLock\Exceptions;
 
-
 use Exception;
 
-
 class LockNotFoundException extends Exception {
-
 }
-

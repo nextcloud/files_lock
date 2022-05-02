@@ -31,13 +31,11 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Listeners;
 
-
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\FilesLock\AppInfo\Application;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Util;
-
 
 /**
  * Class LoadAdditionalScripts
@@ -58,6 +56,4 @@ class LoadAdditionalScripts implements IEventListener {
 		Util::addScript(Application::APP_ID, 'files');
 		Util::addStyle(Application::APP_ID, 'files_lock');
 	}
-
 }
-

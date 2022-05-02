@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 
 /**
@@ -29,7 +31,6 @@
 
 namespace OCA\FilesLock\Db;
 
-
 use OC;
 use OC\DB\Connection;
 use OC\DB\SchemaWrapper;
@@ -40,9 +41,7 @@ use OC\DB\SchemaWrapper;
  * @package OCA\FilesLock\Db
  */
 class CoreRequestBuilder {
-
-
-	const TABLE_LOCKS = 'files_lock';
+	public const TABLE_LOCKS = 'files_lock';
 
 	/** @var array */
 	private static $tables = [
@@ -67,7 +66,8 @@ class CoreRequestBuilder {
 	 */
 	public function uninstall() {
 		$this->uninstallAppTables();
-		$this->removeFromJobs();;
+		$this->removeFromJobs();
+		;
 		$this->removeFromMigrations();
 	}
 
@@ -109,6 +109,4 @@ class CoreRequestBuilder {
 		$qb->where($qb->exprLimitToDBField('class', 'OCA\FilesLock\Cron\Unlock', true, true));
 		$qb->execute();
 	}
-
 }
-

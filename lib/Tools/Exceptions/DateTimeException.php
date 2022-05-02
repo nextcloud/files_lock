@@ -30,11 +30,7 @@
 
 namespace OCA\FilesLock\Tools\Exceptions;
 
-
 use Exception;
 
-
 class DateTimeException extends Exception {
-
 }
-

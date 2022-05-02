@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 
@@ -31,7 +32,6 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Tools\Traits;
 
-
 use OCA\FilesLock\Tools\Exceptions\ArrayNotFoundException;
 use OCA\FilesLock\Tools\Exceptions\ItemNotFoundException;
 use OCA\FilesLock\Tools\Exceptions\MalformedArrayException;
@@ -39,16 +39,13 @@ use OCA\FilesLock\Tools\Exceptions\UnknownTypeException;
 use Exception;
 use JsonSerializable;
 
-
 trait TArrayTools {
-
-
-	static $TYPE_NULL = 'Null';
-	static $TYPE_STRING = 'String';
-	static $TYPE_ARRAY = 'Array';
-	static $TYPE_BOOLEAN = 'Boolean';
-	static $TYPE_INTEGER = 'Integer';
-	static $TYPE_SERIALIZABLE = 'Serializable';
+	public static $TYPE_NULL = 'Null';
+	public static $TYPE_STRING = 'String';
+	public static $TYPE_ARRAY = 'Array';
+	public static $TYPE_BOOLEAN = 'Boolean';
+	public static $TYPE_INTEGER = 'Integer';
+	public static $TYPE_SERIALIZABLE = 'Serializable';
 
 
 	/**
@@ -332,7 +329,7 @@ trait TArrayTools {
 		$list = $this->getArray($k, $arr, $default);
 
 		$r = [];
-		list ($obj, $method) = $import;
+		list($obj, $method) = $import;
 		foreach ($list as $item) {
 			try {
 				$o = new $obj();
@@ -449,7 +446,7 @@ trait TArrayTools {
 	protected function cleanArray(array &$arr) {
 		$arr = array_filter(
 			$arr,
-			function($v) {
+			function ($v) {
 				if (is_string($v)) {
 					return ($v !== '');
 				}
@@ -461,6 +458,4 @@ trait TArrayTools {
 			}
 		);
 	}
-
 }
-

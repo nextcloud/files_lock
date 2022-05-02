@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 
 /**
@@ -29,13 +31,11 @@
 
 namespace OCA\FilesLock\Db;
 
-
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\ConfigService;
 use OCA\FilesLock\Tools\Exceptions\RowNotFoundException;
 use OCA\FilesLock\Tools\Traits\TArrayTools;
-
 
 /**
  * Class LocksRequestBuilder
@@ -43,8 +43,6 @@ use OCA\FilesLock\Tools\Traits\TArrayTools;
  * @package OCA\FilesLock\Db
  */
 class LocksRequestBuilder extends CoreRequestBuilder {
-
-
 	use TArrayTools;
 
 
@@ -154,6 +152,4 @@ class LocksRequestBuilder extends CoreRequestBuilder {
 
 		return $lock;
 	}
-
 }
-

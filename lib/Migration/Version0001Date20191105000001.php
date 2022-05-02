@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 
 /**
@@ -29,14 +31,12 @@
 
 namespace OCA\FilesLock\Migration;
 
-
 use Closure;
 use Exception;
 use OCP\DB\ISchemaWrapper;
 use OCP\IDBConnection;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
-
 
 /**
  * Class Version0001Date20191105000001
@@ -81,14 +81,14 @@ class Version0001Date20191105000001 extends SimpleMigrationStep {
 				'autoincrement' => true,
 				'unsigned' => true,
 				'notnull' => true,
-				'length'  => 11
+				'length' => 11
 			]
 		);
 		$table->addColumn(
 			'user_id', 'string',
 			[
 				'notnull' => true,
-				'length'  => 255,
+				'length' => 255,
 			]
 		);
 		$table->addColumn(
@@ -96,14 +96,14 @@ class Version0001Date20191105000001 extends SimpleMigrationStep {
 			[
 				'notnull' => true,
 				'unsigned' => true,
-				'length'  => 11,
+				'length' => 11,
 			]
 		);
 		$table->addColumn(
 			'token', 'string',
 			[
 				'notnull' => true,
-				'length'  => 63,
+				'length' => 63,
 			]
 		);
 		$table->addColumn(
@@ -132,6 +132,4 @@ class Version0001Date20191105000001 extends SimpleMigrationStep {
 	 */
 	public function postSchemaChange(IOutput $output, Closure $schemaClosure, array $options) {
 	}
-
 }
-

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 
@@ -30,28 +31,24 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Tools\Traits;
 
-
 use Exception;
 use OC;
 use OC\HintException;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
-
 trait TLogger {
-
-
 	use TSetup;
 
 
-	static $EMERGENCY = 4;
-	static $ALERT = 3;
-	static $CRITICAL = 3;
-	static $ERROR = 3;
-	static $WARNING = 2;
-	static $NOTICE = 1;
-	static $INFO = 1;
-	static $DEBUG = 0;
+	public static $EMERGENCY = 4;
+	public static $ALERT = 3;
+	public static $CRITICAL = 3;
+	public static $ERROR = 3;
+	public static $WARNING = 2;
+	public static $NOTICE = 1;
+	public static $INFO = 1;
+	public static $DEBUG = 0;
 
 
 	/**
@@ -78,8 +75,8 @@ trait TLogger {
 				 $level,
 				 $message,
 				 [
-					 'app'       => $this->setup('app'),
-					 'exception' => $t
+				 	'app' => $this->setup('app'),
+				 	'exception' => $t
 				 ]
 			 );
 	}
@@ -118,8 +115,8 @@ trait TLogger {
 				 $level,
 				 $message,
 				 [
-					 'app'       => $this->setup('app'),
-					 'exception' => $e
+				 	'app' => $this->setup('app'),
+				 	'exception' => $e
 				 ]
 			 );
 	}
@@ -201,6 +198,4 @@ trait TLogger {
 			return OC::$server->get(LoggerInterface::class);
 		}
 	}
-
 }
-

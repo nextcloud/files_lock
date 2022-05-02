@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 
 /**
@@ -29,17 +31,12 @@
 
 namespace OCA\FilesLock\AppInfo;
 
-
 use Closure;
 use OC\Files\Filesystem;
-use OCA\DAV\Connector\Sabre\CachingTree;
-use OCA\DAV\Connector\Sabre\ObjectTree;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\FilesLock\Capability;
 use OCA\FilesLock\Listeners\LoadAdditionalScripts;
 use OCA\FilesLock\LockProvider;
-use OCA\FilesLock\Plugins\FilesLockBackend;
-use OCA\FilesLock\Plugins\LockPlugin;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCA\FilesLock\Storage\LockWrapper;
@@ -50,11 +47,8 @@ use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\Files\Lock\ILockManager;
 use OCP\IServerContainer;
 use OCP\IUserSession;
-use OCP\SabrePluginEvent;
 use OCP\Util;
-use Sabre\DAV\Locks\Plugin;
 use Throwable;
-
 
 /**
  * Class Application
@@ -62,19 +56,17 @@ use Throwable;
  * @package OCA\FilesLock\AppInfo
  */
 class Application extends App implements IBootstrap {
+	public const APP_ID = 'files_lock';
 
 
-	const APP_ID = 'files_lock';
-
-
-	const DAV_PROPERTY_LOCK = '{http://nextcloud.org/ns}lock';
-	const DAV_PROPERTY_LOCK_OWNER_TYPE = '{http://nextcloud.org/ns}lock-owner-type';
-	const DAV_PROPERTY_LOCK_OWNER = '{http://nextcloud.org/ns}lock-owner';
-	const DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME = '{http://nextcloud.org/ns}lock-owner-displayname';
-	const DAV_PROPERTY_LOCK_EDITOR = '{http://nextcloud.org/ns}lock-owner-editor';
-	const DAV_PROPERTY_LOCK_TIME = '{http://nextcloud.org/ns}lock-time';
-	const DAV_PROPERTY_LOCK_TIMEOUT = '{http://nextcloud.org/ns}lock-timeout';
-	const DAV_PROPERTY_LOCK_TOKEN = '{http://nextcloud.org/ns}lock-token';
+	public const DAV_PROPERTY_LOCK = '{http://nextcloud.org/ns}lock';
+	public const DAV_PROPERTY_LOCK_OWNER_TYPE = '{http://nextcloud.org/ns}lock-owner-type';
+	public const DAV_PROPERTY_LOCK_OWNER = '{http://nextcloud.org/ns}lock-owner';
+	public const DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME = '{http://nextcloud.org/ns}lock-owner-displayname';
+	public const DAV_PROPERTY_LOCK_EDITOR = '{http://nextcloud.org/ns}lock-owner-editor';
+	public const DAV_PROPERTY_LOCK_TIME = '{http://nextcloud.org/ns}lock-time';
+	public const DAV_PROPERTY_LOCK_TIMEOUT = '{http://nextcloud.org/ns}lock-timeout';
+	public const DAV_PROPERTY_LOCK_TOKEN = '{http://nextcloud.org/ns}lock-token';
 
 
 	/** @var IUserSession */
@@ -143,7 +135,7 @@ class Application extends App implements IBootstrap {
 	public function addStorageWrapper() {
 		Filesystem::addStorageWrapper(
 			'files_lock', function ($mountPoint, $storage) {
-			return new LockWrapper(
+				return new LockWrapper(
 				[
 					'storage' => $storage,
 					'lock_manager' => $this->lockManager,
@@ -152,9 +144,7 @@ class Application extends App implements IBootstrap {
 					'lock_service' => $this->lockService
 				]
 			);
-		},  10
+			}, 10
 		);
 	}
-
 }
-

@@ -6,11 +6,9 @@ use OCA\FilesLock\Service\LockService;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\ILockProvider;
 use OCP\Files\Lock\LockContext;
-use OCP\Files\Lock\OwnerLockedException;
 use OCP\PreConditionNotMetException;
 
 class LockProvider implements ILockProvider {
-
 	private LockService $lockService;
 
 	public function __construct(LockService $lockService) {

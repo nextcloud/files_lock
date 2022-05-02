@@ -24,7 +24,6 @@ namespace OCA\FilesLock\Storage;
 use OC\Files\Storage\Wrapper\Wrapper;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
-use OCA\FilesLock\Service\AppLockService;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\Constants;
@@ -37,7 +36,6 @@ use OCP\Lock\LockedException;
 use OCP\Lock\ManuallyLockedException;
 
 class LockWrapper extends Wrapper {
-
 	private ILockManager $lockManager;
 
 	/** @var FileService */
@@ -100,7 +98,6 @@ class LockWrapper extends Wrapper {
 			default:
 				return false;
 		}
-
 	}
 
 
@@ -233,5 +230,4 @@ class LockWrapper extends Wrapper {
 
 		return parent::file_get_contents($path);
 	}
-
 }

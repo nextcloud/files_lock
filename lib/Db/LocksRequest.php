@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 
 /**
@@ -29,12 +31,10 @@
 
 namespace OCA\FilesLock\Db;
 
-
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Exception;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
-
 
 /**
  * Class LocksRequest
@@ -138,7 +138,4 @@ class LocksRequest extends LocksRequestBuilder {
 
 		return $this->getLocksFromRequest($qb);
 	}
-
-
 }
-

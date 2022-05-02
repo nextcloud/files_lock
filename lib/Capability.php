@@ -5,7 +5,6 @@ namespace OCA\FilesLock;
 use OCP\Capabilities\ICapability;
 
 class Capability implements ICapability {
-
 	public function getCapabilities() {
 		return [
 			'files' => [
@@ -13,5 +12,4 @@ class Capability implements ICapability {
 			]
 		];
 	}
-
 }

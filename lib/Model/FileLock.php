@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 
 /**
@@ -29,7 +31,6 @@
 
 namespace OCA\FilesLock\Model;
 
-
 use OCA\FilesLock\Tools\Db\IQueryRow;
 use OCA\FilesLock\Tools\Traits\TArrayTools;
 use JsonSerializable;
@@ -44,8 +45,6 @@ use Sabre\DAV\Locks\LockInfo;
  * @package OCA\FilesLock\Service
  */
 class FileLock implements ILock, IQueryRow, JsonSerializable {
-
-
 	use TArrayTools;
 
 	public const ETA_INFINITE = -1;
@@ -330,15 +329,15 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 	 */
 	public function jsonSerialize(): array {
 		return [
-			'id'       => $this->getId(),
-			'uri'      => $this->getUri(),
-			'userId'   => $this->getOwner(),
+			'id' => $this->getId(),
+			'uri' => $this->getUri(),
+			'userId' => $this->getOwner(),
 			'displayName' => $this->getDisplayName(),
-			'fileId'   => $this->getFileId(),
-			'token'    => $this->getToken(),
-			'eta'      => $this->getETA(),
+			'fileId' => $this->getFileId(),
+			'token' => $this->getToken(),
+			'eta' => $this->getETA(),
 			'creation' => $this->getCreatedAt(),
-			'type'     => $this->getType(),
+			'type' => $this->getType(),
 		];
 	}
 
@@ -346,4 +345,3 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $this->getToken();
 	}
 }
-
