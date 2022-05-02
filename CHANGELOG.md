@@ -1,6 +1,14 @@
 # Changelog
 
 
+### 24.0.0
+
+- Nextcloud 24 compatibility
+- Collaborative locking support
+- Support for client integrations
+- First implementation of WebDAV locking currently limited to single files
+- Infinite lock timeout by default
+
 ### 20.1.0
 
 - compat nc23
