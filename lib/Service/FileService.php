@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 
 /**
@@ -29,12 +31,10 @@
 
 namespace OCA\FilesLock\Service;
 
-
 use OCP\Files\IRootFolder;
 use OCP\Files\Node;
 use OCP\Files\NotFoundException;
 use OCP\IUserSession;
-
 
 /**
  * Class FileService
@@ -130,6 +130,4 @@ class FileService {
 
 		return $file;
 	}
-
 }
-

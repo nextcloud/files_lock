@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 
 /**
@@ -29,16 +31,12 @@
 
 namespace OCA\FilesLock\Service;
 
-
 use OCA\FilesLock\AppInfo\Application;
 use OCP\IConfig;
 use OCP\IRequest;
 
-
 class ConfigService {
-
-
-	const LOCK_TIMEOUT = 'lock_timeout';
+	public const LOCK_TIMEOUT = 'lock_timeout';
 
 	public $defaults = [
 		self::LOCK_TIMEOUT => '0'
@@ -130,5 +128,4 @@ class ConfigService {
 	public function unsetAppConfig() {
 		$this->config->deleteAppValues(Application::APP_ID);
 	}
-
 }

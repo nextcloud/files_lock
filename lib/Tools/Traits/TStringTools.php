@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 
@@ -31,9 +32,7 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Tools\Traits;
 
-
 use Exception;
-
 
 trait TStringTools {
 
@@ -159,6 +158,4 @@ trait TStringTools {
 
 		return implode('', $word);
 	}
-
 }
-

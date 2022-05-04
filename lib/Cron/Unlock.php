@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 
 /**
@@ -29,13 +31,11 @@
 
 namespace OCA\FilesLock\Cron;
 
-
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
 use OCA\FilesLock\Service\LockService;
 
 class Unlock extends TimedJob {
-
 	private LockService $lockService;
 
 	public function __construct(ITimeFactory $timeFactory, LockService $lockService) {
@@ -53,6 +53,4 @@ class Unlock extends TimedJob {
 	private function manageTimeoutLock(): void {
 		$this->lockService->removeLocks($this->lockService->getDeprecatedLocks());
 	}
-
 }
-

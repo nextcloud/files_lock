@@ -31,7 +31,6 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Tools\Db;
 
-
 use DateInterval;
 use DateTime;
 use Doctrine\DBAL\Query\QueryBuilder as DBALQueryBuilder;
@@ -49,10 +48,7 @@ use OCP\IDBConnection;
 use OCP\ILogger;
 use Psr\Log\LoggerInterface;
 
-
 class ExtendedQueryBuilder extends QueryBuilder {
-
-
 	use TArrayTools;
 
 
@@ -1157,6 +1153,4 @@ class ExtendedQueryBuilder extends QueryBuilder {
 
 		return $this;
 	}
-
 }
-

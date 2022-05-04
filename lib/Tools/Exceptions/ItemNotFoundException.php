@@ -30,10 +30,7 @@
 
 namespace OCA\FilesLock\Tools\Exceptions;
 
-
 use Exception;
 
 class ItemNotFoundException extends Exception {
-
 }
-

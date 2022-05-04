@@ -29,11 +29,7 @@
 
 namespace OCA\FilesLock\Exceptions;
 
-
 use Exception;
 
-
 class NotFileException extends Exception {
-
 }
-

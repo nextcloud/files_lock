@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 
 /**
@@ -29,9 +31,7 @@
 
 namespace OCA\FilesLock\Db;
 
-
 use OCA\FilesLock\Tools\Db\ExtendedQueryBuilder;
-
 
 /**
  *
@@ -55,6 +55,4 @@ class CoreQueryBuilder extends ExtendedQueryBuilder {
 	public function limitToIds(array $ids): void {
 		$this->limitArray('id', $ids);
 	}
-
 }
-

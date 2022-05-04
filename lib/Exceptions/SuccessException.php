@@ -29,11 +29,7 @@
 
 namespace OCA\FilesLock\Exceptions;
 
-
 use Exception;
 
-
 class SuccessException extends Exception {
-
 }
-

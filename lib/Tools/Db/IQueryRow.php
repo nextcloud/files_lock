@@ -56,7 +56,6 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Tools\Db;
 
-
 /**
  *
  */
@@ -70,6 +69,4 @@ interface IQueryRow {
 	 * @return IQueryRow
 	 */
 	public function importFromDatabase(array $data): self;
-
 }
-

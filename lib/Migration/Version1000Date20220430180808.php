@@ -62,7 +62,7 @@ class Version1000Date20220430180808 extends SimpleMigrationStep {
 				'owner', Types::STRING,
 				[
 					'notnull' => false,
-					'length'  => 255,
+					'length' => 255,
 					'default' => ''
 				]
 			);
