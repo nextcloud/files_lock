@@ -4,6 +4,7 @@ OC.L10N.register(
     "Unlock file" : "Odblokuj plik",
     "Lock file" : "Zablokuj plik",
     "Locked by {0}" : "Zablokowany przez {0}",
+    "File can only be unlocked by providing a valid owner lock token" : "Plik można odblokować tylko poprzez podanie prawidłowego tokena blokady właściciela",
     "File can only be unlocked by the owner of the lock" : "Plik może odblokować tylko właściciel blokady",
     "Temporary files lock" : "Tymczasowa blokada plików",
     "Temporary lock your files" : "Tymczasowo zablokuj swoje pliki",
