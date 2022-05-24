@@ -9,4 +9,4 @@ OC.L10N.register(
     "Temporary lock your files" : "Blocca temporaneamente i tuoi file",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Consenti ai tuoi utenti di bloccare temporaneamente i loro file per evitare conflitti mentre lavorano su file condivisi."
 },
-"nplurals=2; plural=(n != 1);");
+"nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

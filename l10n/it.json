@@ -6,5 +6,5 @@
     "Temporary files lock" : "Blocco temporaneo dei file",
     "Temporary lock your files" : "Blocca temporaneamente i tuoi file",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Consenti ai tuoi utenti di bloccare temporaneamente i loro file per evitare conflitti mentre lavorano su file condivisi."
-},"pluralForm" :"nplurals=2; plural=(n != 1);"
+},"pluralForm" :"nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }
