@@ -2,6 +2,7 @@
     "Unlock file" : "Deblochează fișierul",
     "Lock file" : "Blochează fișierul",
     "Locked by {0}" : "Blochat de {0}",
+    "File can only be unlocked by providing a valid owner lock token" : "Fișierul poate fi deblocat numai prin furnizarea unui token de blocare a proprietarului valid",
     "File can only be unlocked by the owner of the lock" : "Fișierul poate fi deblocat numai de către deținătorul fișierului",
     "Temporary files lock" : "Blocaj temporar de fișiere",
     "Temporary lock your files" : "Blochează-ți  temporar fișierele",
