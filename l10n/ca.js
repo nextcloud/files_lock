@@ -4,6 +4,7 @@ OC.L10N.register(
     "Unlock file" : "Desbloca el fitxer",
     "Lock file" : "Bloca el fitxer",
     "Locked by {0}" : "Blocat per {0}",
+    "File can only be unlocked by providing a valid owner lock token" : "Només es pot desblocar el fitxer si es proporciona un testimoni de blocatge del propietari vàlid",
     "File can only be unlocked by the owner of the lock" : "Només l'usuari propietari del blocatge pot desblocar el fitxer",
     "Temporary files lock" : "Blocatge temporal dels fitxers",
     "Temporary lock your files" : "Bloqueu temporalment els fitxers",
