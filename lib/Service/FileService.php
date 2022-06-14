@@ -35,6 +35,7 @@ use OCP\Files\IRootFolder;
 use OCP\Files\Node;
 use OCP\Files\NotFoundException;
 use OCP\IUserSession;
+use OCP\Session\Exceptions\SessionNotAvailableException;
 
 /**
  * Class FileService
@@ -106,6 +107,10 @@ class FileService {
 	 */
 	public function getFileFromUri(string $uri): Node {
 		$user = $this->userSession->getUser();
+		if (is_null($user)) {
+			throw new SessionNotAvailableException();
+		}
+
 		$userId = $user->getUID();
 
 		$path = '/' . $uri;
