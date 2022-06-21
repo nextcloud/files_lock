@@ -2,6 +2,7 @@
     "Unlock file" : "Разблокировать файл",
     "Lock file" : "Заблокировать файл",
     "Locked by {0}" : "Файл заблокирован {0}",
+    "File can only be unlocked by providing a valid owner lock token" : "Файл может быть разблокирован только вводом действительного токена блокировки, подтверждающим владение файлом",
     "File can only be unlocked by the owner of the lock" : "Файл может быть разблокирован только тем, кто установил блокировку",
     "Temporary files lock" : "Временная блокировка файлов",
     "Temporary lock your files" : "Временная блокировка файлов",
