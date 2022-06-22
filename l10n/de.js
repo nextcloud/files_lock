@@ -4,6 +4,7 @@ OC.L10N.register(
     "Unlock file" : "Datei entsperren",
     "Lock file" : "Datei sperren",
     "Locked by {0}" : "Gesperrt von {0}",
+    "File can only be unlocked by providing a valid owner lock token" : "Die Datei kann nur mit einem gültigen Eigentümer-Sperr-Token entsperrt werden",
     "File can only be unlocked by the owner of the lock" : "Datei kann nur vom Besitzer der Sperre entsperrt werden",
     "Temporary files lock" : "Dateien temporär sperren",
     "Temporary lock your files" : "Deine Dateien temporär sperren",
