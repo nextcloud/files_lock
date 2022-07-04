@@ -2,6 +2,7 @@
     "Unlock file" : "Отключване на файл",
     "Lock file" : "Заключване на файл",
     "Locked by {0}" : "Заключено от  {0}",
+    "File can only be unlocked by providing a valid owner lock token" : "Файлът може да бъде отключен само чрез предоставяне на валиден токен за заключване от собственика",
     "File can only be unlocked by the owner of the lock" : "Файлът може да бъде отключен само от собственика на заключването",
     "Temporary files lock" : "Заключване на временните файлове ",
     "Temporary lock your files" : "Временно заключване на файлове ви",
