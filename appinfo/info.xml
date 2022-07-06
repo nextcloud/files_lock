@@ -1,6 +1,5 @@
-<?xml version="1.0"?>
-<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	  xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+<?xml version="1.0" encoding="utf-8"?>
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
 	<id>files_lock</id>
 	<name>Temporary files lock</name>
 	<summary>Temporary lock your files</summary>
@@ -10,7 +9,7 @@ Allow your users to temporary lock their files to avoid conflicts while working 
 
 ]]>
 	</description>
-	<version>24.0.0</version>
+	<version>24.0.1</version>
 	<licence>agpl</licence>
 	<author>Maxence Lange</author>
 	<namespace>FilesLock</namespace>
