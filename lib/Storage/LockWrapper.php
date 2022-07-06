@@ -30,6 +30,7 @@ use OCP\Constants;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\ILockManager;
+use OCP\Files\Lock\NoLockProviderException;
 use OCP\Files\NotFoundException;
 use OCP\IUserSession;
 use OCP\Lock\LockedException;
@@ -123,21 +124,18 @@ class LockWrapper extends Wrapper {
 			}
 
 			$lock = $this->lockService->getLockFromFileId($file->getId());
-			// TODO: double check empty viewer id condition
-			if ($viewerId === '') {
-				return true;
-			}
 
-			$lockScope = $this->lockManager->getLockInScope();
 			if ($lock->getType() === ILock::TYPE_USER && $lock->getOwner() !== $viewerId) {
 				return true;
 			}
+
 			if ($lock->getType() === ILock::TYPE_APP) {
+				$lockScope = $this->lockManager->getLockInScope();
 				if (!$lockScope || $lockScope->getType() !== $lock->getType() || $lockScope->getOwner() !== $lock->getOwner()) {
 					return true;
 				}
 			}
-		} catch (LockNotFoundException | InvalidPathException | NotFoundException $e) {
+		} catch (NoLockProviderException | LockNotFoundException | InvalidPathException | NotFoundException $e) {
 		}
 
 		return false;

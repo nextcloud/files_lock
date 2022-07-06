@@ -291,6 +291,32 @@ class LockFeatureTest extends TestCase {
 		});
 	}
 
+	public function testLockDifferentAppsPublic() {
+		self::logout();
+		$file = $this->rootFolder->getUserFolder(self::TEST_USER1)
+			->newFile('testfile_public', 'AAA');
+		$scope = new LockContext($file, ILock::TYPE_APP, 'collaborative_app');
+		$this->lockManager->lock($scope);
+
+		$this->lockManager->runInScope($scope, function () use ($file) {
+			self::assertEquals('collaborative_app', $this->lockManager->getLockInScope()->getOwner());
+			$file->putContent('EEE');
+			self::assertEquals('EEE', $file->getContent());
+		});
+
+		$otherAppScope = new LockContext($file, ILock::TYPE_APP, 'other_app');
+		$this->lockManager->runInScope($otherAppScope, function () use ($file) {
+			self::assertEquals('other_app', $this->lockManager->getLockInScope()->getOwner());
+			try {
+				$file->putContent('BBB');
+				$this->fail('Expected to throw a ManuallyLockedException');
+			} catch (ManuallyLockedException $e) {
+				self::assertInstanceOf(ManuallyLockedException::class, $e);
+				self::assertEquals('EEE', $file->getContent());
+			}
+		});
+	}
+
 	private function loginAndGetUserFolder(string $userId) {
 		$this->loginAsUser($userId);
 		return $this->rootFolder->getUserFolder($userId);
@@ -317,6 +343,10 @@ class LockFeatureTest extends TestCase {
 		parent::tearDown();
 		$folder = $this->rootFolder->getUserFolder(self::TEST_USER1);
 		$folder->delete('testfile');
+		$folder->delete('etag_test');
 		$folder->delete('testfile2');
+		$folder->delete('testfile3');
+		$folder->delete('testfile-infinite');
+		$folder->delete('testfile_public');
 	}
 }
