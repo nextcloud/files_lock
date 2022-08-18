@@ -55,4 +55,8 @@ class CoreQueryBuilder extends ExtendedQueryBuilder {
 	public function limitToIds(array $ids): void {
 		$this->limitArray('id', $ids);
 	}
+
+	public function limitToFileIds(array $ids): void {
+		$this->limitInIntArray('file_id', $ids);
+	}
 }

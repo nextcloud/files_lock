@@ -115,6 +115,19 @@ class LocksRequest extends LocksRequestBuilder {
 		return $this->getLockFromRequest($qb);
 	}
 
+	/**
+	 * @param list<int> $fileIds
+	 *
+	 * @return list<FileLock>
+	 * @throws LockNotFoundException
+	 */
+	public function getFromFileIds(array $fileIds): array {
+		$qb = $this->getLocksSelectSql();
+		$qb->limitToFileIds($fileIds);
+
+		return $this->getLocksFromRequest($qb);
+	}
+
 
 	/**
 	 * @return FileLock[]

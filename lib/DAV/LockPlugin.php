@@ -5,6 +5,7 @@ namespace OCA\FilesLock\DAV;
 use OCA\DAV\Connector\Sabre\CachingTree;
 use OCA\DAV\Connector\Sabre\FakeLockerPlugin;
 use OCA\DAV\Connector\Sabre\Node as SabreNode;
+use OCA\DAV\Connector\Sabre\Directory;
 use OCA\DAV\Connector\Sabre\ObjectTree;
 use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
@@ -63,8 +64,37 @@ class LockPlugin extends SabreLockPlugin {
 		parent::initialize($server);
 	}
 
+	private function cacheDirectory(Directory $directory): void {
+		$children = $directory->getChildren();
+
+		$ids = [];
+		foreach ($children as $child) {
+			if (!($child instanceof File || $child instanceof Directory)) {
+				continue;
+			}
+
+			$id = $child->getId();
+			if ($id === null) {
+				continue;
+			}
+
+			$ids[] = (string)$id;
+		}
+
+		$ids[] = (string) $directory->getId();
+		// the lock service will take care of the caching
+		$this->lockService->getLockForNodeIds($ids);
+	}
+
 	public function customProperties(PropFind $propFind, INode $node) {
-		if (!$node instanceof SabreNode) {
+		if (!($node instanceof File) && !($node instanceof Directory)) {
+			return;
+		}
+		if ($node instanceof Directory
+			&& $propFind->getDepth() !== 0
+			&& !is_null($propFind->getStatus(Application::DAV_PROPERTY_LOCK))
+		) {
+			$this->cacheDirectory($node);
 			return;
 		}
 

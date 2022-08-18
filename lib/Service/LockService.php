@@ -119,6 +119,43 @@ class LockService {
 		return $this->lockCache[$nodeId];
 	}
 
+	/**
+	 * @param list<int> $nodeIds
+	 *
+	 * @return array<int, FileLock|bool>
+	 */
+	public function getLockForNodeIds(array $nodeIds): array {
+		$locks = [];
+		$locksToRequest = [];
+		foreach ($nodeIds as $nodeId) {
+			if (array_key_exists($nodeId, $this->lockCache) && $this->lockCache[$nodeId] !== null) {
+				$locks[$nodeId] = $this->lockCache[$nodeId];
+			} else {
+				$locksToRequest[] = $nodeId;
+			}
+		}
+		if (count($locksToRequest) === 0) {
+			return $locks;
+		}
+		$newLocks = $this->locksRequest->getFromFileIds($locksToRequest);
+		foreach ($locksToRequest as $lockId) {
+			$this->lockCache[$lockId] = false;
+		}
+		foreach ($newLocks as $lock) {
+			if ($lock->getETA() === 0) {
+				// TODO batch remove
+				$this->locksRequest->delete($lock);
+				$locks[$lock->getFileId()] = false;
+				$this->lockCache[$lock->getFileId()] = false;
+			} else {
+				$locks[$lock->getFileId()] = $lock;
+				$this->lockCache[$lock->getFileId()] = $lock;
+			}
+		}
+
+		return $locks;
+	}
+
 	public function lock(LockContext $lockScope): FileLock {
 		try {
 			$known = $this->getLockFromFileId($lockScope->getNode()->getId());
