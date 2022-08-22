@@ -14,11 +14,12 @@
     </UndefinedThisPropertyFetch>
   </file>
   <file src="lib/DAV/LockPlugin.php">
-    <UndefinedClass occurrences="4">
+    <UndefinedClass occurrences="5">
       <code>CachingTree</code>
+      <code>Directory</code>
       <code>FakeLockerPlugin</code>
+      <code>File</code>
       <code>ObjectTree</code>
-      <code>SabreNode</code>
     </UndefinedClass>
   </file>
   <file src="lib/Db/CoreQueryBuilder.php">
@@ -40,7 +41,8 @@
     </MissingDependency>
   </file>
   <file src="lib/Db/LocksRequest.php">
-    <MissingDependency occurrences="24">
+    <MissingDependency occurrences="25">
+      <code>$qb</code>
       <code>$qb</code>
       <code>$qb</code>
       <code>$qb</code>
