@@ -383,6 +383,10 @@ class ExtendedQueryBuilder extends QueryBuilder {
 		$this->andWhere($this->exprLimitInArray($field, $value, $alias));
 	}
 
+	public function limitInIntArray(string $field, array $value, string $alias = ''): void {
+		$this->andWhere($this->exprLimitInIntArray($field, $value, $alias));
+	}
+
 	/**
 	 * @param string $field
 	 * @param int $flag
@@ -594,6 +598,20 @@ class ExtendedQueryBuilder extends QueryBuilder {
 
 		return (string)$expr->in($field, $this->createNamedParameter($values, IQueryBuilder::PARAM_STR_ARRAY));
 	}
+
+	/**
+	 * @param int[] $values
+	 */
+	public function exprLimitInIntArray(string $field, array $values, string $alias = ''): string {
+		if ($this->getType() === DBALQueryBuilder::SELECT) {
+			$field = (($alias === '') ? $this->getDefaultSelectAlias() : $alias) . '.' . $field;
+		}
+
+		$expr = $this->expr();
+
+		return (string)$expr->in($field, $this->createNamedParameter($values, IQueryBuilder::PARAM_INT_ARRAY));
+	}
+
 
 
 	/**
