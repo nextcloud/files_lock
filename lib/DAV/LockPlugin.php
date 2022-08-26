@@ -182,15 +182,6 @@ class LockPlugin extends SabreLockPlugin {
 		});
 	}
 
-	private function getLockDisplayName(ILock $lock): ?string {
-		$user = $this->userManager->get($lock->getOwner());
-		if ($user !== null) {
-			return $user->getDisplayName();
-		}
-
-		return null;
-	}
-
 	public function httpLock(RequestInterface $request, ResponseInterface $response) {
 		if ($request->getHeader('X-User-Lock')) {
 			$response->setHeader('Content-Type', 'application/xml; charset=utf-8');
@@ -275,7 +266,7 @@ class LockPlugin extends SabreLockPlugin {
 			Application::DAV_PROPERTY_LOCK => $lock !== null,
 			Application::DAV_PROPERTY_LOCK_OWNER_TYPE => $lock ? $lock->getType() : null,
 			Application::DAV_PROPERTY_LOCK_OWNER => $lock ? $lock->getOwner() : null,
-			Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME => $lock ? $this->getLockDisplayName($lock) : null,
+			Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME => $lock ? $lock->getDisplayName() : null,
 			Application::DAV_PROPERTY_LOCK_EDITOR => $lock ? $lock->getOwner() : null,
 			Application::DAV_PROPERTY_LOCK_TIME => $lock ? $lock->getCreatedAt() : null,
 			Application::DAV_PROPERTY_LOCK_TIMEOUT => $lock ? $lock->getTimeout() : null,

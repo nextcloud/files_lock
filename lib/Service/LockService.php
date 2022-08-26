@@ -318,14 +318,13 @@ class LockService {
 	public function injectMetadata(FileLock $lock): FileLock {
 		$displayName = null;
 		if ($lock->getType() === ILock::TYPE_USER) {
-			$displayName = $this->userManager->get($lock->getOwner())->getDisplayName();
+			$displayName = $this->userManager->getDisplayName($lock->getOwner());
 		}
 		if ($lock->getType() === ILock::TYPE_APP) {
 			$displayName = $this->getAppName($lock->getOwner()) ?? null;
 		}
 		if ($lock->getType() === ILock::TYPE_TOKEN) {
-			$user = $this->userManager->get($lock->getOwner());
-			$displayName = $user ? $user->getDisplayName(): $lock->getDisplayName();
+			$displayName = $this->userManager->getDisplayName($lock->getOwner()) ?? $lock->getDisplayName();
 		}
 
 		if ($displayName) {
