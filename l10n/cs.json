@@ -2,7 +2,7 @@
     "Unlock file" : "Odemknout soubor",
     "Lock file" : "Zamknout soubor",
     "Locked by {0}" : "Uzamkl(a) {0}",
-    "File can only be unlocked by providing a valid owner lock token" : "Soubor je možné odemknout zadáním platného tokenu vlastníka zámku",
+    "File can only be unlocked by providing a valid owner lock token" : "Soubor je možné odemknout pouze zadáním platného tokenu zámku vlastníka",
     "File can only be unlocked by the owner of the lock" : "Soubor může být odemčen pouze vlastníkem zámku",
     "Temporary files lock" : "Dočasný zámek souborů",
     "Temporary lock your files" : "Dočasně zamykejte své soubory",
