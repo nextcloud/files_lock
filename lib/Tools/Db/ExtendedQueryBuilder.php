@@ -195,7 +195,7 @@ class ExtendedQueryBuilder extends QueryBuilder {
 
 		$orX = $expr->orX();
 		$orX->add(
-			$expr->lte($field, $this->createNamedParameter($date, IQueryBuilder::PARAM_DATE))
+			$expr->lte($field, $this->createNamedParameter($date, IQueryBuilder::PARAM_INT))
 		);
 
 		if ($orNull === true) {
