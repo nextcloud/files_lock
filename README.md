@@ -3,7 +3,7 @@
 ![](screenshots/0.7.0.png)
 
 **Files Lock** allows your users to temporary lock a file to avoid other users' edits.  
-By default, files locked using this app will be unlocked after 30 minutes.
+By default, files locked using this app will be unlocked indefinitely.
 
 
 
