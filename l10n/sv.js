@@ -4,6 +4,7 @@ OC.L10N.register(
     "Unlock file" : "Lås upp fil",
     "Lock file" : "Lås fil",
     "Locked by {0}" : "Låst av {0}",
+    "File can only be unlocked by providing a valid owner lock token" : "Filen kan endast låsas upp genom att tillhandahålla en giltig token för ägarlåset.",
     "File can only be unlocked by the owner of the lock" : "Fil kan endast låsas upp av låsets ägare",
     "Temporary files lock" : "Tillfällig låsning av filer",
     "Temporary lock your files" : "Tillfälligt låsa dina filer",
