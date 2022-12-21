@@ -43,8 +43,6 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
  * @package OCA\FilesLock\Db
  */
 class LocksRequest extends LocksRequestBuilder {
-
-
 	/**
 	 * @param FileLock $lock
 	 */

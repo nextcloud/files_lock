@@ -60,7 +60,6 @@ namespace OCA\FilesLock\Tools\Db;
  *
  */
 interface IQueryRow {
-
 	/**
 	 * import data to feed the model.
 	 *

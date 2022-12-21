@@ -37,8 +37,6 @@ use OCA\FilesLock\Tools\Db\ExtendedQueryBuilder;
  *
  */
 class CoreQueryBuilder extends ExtendedQueryBuilder {
-
-
 	/**
 	 * @param int $fileId
 	 *

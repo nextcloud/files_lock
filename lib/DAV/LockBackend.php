@@ -42,7 +42,6 @@ use Sabre\DAV\Locks\LockInfo;
 use Sabre\DAV\Server;
 
 class LockBackend implements BackendInterface {
-
 	/** @var FileService */
 	private $fileService;
 

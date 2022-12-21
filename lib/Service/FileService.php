@@ -43,8 +43,6 @@ use OCP\Session\Exceptions\SessionNotAvailableException;
  * @package OCA\FilesLock\Service
  */
 class FileService {
-
-
 	/** @var IUserSession */
 	private $userSession;
 

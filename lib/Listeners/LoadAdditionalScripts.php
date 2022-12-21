@@ -37,17 +37,8 @@ use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Util;
 
-/**
- * Class LoadAdditionalScripts
- *
- * @package OCA\FilesLock\Listeners
- */
+/** @template-implements IEventListener<Event|LoadAdditionalScriptsEvent> */
 class LoadAdditionalScripts implements IEventListener {
-
-
-	/**
-	 * @param Event $event
-	 */
 	public function handle(Event $event): void {
 		if (!($event instanceof LoadAdditionalScriptsEvent)) {
 			return;
