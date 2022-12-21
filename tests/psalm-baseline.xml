@@ -41,7 +41,9 @@
     </MissingDependency>
   </file>
   <file src="lib/Db/LocksRequest.php">
-    <MissingDependency occurrences="25">
+    <MissingDependency occurrences="27">
+      <code>$qb</code>
+      <code>$qb</code>
       <code>$qb</code>
       <code>$qb</code>
       <code>$qb</code>
