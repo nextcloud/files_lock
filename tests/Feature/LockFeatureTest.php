@@ -71,6 +71,7 @@ class LockFeatureTest extends TestCase {
 		$folder->delete('testfile');
 		$folder->delete('testfile2');
 		$folder->delete('testfile3');
+		\OC_Hook::$thrownExceptions = [];
 		$this->overwriteService(ITimeFactory::class, $this->timeFactory);
 	}
 
