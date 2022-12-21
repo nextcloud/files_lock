@@ -31,7 +31,6 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Tools\Db;
 
-use DateInterval;
 use DateTime;
 use Doctrine\DBAL\Query\QueryBuilder as DBALQueryBuilder;
 use Exception;
@@ -163,48 +162,6 @@ class ExtendedQueryBuilder extends QueryBuilder {
 	public function limitToMemberId(string $memberId): void {
 		$this->limit('member_id', $memberId);
 	}
-
-	/**
-	 * Limit the request to the creation
-	 *
-	 * @param int $delay
-	 *
-	 * @return self
-	 * @throws Exception
-	 */
-	public function limitToCreation(int $delay = 0): self {
-		$date = new DateTime('now');
-		$date->sub(new DateInterval('PT' . $delay . 'M'));
-
-		$this->limitToDBFieldDateTime('creation', $date, true);
-
-		return $this;
-	}
-
-
-	/**
-	 * @param string $field
-	 * @param DateTime $date
-	 * @param bool $orNull
-	 */
-	public function limitToDBFieldDateTime(string $field, DateTime $date, bool $orNull = false): void {
-		$expr = $this->expr();
-		$pf = ($this->getType() === DBALQueryBuilder::SELECT) ? $this->getDefaultSelectAlias()
-																. '.' : '';
-		$field = $pf . $field;
-
-		$orX = $expr->orX();
-		$orX->add(
-			$expr->lte($field, $this->createNamedParameter($date, IQueryBuilder::PARAM_DATE))
-		);
-
-		if ($orNull === true) {
-			$orX->add($expr->isNull($field));
-		}
-
-		$this->andWhere($orX);
-	}
-
 
 	/**
 	 * @param int $timestamp
