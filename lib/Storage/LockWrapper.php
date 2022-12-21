@@ -170,8 +170,8 @@ class LockWrapper extends Wrapper {
 
 		return $this->checkPermissions($path2, $permissions)
 			   && $this->checkPermissions(
-				$path1, Constants::PERMISSION_READ
-			)
+			   	$path1, Constants::PERMISSION_READ
+			   )
 			   && parent::copy($path1, $path2);
 	}
 

@@ -136,14 +136,14 @@ class Application extends App implements IBootstrap {
 		Filesystem::addStorageWrapper(
 			'files_lock', function ($mountPoint, $storage) {
 				return new LockWrapper(
-				[
-					'storage' => $storage,
-					'lock_manager' => $this->lockManager,
-					'user_session' => $this->userSession,
-					'file_service' => $this->fileService,
-					'lock_service' => $this->lockService
-				]
-			);
+					[
+						'storage' => $storage,
+						'lock_manager' => $this->lockManager,
+						'user_session' => $this->userSession,
+						'file_service' => $this->fileService,
+						'lock_service' => $this->lockService
+					]
+				);
 			}, 10
 		);
 	}

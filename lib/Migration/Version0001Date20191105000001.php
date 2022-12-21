@@ -44,8 +44,6 @@ use OCP\Migration\SimpleMigrationStep;
  * @package OCA\FilesLock\Migration
  */
 class Version0001Date20191105000001 extends SimpleMigrationStep {
-
-
 	/** @var IDBConnection */
 	private $connection;
 

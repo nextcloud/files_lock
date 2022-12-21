@@ -55,8 +55,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class Lock extends Base {
-
-
 	/** @var IUserManager */
 	private $userManager;
 
@@ -104,7 +102,7 @@ class Lock extends Base {
 		$this->setName('files:lock')
 			 ->addOption('unlock', 'u', InputOption::VALUE_NONE, 'unlock a file')
 			 ->addOption(
-				 'uninstall', '', InputOption::VALUE_NONE, 'fully uninstall the app from your Nextcloud'
+			 	'uninstall', '', InputOption::VALUE_NONE, 'fully uninstall the app from your Nextcloud'
 			 )
 			 ->addOption('status', 's', InputOption::VALUE_NONE, 'returns lock status of the file')
 			 ->addArgument('file_id', InputArgument::OPTIONAL, 'Id of the locked file', 0)

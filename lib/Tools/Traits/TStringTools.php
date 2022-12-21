@@ -35,8 +35,6 @@ namespace OCA\FilesLock\Tools\Traits;
 use Exception;
 
 trait TStringTools {
-
-
 	/**
 	 * @param int $length
 	 *
