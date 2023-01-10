@@ -74,8 +74,7 @@ class LockBackend implements BackendInterface {
 			$file = $this->getFileFromUri($uri);
 			$lock = $this->lockService->getLockFromFileId($file->getId());
 
-			$userLock = $this->server->httpRequest->getHeader('X-User-Lock');
-			if ($userLock && $lock->getType() === ILock::TYPE_USER && $lock->getOwner() === \OC::$server->getUserSession()->getUser()->getUID()) {
+			if ($lock->getType() === ILock::TYPE_USER && $lock->getOwner() === \OC::$server->getUserSession()->getUser()->getUID()) {
 				return [];
 			}
 
