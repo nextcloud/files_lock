@@ -18,7 +18,7 @@ Allow your users to temporary lock their files to avoid conflicts while working 
 		<dav/>
 	</types>
 	<documentation>
-		<admin>https://github.com/nextcloud/files_lock/blob/master/README.md</admin>
+		<admin>https://github.com/nextcloud/files_lock/blob/main/README.md</admin>
 	</documentation>
 	<category>tools</category>
 	<category>files</category>
@@ -26,7 +26,7 @@ Allow your users to temporary lock their files to avoid conflicts while working 
 	<website>https://github.com/nextcloud/files_lock</website>
 	<bugs>https://github.com/nextcloud/files_lock/issues</bugs>
 	<repository>https://github.com/nextcloud/files_lock.git</repository>
-	<screenshot>https://raw.githubusercontent.com/nextcloud/files_lock/master/screenshots/0.7.0.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nextcloud/files_lock/main/screenshots/0.7.0.png</screenshot>
 
 	<background-jobs>
 		<job>OCA\FilesLock\Cron\Unlock</job>
