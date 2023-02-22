@@ -166,7 +166,7 @@ class Lock extends Base {
 				'File #' . $fileId . ' is <comment>locked</comment> by ' . $lock->getOwner()
 			);
 			$output->writeln(
-				' - Locked at: ' . date('c', $lock->getCreation())
+				' - Locked at: ' . date('c', $lock->getCreatedAt())
 			);
 			if ($lock->getETA() !== FileLock::ETA_INFINITE) {
 				$output->writeln(
