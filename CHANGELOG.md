@@ -1,5 +1,21 @@
 # Changelog
 
+## 26.0.0
+
+
+### Added
+
+- Nextcloud 26 compatibility
+
+### Fixed
+
+- fix(webdav): allow the lock owner to overrule the webdav lock @juliushaertl [#109](https://github.com/nextcloud/files_lock/pull/109)
+- Use user display name cache @juliushaertl [#87](https://github.com/nextcloud/files_lock/pull/87)
+- Improve locks PROPFIND @CarlSchwan [#86](https://github.com/nextcloud/files_lock/pull/86)
+- Ensure that we stay backward compatible when getting the display name @juliushaertl [#94](https://github.com/nextcloud/files_lock/pull/94)
+- Fix type of param for creation column @tcitworld [#99](https://github.com/nextcloud/files_lock/pull/99)
+- Lock.php: fix creation date fetch @meonkeys [#118](https://github.com/nextcloud/files_lock/pull/118)
+
 ## 24.0.1
 
 ### Fixed
