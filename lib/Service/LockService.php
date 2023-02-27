@@ -137,10 +137,13 @@ class LockService {
 		if (count($locksToRequest) === 0) {
 			return $locks;
 		}
-		$newLocks = $this->locksRequest->getFromFileIds($locksToRequest);
-		foreach ($locksToRequest as $lockId) {
-			$this->lockCache[$lockId] = false;
+
+		$newLocks = [];
+		while ($fileIds = array_splice($locksToRequest, 0, 1000)) {
+			$newLocks[] = $this->locksRequest->getFromFileIds($fileIds);
 		}
+		$newLocks = array_merge(...$newLocks);
+
 		foreach ($newLocks as $lock) {
 			if ($lock->getETA() === 0) {
 				// TODO batch remove
