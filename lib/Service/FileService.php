@@ -31,9 +31,11 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Service;
 
+use OC\User\NoUserException;
 use OCP\Files\IRootFolder;
 use OCP\Files\Node;
 use OCP\Files\NotFoundException;
+use OCP\Files\NotPermittedException;
 use OCP\IUserSession;
 use OCP\Session\Exceptions\SessionNotAvailableException;
 
@@ -124,9 +126,14 @@ class FileService {
 	 *
 	 * @return Node
 	 * @throws NotFoundException
+	 * @throws NotPermittedException
+	 * @throws NoUserException
 	 */
 	public function getFileFromAbsoluteUri(string $uri): Node {
-		list(, $userId, $path) = explode('/', trim($uri, '/') . '/', 3);
+		list($root, $userId, $path) = explode('/', trim($uri, '/') . '/', 3);
+		if ($root !== 'files') {
+			throw new NotFoundException();
+		}
 		$path = '/' . $path;
 		$file = $this->rootFolder->getUserFolder($userId)
 								 ->get($path);
