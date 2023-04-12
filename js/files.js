@@ -127,22 +127,22 @@
 			if (locked !== undefined && locked) {
 				$.ajax({
 					method: 'DELETE',
-					url: OC.linkToOCS('/apps/files_lock/lock', 2) + fileId
+					url: OC.linkToOCS('/apps/files_lock/lock', 2) + fileId + '?format=json'
 				}).done(function(res) {
 					model.set('locked', false)
 				}).fail(function(res) {
-					OCP.Toast.warning(res.responseJSON.message)
+					OCP.Toast.warning(res.responseJSON.ocs.meta.message)
 				});
 			} else {
 				$.ajax({
 					method: 'PUT',
-					url: OC.linkToOCS('/apps/files_lock/lock', 2) + fileId
+					url: OC.linkToOCS('/apps/files_lock/lock', 2) + fileId + '?format=json'
 				}).done(function(res) {
 					model.set('locked', true)
 					model.set('lockOwner', OC.getCurrentUser().uid)
 					model.set('lockOwnerDisplayname', OC.getCurrentUser().displayName)
 				}).fail(function(res) {
-					OCP.Toast.warning(res.responseJSON.message)
+					OCP.Toast.warning(res.responseJSON.ocs.meta.message)
 				});
 			}
 		}
