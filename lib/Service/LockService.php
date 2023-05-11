@@ -245,6 +245,10 @@ class LockService {
 			return;
 		}
 
+		if ($request->getType() === ILock::TYPE_USER && $request->getNode()->getOwner()->getUID() === $this->userId) {
+			return;
+		}
+
 		throw new UnauthorizedUnlockException(
 			$this->l10n->t('File can only be unlocked by the owner of the lock')
 		);
