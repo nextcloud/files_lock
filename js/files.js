@@ -131,6 +131,11 @@
 				}).done(function(res) {
 					model.set('locked', false)
 				}).fail(function(res) {
+					if (res.status === 412) {
+						// No lock available so we assume unlocked
+						model.set('locked', false)
+						return;
+					}
 					OCP.Toast.warning(res.responseJSON.ocs.meta.message)
 				});
 			} else {
