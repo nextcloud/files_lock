@@ -1,7 +1,24 @@
 # Changelog
 
-## 26.0.0
+## 27.0.0
 
+### Added
+
+- Nextcloud 27 compatibility
+
+### Fixed
+
+- Allow the file owner to always unlock [#140](https://github.com/nextcloud/files_lock/pull/140)
+- Ingore error if unlocking an already unlocked file [#139](https://github.com/nextcloud/files_lock/pull/139)
+- Show proper error message when trying to unlock as someone else [#133](https://github.com/nextcloud/files_lock/pull/133)
+- Avoid getting the user folder for non-files dav paths [#124](https://github.com/nextcloud/files_lock/pull/124)
+
+### Changed
+
+- Update translations
+- Upgrade dependencies
+
+## 26.0.0
 
 ### Added
 
