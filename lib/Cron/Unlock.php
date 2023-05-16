@@ -31,9 +31,9 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Cron;
 
+use OCA\FilesLock\Service\LockService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
-use OCA\FilesLock\Service\LockService;
 
 class Unlock extends TimedJob {
 	private LockService $lockService;
