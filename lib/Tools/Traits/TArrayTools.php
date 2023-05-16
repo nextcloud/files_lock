@@ -32,12 +32,12 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Tools\Traits;
 
+use Exception;
+use JsonSerializable;
 use OCA\FilesLock\Tools\Exceptions\ArrayNotFoundException;
 use OCA\FilesLock\Tools\Exceptions\ItemNotFoundException;
 use OCA\FilesLock\Tools\Exceptions\MalformedArrayException;
 use OCA\FilesLock\Tools\Exceptions\UnknownTypeException;
-use Exception;
-use JsonSerializable;
 
 trait TArrayTools {
 	public static $TYPE_NULL = 'Null';

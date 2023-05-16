@@ -31,9 +31,9 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Model;
 
+use JsonSerializable;
 use OCA\FilesLock\Tools\Db\IQueryRow;
 use OCA\FilesLock\Tools\Traits\TArrayTools;
-use JsonSerializable;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;

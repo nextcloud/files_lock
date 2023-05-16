@@ -3,8 +3,8 @@
 namespace OCA\FilesLock\DAV;
 
 use OCA\DAV\Connector\Sabre\CachingTree;
-use OCA\DAV\Connector\Sabre\FakeLockerPlugin;
 use OCA\DAV\Connector\Sabre\Directory;
+use OCA\DAV\Connector\Sabre\FakeLockerPlugin;
 use OCA\DAV\Connector\Sabre\File;
 use OCA\DAV\Connector\Sabre\ObjectTree;
 use OCA\FilesLock\AppInfo\Application;

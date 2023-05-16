@@ -21,9 +21,9 @@
  *
  */
 
+use OC\Files\Lock\LockManager;
 use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Service\ConfigService;
-use OC\Files\Lock\LockManager;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Files\IRootFolder;
 use OCP\Files\Lock\ILock;
