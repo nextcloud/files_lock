@@ -384,9 +384,6 @@ class LockService {
 
 	private function propagateEtag(LockContext $lockContext): void {
 		$node = $lockContext->getNode();
-		$node->getStorage()->getCache()->update($node->getId(), [
-			'etag' => uniqid(),
-		]);
 		$node->getStorage()->getUpdater()->propagate($node->getInternalPath(), $node->getMTime());
 	}
 }
