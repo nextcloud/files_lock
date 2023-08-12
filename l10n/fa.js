@@ -4,6 +4,7 @@ OC.L10N.register(
     "Unlock file" : "باز کردن قفل پرونده",
     "Lock file" : "قفل کردن پرونده",
     "Locked by {0}" : "قفل شده توسط {0}",
+    "File can only be unlocked by providing a valid owner lock token" : "File can only be unlocked by providing a valid owner lock token",
     "File can only be unlocked by the owner of the lock" : "قفل پرونده فقط توسط صاحب قفل قابل باز شدن است",
     "Temporary files lock" : "موقتا پرونده‌ها قفل شده اند",
     "Temporary lock your files" : "موقتا پرونده‌هایتان را قفل کنید",
