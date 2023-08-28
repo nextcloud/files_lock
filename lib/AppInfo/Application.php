@@ -119,8 +119,6 @@ class Application extends App implements IBootstrap {
 	 * @param IServerContainer $container
 	 */
 	public function registerHooks(IServerContainer $container) {
-		$eventDispatcher = \OC::$server->getEventDispatcher();
-
 		$this->userSession = $container->get(IUserSession::class);
 		$this->fileService = $container->get(FileService::class);
 		$this->lockService = $container->get(LockService::class);
