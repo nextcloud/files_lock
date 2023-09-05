@@ -6,6 +6,7 @@ use OCA\DAV\Connector\Sabre\CachingTree;
 use OCA\DAV\Connector\Sabre\Directory;
 use OCA\DAV\Connector\Sabre\FakeLockerPlugin;
 use OCA\DAV\Connector\Sabre\File;
+use OCA\DAV\Connector\Sabre\FilesPlugin;
 use OCA\DAV\Connector\Sabre\ObjectTree;
 use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
@@ -17,7 +18,7 @@ use OCP\AppFramework\Http;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
-use OCP\IUserManager;
+use OCP\Files\Node;
 use OCP\IUserSession;
 use Sabre\DAV\Exception\LockTokenMatchesRequestUri;
 use Sabre\DAV\INode;
@@ -30,13 +31,11 @@ use Sabre\HTTP\ResponseInterface;
 class LockPlugin extends SabreLockPlugin {
 	private LockService $lockService;
 	private FileService $fileService;
-	private IUserManager $userManager;
 	private IUserSession $userSession;
 
-	public function __construct(LockService $lockService, FileService $fileService, IUserManager $userManager, IUserSession $userSession) {
+	public function __construct(LockService $lockService, FileService $fileService, IUserSession $userSession) {
 		$this->lockService = $lockService;
 		$this->fileService = $fileService;
-		$this->userManager = $userManager;
 		$this->userSession = $userSession;
 	}
 
@@ -186,8 +185,9 @@ class LockPlugin extends SabreLockPlugin {
 		if ($request->getHeader('X-User-Lock')) {
 			$response->setHeader('Content-Type', 'application/xml; charset=utf-8');
 
+			$file = $this->fileService->getFileFromAbsoluteUri($this->server->getRequestUri());
+
 			try {
-				$file = $this->fileService->getFileFromAbsoluteUri($this->server->getRequestUri());
 				$lockInfo = $this->lockService->lock(new LockContext(
 					$file, ILock::TYPE_USER, $this->userSession->getUser()->getUID()
 				));
@@ -195,7 +195,7 @@ class LockPlugin extends SabreLockPlugin {
 				$response->setBody(
 					$this->server->xml->write(
 						'{DAV:}prop',
-						$this->getLockProperties($lockInfo)
+						$this->getLockProperties($lockInfo, $file)
 					)
 				);
 			} catch (OwnerLockedException $e) {
@@ -203,7 +203,7 @@ class LockPlugin extends SabreLockPlugin {
 				$response->setBody(
 					$this->server->xml->write(
 						'{DAV:}prop',
-						$this->getLockProperties($e->getLock())
+						$this->getLockProperties($e->getLock(), $file)
 					)
 				);
 			}
@@ -218,8 +218,9 @@ class LockPlugin extends SabreLockPlugin {
 		if ($request->getHeader('X-User-Lock')) {
 			$response->setHeader('Content-Type', 'application/xml; charset=utf-8');
 
+			$file = $this->fileService->getFileFromAbsoluteUri($this->server->getRequestUri());
+
 			try {
-				$file = $this->fileService->getFileFromAbsoluteUri($this->server->getRequestUri());
 				$this->lockService->enableUserOverride();
 				$this->lockService->unlock(new LockContext(
 					$file, ILock::TYPE_USER, $this->userSession->getUser()->getUID()
@@ -228,7 +229,7 @@ class LockPlugin extends SabreLockPlugin {
 				$response->setBody(
 					$this->server->xml->write(
 						'{DAV:}prop',
-						$this->getLockProperties(null)
+						$this->getLockProperties(null, $file)
 					)
 				);
 			} catch (LockNotFoundException $e) {
@@ -236,7 +237,7 @@ class LockPlugin extends SabreLockPlugin {
 				$response->setBody(
 					$this->server->xml->write(
 						'{DAV:}prop',
-						$this->getLockProperties(null)
+						$this->getLockProperties(null, $file)
 					)
 				);
 			} catch (UnauthorizedUnlockException $e) {
@@ -245,7 +246,7 @@ class LockPlugin extends SabreLockPlugin {
 				$response->setBody(
 					$this->server->xml->write(
 						'{DAV:}prop',
-						$this->getLockProperties($lock)
+						$this->getLockProperties($lock, $file)
 					)
 				);
 			}
@@ -261,8 +262,12 @@ class LockPlugin extends SabreLockPlugin {
 		}
 	}
 
-	private function getLockProperties(?FileLock $lock): array {
+	private function getLockProperties(?FileLock $lock, Node $file): array {
+		// We need to fetch the node again to get the proper new Etag
+		$actingUser = ($file->getOwner() ? $file->getOwner()->getUID() : null) ?? $this->userSession->getUser()->getUID();
+		$file = $this->fileService->getFileFromId($actingUser, $file->getId());
 		return [
+			FilesPlugin::GETETAG_PROPERTYNAME => $file->getEtag(),
 			Application::DAV_PROPERTY_LOCK => $lock !== null,
 			Application::DAV_PROPERTY_LOCK_OWNER_TYPE => $lock ? $lock->getType() : null,
 			Application::DAV_PROPERTY_LOCK_OWNER => $lock ? $lock->getOwner() : null,

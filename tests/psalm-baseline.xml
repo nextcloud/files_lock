@@ -1,29 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="dev-master@">
+<files psalm-version="5.13.1@086b94371304750d1c673315321a55d15fc59015">
   <file src="lib/DAV/LockBackend.php">
-    <UndefinedThisPropertyAssignment occurrences="1">
-      <code>$this-&gt;server</code>
+    <UndefinedThisPropertyAssignment>
+      <code><![CDATA[$this->server]]></code>
     </UndefinedThisPropertyAssignment>
-    <UndefinedThisPropertyFetch occurrences="1">
-      <code>$this-&gt;server</code>
-    </UndefinedThisPropertyFetch>
   </file>
   <file src="lib/DAV/LockPlugin.php">
-    <UndefinedClass occurrences="5">
+    <UndefinedClass>
       <code>CachingTree</code>
       <code>Directory</code>
       <code>FakeLockerPlugin</code>
       <code>File</code>
+      <code>FilesPlugin</code>
       <code>ObjectTree</code>
     </UndefinedClass>
   </file>
   <file src="lib/Db/CoreQueryBuilder.php">
-    <MissingDependency occurrences="1">
+    <MissingDependency>
       <code>ExtendedQueryBuilder</code>
     </MissingDependency>
   </file>
   <file src="lib/Db/CoreRequestBuilder.php">
-    <MissingDependency occurrences="9">
+    <MissingDependency>
       <code>$qb</code>
       <code>$qb</code>
       <code>$qb</code>
@@ -36,7 +34,7 @@
     </MissingDependency>
   </file>
   <file src="lib/Db/LocksRequest.php">
-    <MissingDependency occurrences="27">
+    <MissingDependency>
       <code>$qb</code>
       <code>$qb</code>
       <code>$qb</code>
@@ -65,12 +63,12 @@
       <code>$qb</code>
       <code>$qb</code>
     </MissingDependency>
-    <UndefinedClass occurrences="1">
+    <UndefinedClass>
       <code>UniqueConstraintViolationException</code>
     </UndefinedClass>
   </file>
   <file src="lib/Db/LocksRequestBuilder.php">
-    <MissingDependency occurrences="6">
+    <MissingDependency>
       <code>CoreQueryBuilder</code>
       <code>CoreQueryBuilder</code>
       <code>CoreQueryBuilder</code>
@@ -80,22 +78,22 @@
     </MissingDependency>
   </file>
   <file src="lib/LockProvider.php">
-    <RedundantCondition occurrences="1">
+    <RedundantCondition>
       <code>$lock</code>
     </RedundantCondition>
   </file>
   <file src="lib/Service/FileService.php">
-    <MissingDependency occurrences="6">
-      <code>$this-&gt;rootFolder</code>
-      <code>$this-&gt;rootFolder</code>
-      <code>$this-&gt;rootFolder</code>
-      <code>$this-&gt;rootFolder</code>
+    <MissingDependency>
+      <code><![CDATA[$this->rootFolder]]></code>
+      <code><![CDATA[$this->rootFolder]]></code>
+      <code><![CDATA[$this->rootFolder]]></code>
+      <code><![CDATA[$this->rootFolder]]></code>
       <code>IRootFolder</code>
       <code>IRootFolder</code>
     </MissingDependency>
   </file>
   <file src="lib/Tools/Traits/TArrayTools.php">
-    <TypeDoesNotContainNull occurrences="7">
+    <TypeDoesNotContainNull>
       <code>$arr === null</code>
       <code>$arr === null</code>
       <code>$arr === null</code>
@@ -106,11 +104,11 @@
     </TypeDoesNotContainNull>
   </file>
   <file src="lib/Tools/Traits/TSetup.php">
-    <MismatchingDocblockParamType occurrences="2">
+    <MismatchingDocblockParamType>
       <code>string</code>
       <code>string</code>
     </MismatchingDocblockParamType>
-    <MismatchingDocblockReturnType occurrences="1">
+    <MismatchingDocblockReturnType>
       <code>string</code>
     </MismatchingDocblockReturnType>
   </file>
