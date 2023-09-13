@@ -1,5 +1,17 @@
 # Changelog
 
+## 27.0.1
+
+### Added
+
+- feat(dav): Expose etag property after user LOCK/UNLOCK @juliushaertl [#163](https://github.com/nextcloud/files_lock/pull/163)
+
+### Fixed
+
+- fix: Do not load unused event dispatcher @juliushaertl [#160](https://github.com/nextcloud/files_lock/pull/160)
+- Dependency updates
+
+
 ## 27.0.0
 
 ### Added
