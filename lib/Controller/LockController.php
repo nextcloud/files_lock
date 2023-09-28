@@ -130,7 +130,7 @@ class LockController extends OCSController {
 			$lock = $this->lockService->getLockFromFileId((int)$fileId);
 			$response = new DataResponse();
 			$response->setStatus(Http::STATUS_LOCKED);
-			$response->setData($lock->jsonSerialize());
+			$response->setData($lock);
 			return $response;
 		} catch (Exception $e) {
 			return $this->fail($e);
