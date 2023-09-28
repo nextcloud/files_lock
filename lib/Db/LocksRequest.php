@@ -51,6 +51,7 @@ class LocksRequest extends LocksRequestBuilder {
 		$qb->setValue('user_id', $qb->createNamedParameter($lock->getOwner()))
 		   ->setValue('file_id', $qb->createNamedParameter($lock->getFileId()))
 		   ->setValue('token', $qb->createNamedParameter($lock->getToken()))
+		   ->setValue('owner', $qb->createNamedParameter($lock->getDisplayName()))
 		   ->setValue('creation', $qb->createNamedParameter($lock->getCreatedAt()))
 		   ->setValue('type', $qb->createNamedParameter($lock->getType()))
 		   ->setValue('ttl', $qb->createNamedParameter($lock->getTimeout()));
