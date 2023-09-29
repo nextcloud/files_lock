@@ -1,5 +1,12 @@
 # Changelog
 
+## 27.0.2
+
+### Fixed
+
+- fix: ignore file-owner condition in groupfolders and external storage [#171]
+- fix: response's data is FileLock [#173]
+
 ## 27.0.1
 
 ### Added
