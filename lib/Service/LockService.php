@@ -245,7 +245,15 @@ class LockService {
 			return;
 		}
 
-		if ($request->getType() === ILock::TYPE_USER && $request->getNode()->getOwner()->getUID() === $this->userId) {
+		// we need to ignore some filesystem that return current user as file owner
+		$ignoreFileOwnership = [
+			'OCA\GroupFolders\Mount\MountProvider',
+			'OCA\Files_External\Config\ConfigAdapter'
+		];
+		if ($request->getType() === ILock::TYPE_USER
+			&& $request->getNode()->getOwner()->getUID() === $this->userId
+			&& !in_array($request->getNode()->getMountPoint()->getMountProvider(), $ignoreFileOwnership)
+		) {
 			return;
 		}
 
