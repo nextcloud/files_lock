@@ -61,7 +61,7 @@ WebDAV returns the following additional properties if requests through a `PROPFI
 - `{http://nextcloud.org/ns}lock-owner-displayname`: Display name of the lock owner
 - `{http://nextcloud.org/ns}lock-owner-editor`: App id of an app owned lock to allow clients to suggest joining the collaborative editing session through the web or direct editing
 - `{http://nextcloud.org/ns}lock-time`: Timestamp of the log creation time
-- `{http://nextcloud.org/ns}lock-timeout`: TTL of the lock in seconds staring from the creation time
+- `{http://nextcloud.org/ns}lock-timeout`: TTL of the lock in seconds staring from the creation time. a value of 0 means the timeout is infinite. client implementations should properly handle this specific value
 - `{http://nextcloud.org/ns}lock-token`: Unique lock token (to be preserved on the client side while holding the lock to sent once full webdav locking is implemented)
 
 ```bash
