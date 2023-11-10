@@ -27,3 +27,4 @@
 /package-lock.json
 /node_modules/
 /src/
+/vite.config.ts

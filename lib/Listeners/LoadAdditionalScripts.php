@@ -44,7 +44,7 @@ class LoadAdditionalScripts implements IEventListener {
 			return;
 		}
 
-		Util::addScript(Application::APP_ID, 'files');
-		Util::addStyle(Application::APP_ID, 'files_lock');
+		Util::addInitScript(Application::APP_ID, 'files_lock-init');
+		Util::addScript(Application::APP_ID, 'files_lock-main');
 	}
 }
