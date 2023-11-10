@@ -1,5 +1,17 @@
 # Changelog
 
+## 28.0.0-beta.1
+
+### Added
+
+- Nextcloud 28 compatibility
+  - Migrate to new files API @juliushaertl [#177](https://github.com/nextcloud/files_lock/pull/177)
+  - Use different icon to indicate automatic collaborative app lock (e.g. with Text or Nextcloud Office)
+
+### Fixed
+
+- lock-timeout can have a special value of 0 for infinite timeout @mgallien [#175](https://github.com/nextcloud/files_lock/pull/175)
+
 ## 27.0.2
 
 ### Fixed
