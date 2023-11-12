@@ -4,6 +4,8 @@
     "Temporary files lock" : "قفل الملفات مؤقتا",
     "Temporary lock your files" : "قفل ملفاتك مؤقتا",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "السماح للمستخدمين بإقفال الملفات الخاصة بهم مؤقتا لتجنب حدوث تعارُضات بينما يعملون على ملفات مشتركة. ",
+    "Locked by {user}" : "مُقفَلٌ من قبل {user}",
+    "Locked by {app}" : "مُقفَلٌ من قبل {app}",
     "Unlock file" : "فك قفل الملف",
     "Lock file" : "قفل الملف",
     "Locked by {0}" : "مقفل بواسطة {0}"

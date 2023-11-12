@@ -6,6 +6,8 @@ OC.L10N.register(
     "Temporary files lock" : "Geçici dosya kilidi",
     "Temporary lock your files" : "Dosyalarınızı geçici olarak kilitleyin",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Kullanıcılar paylaşımlı dosyalar üzerinde çalışırken, çakışmaların engellenmesi için dosyaların geçici olarak kilitlenmesini sağlar.",
+    "Locked by {user}" : "{user} tarafından kilitlenmiş",
+    "Locked by {app}" : "{app} tarafından kilitlenmiş",
     "Unlock file" : "Dosya kilidini aç",
     "Lock file" : "Dosyayı kilitle",
     "Locked by {0}" : "{0} tarafından kilitlenmiş"
