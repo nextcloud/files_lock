@@ -6,6 +6,8 @@ OC.L10N.register(
     "Temporary files lock" : "Dočasný zámek souborů",
     "Temporary lock your files" : "Dočasně zamykejte své soubory",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Umožňuje vašim uživatelům dočasně uzamykat své soubory a vyhýbat se tak konfliktům při práci na sdílených souborech.",
+    "Locked by {user}" : "Uzamčeno {user}",
+    "Locked by {app}" : "Uzamčeno {app}",
     "Unlock file" : "Odemknout soubor",
     "Lock file" : "Zamknout soubor",
     "Locked by {0}" : "Uzamkl(a) {0}"
