@@ -6,6 +6,8 @@ OC.L10N.register(
     "Temporary files lock" : "暫時上鎖檔案",
     "Temporary lock your files" : "暫時將您的檔案上鎖",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "允許您的使用者將他們的檔案暫時上鎖，以免在處理分享檔案時出現衝突。",
+    "Locked by {user}" : "由 {user} 鎖定",
+    "Locked by {app}" : "由 {app} 鎖定",
     "Unlock file" : "解鎖檔案",
     "Lock file" : "上鎖檔案",
     "Locked by {0}" : "由 {0} 上鎖"
