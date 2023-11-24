@@ -6,6 +6,8 @@ OC.L10N.register(
     "Temporary files lock" : "Temporary files lock",
     "Temporary lock your files" : "Temporary lock your files",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Allow your users to temporary lock their files to avoid conflicts while working on shared files.",
+    "Locked by {user}" : "Locked by {user}",
+    "Locked by {app}" : "Locked by {app}",
     "Unlock file" : "Unlock file",
     "Lock file" : "Lock file",
     "Locked by {0}" : "Locked by {0}"
