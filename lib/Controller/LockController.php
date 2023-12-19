@@ -90,13 +90,13 @@ class LockController extends OCSController {
 	 *
 	 * @return DataResponse
 	 */
-	public function locking(string $fileId): DataResponse {
+	public function locking(string $fileId, int $lockType = ILock::TYPE_USER): DataResponse {
 		try {
 			$user = $this->userSession->getUser();
 			$file = $this->fileService->getFileFromId($user->getUID(), (int)$fileId);
 
 			$lock = $this->lockService->lock(new LockContext(
-				$file, ILock::TYPE_USER, $user->getUID()
+				$file, $lockType, $user->getUID()
 			));
 
 			return new DataResponse($lock, Http::STATUS_OK);
@@ -115,7 +115,7 @@ class LockController extends OCSController {
 	 *
 	 * @return DataResponse
 	 */
-	public function unlocking(string $fileId): DataResponse {
+	public function unlocking(string $fileId, int $lockType = ILock::TYPE_USER): DataResponse {
 		try {
 			$user = $this->userSession->getUser();
 			$this->lockService->enableUserOverride();
