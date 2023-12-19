@@ -20,7 +20,7 @@ jobs:
       matrix:
         php-versions: ['8.0']
         databases: ['mysql']
-        server-versions: ['master']
+        server-versions: ['stable24', 'stable25', 'stable26', 'stable27']
 
     name: litmus ${{ matrix.php-versions }}-${{ matrix.databases }}-${{ matrix.server-versions }}
 
