@@ -47,12 +47,8 @@ use OCP\Files\Lock\OwnerLockedException;
 use OCP\Files\NotFoundException;
 use OCP\IL10N;
 use OCP\IUserManager;
+use OCP\IUserSession;
 
-/**
- * Class LockService
- *
- * @package OCA\FilesLock\Service
- */
 class LockService {
 	public const PREFIX = 'files_lock';
 
@@ -61,7 +57,6 @@ class LockService {
 	use TLogger;
 
 
-	private ?string $userId;
 	private IUserManager $userManager;
 	private IL10N $l10n;
 	private LocksRequest $locksRequest;
@@ -69,6 +64,7 @@ class LockService {
 	private ConfigService $configService;
 	private IAppManager $appManager;
 	private IEventDispatcher $eventDispatcher;
+	private IUserSession $userSession;
 
 
 	private array $locks = [];
@@ -79,16 +75,15 @@ class LockService {
 
 
 	public function __construct(
-		$userId,
 		IL10N $l10n,
 		IUserManager $userManager,
 		LocksRequest $locksRequest,
 		FileService $fileService,
 		ConfigService $configService,
 		IAppManager $appManager,
-		IEventDispatcher $eventDispatcher
+		IEventDispatcher $eventDispatcher,
+		IUserSession $userSession,
 	) {
-		$this->userId = $userId;
 		$this->l10n = $l10n;
 		$this->userManager = $userManager;
 		$this->locksRequest = $locksRequest;
@@ -96,6 +91,7 @@ class LockService {
 		$this->configService = $configService;
 		$this->appManager = $appManager;
 		$this->eventDispatcher = $eventDispatcher;
+		$this->userSession = $userSession;
 
 		$this->setup('app', 'files_lock');
 	}
@@ -229,7 +225,7 @@ class LockService {
 	}
 
 	public function canUnlock(LockContext $request, FileLock $current): void {
-		$isSameUser = $current->getOwner() === $this->userId;
+		$isSameUser = $current->getOwner() === $this->userSession->getUser()?->getUID();
 		$isSameToken = $request->getOwner() === $current->getToken();
 		$isSameOwner = $request->getOwner() === $current->getOwner();
 		$isSameType = $request->getType() === $current->getType();
@@ -256,7 +252,7 @@ class LockService {
 			'OCA\Files_External\Config\ConfigAdapter'
 		];
 		if ($request->getType() === ILock::TYPE_USER
-			&& $request->getNode()->getOwner()->getUID() === $this->userId
+			&& $request->getNode()->getOwner()->getUID() === $this->userSession->getUser()?->getUID()
 			&& !in_array($request->getNode()->getMountPoint()->getMountProvider(), $ignoreFileOwnership)
 		) {
 			return;
@@ -274,22 +270,21 @@ class LockService {
 	 * @throws NotFoundException
 	 * @throws UnauthorizedUnlockException
 	 */
-	public function unlockFile(int $fileId, string $userId, bool $force = false): FileLock {
+	public function unlockFile(int $fileId, string $userId, bool $force = false, int $lockType = ILock::TYPE_USER): FileLock {
 		$lock = $this->getLockForNodeId($fileId);
 		if (!$lock) {
 			throw new LockNotFoundException();
 		}
 
-		$type = ILock::TYPE_USER;
 		if ($force) {
 			$userId = $lock->getOwner();
-			$type = $lock->getType();
+			$lockType = $lock->getType();
 		}
 
 		$node = $this->fileService->getFileFromId($userId, $fileId);
 		$lock = new LockContext(
 			$node,
-			$type,
+			$lockType,
 			$userId,
 		);
 		$this->propagateEtag($lock);
