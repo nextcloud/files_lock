@@ -13,7 +13,7 @@ jobs:
       runs-on: ubuntu-latest
       strategy:
           matrix:
-              ocp-version: [ 'dev-master' ]
+              ocp-version: [ 'dev-stable27', 'dev-stable25', 'dev-stable26' ]
       name: Nextcloud ${{ matrix.ocp-version }}
       steps:
           - name: Checkout
@@ -22,11 +22,11 @@ jobs:
             uses: shivammathur/setup-php@2.18.1
             with:
                 php-version: 8.0
-                tools: composer:v1
+                tools: composer
                 coverage: none
           - name: Install dependencies
             run: composer i
           - name: Install dependencies
-            run: composer require --dev christophwurst/nextcloud:${{ matrix.ocp-version }}
+            run: composer require --dev nextcloud/ocp:${{ matrix.ocp-version }} --ignore-platform-reqs -W
           - name: Run coding standards check
             run: composer run psalm

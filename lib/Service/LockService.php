@@ -132,6 +132,7 @@ class LockService {
 				$locks[$nodeId] = $this->lockCache[$nodeId];
 			} else {
 				$locksToRequest[] = $nodeId;
+				$this->lockCache[$nodeId] = false;
 			}
 		}
 		if (count($locksToRequest) === 0) {
@@ -144,16 +145,20 @@ class LockService {
 		}
 		$newLocks = array_merge(...$newLocks);
 
+		$expiredLocks = [];
 		foreach ($newLocks as $lock) {
 			if ($lock->getETA() === 0) {
-				// TODO batch remove
-				$this->locksRequest->delete($lock);
+				$expiredLocks[] = $lock->getId();
 				$locks[$lock->getFileId()] = false;
 				$this->lockCache[$lock->getFileId()] = false;
 			} else {
 				$locks[$lock->getFileId()] = $lock;
 				$this->lockCache[$lock->getFileId()] = $lock;
 			}
+		}
+
+		if (count($expiredLocks) > 0) {
+			$this->locksRequest->removeIds($expiredLocks);
 		}
 
 		return $locks;
