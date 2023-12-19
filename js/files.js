@@ -43,6 +43,18 @@
 				return data
 			})
 
+			var oldElementToFile = fileList.elementToFile
+			fileList.elementToFile = function($el) {
+				var fileData = oldElementToFile.apply(this, arguments)
+				fileData.locked = $el.data('locked')
+				fileData.lockOwnerType = $el.data('lock-owner-type')
+				fileData.lockOwnerEditor = $el.data('lock-owner-editor')
+				fileData.lockOwner = $el.data('lock-owner')
+				fileData.lockOwnerDisplayname = $el.data('lock-owner-displayname')
+				fileData.lockTime = $el.data('lock-time')
+				return fileData
+			}
+
 			var oldCreateRow = fileList._createRow
 			fileList._createRow = function(fileData) {
 				var $tr = oldCreateRow.apply(this, arguments)
