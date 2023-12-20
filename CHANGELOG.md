@@ -1,5 +1,13 @@
 # Changelog
 
+## 27.0.3
+
+### Fixed
+
+- fix: Preserve lock data in file info model @juliushaertl [#201](https://github.com/nextcloud/files_lock/pull/201)
+- perf: Avoid re-query of already fetched lock info [#200](https://github.com/nextcloud/files_lock/pull/200)
+- lock-timeout can have a special value of 0 for infinite timeout @mgallien [#175](https://github.com/nextcloud/files_lock/pull/175)
+
 ## 27.0.2
 
 ### Fixed
