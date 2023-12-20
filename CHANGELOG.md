@@ -1,5 +1,11 @@
 # Changelog
 
+## 28.0.1
+
+### Fixed
+
+- perf: Avoid re-query of already fetched lock info @juliushaertl [#196](https://github.com/nextcloud/files_lock/pull/196)
+
 ## 28.0.0
 
 ### Added
