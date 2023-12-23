@@ -1,4 +1,5 @@
 { "translations": {
-    "Unlock file" : "Buka kunci berkas"
+    "Unlock file" : "Buka kunci berkas",
+    "Lock file" : "Kunci berkas"
 },"pluralForm" :"nplurals=1; plural=0;"
 }
