@@ -30,5 +30,6 @@ export type LockState = {
 	lockOwnerDisplayName: string,
 	lockOwnerType: LockType,
 	lockOwnerEditor: string,
+	lockManager: boolean,
 	lockTime: number,
 }

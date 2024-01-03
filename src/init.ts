@@ -11,3 +11,4 @@ registerDavProperty('nc:lock-owner-displayname', { nc: 'http://nextcloud.org/ns'
 registerDavProperty('nc:lock-owner-type', { nc: 'http://nextcloud.org/ns' })
 registerDavProperty('nc:lock-owner-editor', { nc: 'http://nextcloud.org/ns' })
 registerDavProperty('nc:lock-time', { nc: 'http://nextcloud.org/ns' })
+registerDavProperty('nc:lock-manager', { nc: 'http://nextcloud.org/ns' })

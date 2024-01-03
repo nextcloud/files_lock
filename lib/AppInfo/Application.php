@@ -67,6 +67,7 @@ class Application extends App implements IBootstrap {
 	public const DAV_PROPERTY_LOCK_TIME = '{http://nextcloud.org/ns}lock-time';
 	public const DAV_PROPERTY_LOCK_TIMEOUT = '{http://nextcloud.org/ns}lock-timeout';
 	public const DAV_PROPERTY_LOCK_TOKEN = '{http://nextcloud.org/ns}lock-token';
+	public const DAV_PROPERTY_LOCK_MANAGER = '{http://nextcloud.org/ns}lock-manager';
 
 
 	/** @var IUserSession */

@@ -179,6 +179,10 @@ class LockPlugin extends SabreLockPlugin {
 
 			return $lock->getToken();
 		});
+
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_MANAGER, function () use ($node) {
+			return $this->lockService->isLockManager($this->userSession->getUser(), $node->getNode());
+		});
 	}
 
 	public function httpLock(RequestInterface $request, ResponseInterface $response) {
