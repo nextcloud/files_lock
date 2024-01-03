@@ -16,6 +16,7 @@ use OCP\App\IAppManager;
 use OCP\AppFramework\Services\IAppConfig;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\IRootFolder;
+use OCP\IGroupManager;
 use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserManager;
@@ -35,6 +36,7 @@ class LockServiceTest extends TestCase {
 		$service = new LockService(
 			$this->createMock(IL10N::class),
 			$this->createMock(IUserManager::class),
+			$this->createMock(IGroupManager::class),
 			$this->createMock(LocksRequest::class),
 			$this->createMock(FileService::class),
 			$this->createMock(IAppConfig::class),
