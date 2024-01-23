@@ -38,14 +38,18 @@ use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Tools\Traits\TLogger;
 use OCA\FilesLock\Tools\Traits\TStringTools;
+use OCA\GroupFolders\Mount\GroupMountPoint;
 use OCP\App\IAppManager;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
+use OCP\Files\Node;
 use OCP\Files\NotFoundException;
+use OCP\IGroupManager;
 use OCP\IL10N;
+use OCP\IUser;
 use OCP\IUserManager;
 
 /**
@@ -56,20 +60,8 @@ use OCP\IUserManager;
 class LockService {
 	public const PREFIX = 'files_lock';
 
-
 	use TStringTools;
 	use TLogger;
-
-
-	private ?string $userId;
-	private IUserManager $userManager;
-	private IL10N $l10n;
-	private LocksRequest $locksRequest;
-	private FileService $fileService;
-	private ConfigService $configService;
-	private IAppManager $appManager;
-	private IEventDispatcher $eventDispatcher;
-
 
 	private array $locks = [];
 	private bool $lockRetrieved = false;
@@ -77,26 +69,17 @@ class LockService {
 	private ?array $directEditors = null;
 	private bool $allowUserOverride = false;
 
-
 	public function __construct(
-		$userId,
-		IL10N $l10n,
-		IUserManager $userManager,
-		LocksRequest $locksRequest,
-		FileService $fileService,
-		ConfigService $configService,
-		IAppManager $appManager,
-		IEventDispatcher $eventDispatcher
+		private ?string $userId,
+		private IL10N $l10n,
+		private IUserManager $userManager,
+		private IGroupManager $groupManager,
+		private LocksRequest $locksRequest,
+		private FileService $fileService,
+		private ConfigService $configService,
+		private IAppManager $appManager,
+		private IEventDispatcher $eventDispatcher
 	) {
-		$this->userId = $userId;
-		$this->l10n = $l10n;
-		$this->userManager = $userManager;
-		$this->locksRequest = $locksRequest;
-		$this->fileService = $fileService;
-		$this->configService = $configService;
-		$this->appManager = $appManager;
-		$this->eventDispatcher = $eventDispatcher;
-
 		$this->setup('app', 'files_lock');
 	}
 
@@ -401,5 +384,25 @@ class LockService {
 			'etag' => uniqid(),
 		]);
 		$node->getStorage()->getUpdater()->propagate($node->getInternalPath(), $node->getMTime());
+	}
+
+	public function isLockManager(IUser $user, ?Node $node): bool {
+		if ($this->groupManager->isAdmin($user->getUID())) {
+			return true;
+		}
+
+		$lockManagerGroups = explode('|', $this->configService->getAppValue('lock_managers') ?? '');
+		$userGroups = $this->groupManager->getUserGroupIds($user);
+		$matchGroups = !empty(array_intersect($lockManagerGroups, $userGroups));
+
+		if ($matchGroups) {
+			return true;
+		}
+
+		if ($node && $node->getOwner()?->getUID() === $user->getUID() && !$node->getMountPoint() instanceof GroupMountPoint) {
+			return true;
+		}
+
+		return false;
 	}
 }
