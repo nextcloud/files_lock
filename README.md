@@ -32,11 +32,15 @@ Locks are separated into three different types:
   This lock type is initiated by a user manually through the WebUI or Clients and will limit editing capabilities on the file to the lock owning user.
 - **1 App owned lock:**
   This lock type is created by collaborative apps like Text or Office to avoid outside changes through WevDAV or other apps.
-- **2 Token owned lock:** (not implemented yet) This lock type will bind the ownership to the provided lock token. Any request that aims to modify the file will be required to sent the token, the user itself is not able to write to files without the token. This will allow to limit the locking to an individual client.
+- **2 Token owned lock:** This lock type will bind the ownership to the provided lock token. Any request that aims to modify the file will be required to sent the token, the user itself is not able to write to files without the token. This will allow to limit the locking to an individual client.
+  - This is mostly used for automatic client locking, e.g. when a file is opened in a client or with WebDAV clients that support native WebDAV locking. The lock token can be skipped on follow up requests using the OCS API or the `X-User-Lock` header for WebDAV requests, but in that case the server will not be able to validate the lock ownership when unlocking the file from the client.
 
 ### Capability
 
 If locking is available the app will expose itself through the capabilties endpoint under the files key:
+
+Make sure to validate that also the key exists in the capabilities response, not just check the value as on older versions the entry might be missing completely.
+
 ```
 curl http://admin:admin@nextcloud.local/ocs/v1.php/cloud/capabilities\?format\=json \
 	-H 'OCS-APIRequest: true' \
@@ -44,9 +48,13 @@ curl http://admin:admin@nextcloud.local/ocs/v1.php/cloud/capabilities\?format\=j
 {
   ...
   "locking": "1.0",
+  "api-feature-lock-type" => true,
   ...
 }
 ```
+
+- `locking`: The version of the locking API
+- `api-feature-lock-type`: Feature flag, whether the server supports the `lockType` parameter for the OCS API or `X-User-Lock-Type` header for WebDAV requests.
 
 ### WebDAV: Fetching lock details
 
@@ -88,6 +96,11 @@ curl -X LOCK \
   --header 'X-User-Lock: 1'
 ```
 
+#### Headers
+
+- `X-User-Lock`: Indicate that locking shall ignore token requirements that the WebDAV standard required.
+- `X-User-Lock-Type`: The type of the lock (see description above)
+
 #### Response
 
 The response will give back the updated properties after obtaining the lock with a `200 Success` status code or the existing lock details in case of a `423 Locked` status.
@@ -123,6 +136,11 @@ curl -X UNLOCK \
   --header 'X-User-Lock: 1'
 ```
 
+#### Headers
+
+- `X-User-Lock`: Indicate that locking shall ignore token requirements that the WebDAV standard required.
+- `X-User-Lock-Type`: The type of the lock (see description above)
+
 #### Response
 
 ```xml
@@ -154,6 +172,13 @@ curl -X UNLOCK \
 ```bash
 curl -X PUT 'http://admin:admin@nextcloud.local/ocs/v2.php/apps/files_lock/lock/123' -H 'OCS-APIREQUEST: true'`
 ```
+
+#### Parameters
+
+- `lockType` (optional): The type of the lock. Defaults to `0` (user owned manual lock). Possible values are:
+  - `0`: User owned manual lock
+  - `1`: App owned lock
+  - `2`: Token owned lock
 
 #### Success
 ```
@@ -192,6 +217,13 @@ curl -X PUT 'http://admin:admin@nextcloud.local/ocs/v2.php/apps/files_lock/lock/
 ```bash
 curl -X DELETE 'http://admin:admin@nextcloud.local/ocs/v2.php/apps/files_lock/lock/123' -H 'OCS-APIREQUEST: true'
 ```
+
+#### Parameters
+
+- `lockType` (optional): The type of the lock. Defaults to `0` (user owned manual lock). Possible values are:
+  - `0`: User owned manual lock
+  - `1`: App owned lock
+  - `2`: Token owned lock
 
 #### Success
 ```
