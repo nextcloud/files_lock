@@ -9,6 +9,7 @@ class Capability implements ICapability {
 		return [
 			'files' => [
 				'locking' => '1.0',
+				'api-feature-lock-type' => true,
 			]
 		];
 	}
