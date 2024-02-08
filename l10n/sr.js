@@ -1,6 +1,8 @@
 OC.L10N.register(
     "files_lock",
     {
+    "File is currently locked by %s" : "Фајл је тренутно закључао корисник %s",
+    "File is not locked" : "Фајл је закључан",
     "File can only be unlocked by providing a valid owner lock token" : "Фајл може да се откључа само ако се наведе власников важећи жетон катанца",
     "File can only be unlocked by the owner of the lock" : "Фајл може да откључа само власник катанца",
     "Temporary files lock" : "Привремено закључавање фајлова",
