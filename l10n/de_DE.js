@@ -1,6 +1,8 @@
 OC.L10N.register(
     "files_lock",
     {
+    "File is currently locked by %s" : "Datei ist derzeit von %s gesperrt.",
+    "File is not locked" : "Datei ist nicht gesperrt",
     "File can only be unlocked by providing a valid owner lock token" : "Die Datei kann nur mit einem gültigen Eigentümer-Sperr-Token entsperrt werden",
     "File can only be unlocked by the owner of the lock" : "Datei kann nur vom Besitzer der Sperre entsperrt werden",
     "Temporary files lock" : "Dateien temporär sperren",
