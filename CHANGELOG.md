@@ -1,5 +1,11 @@
 # Changelog
 
+## 27.0.4
+
+### Added
+
+- feat: Add API parameters to specify the lock type @backportbot[bot] [#220](https://github.com/nextcloud/files_lock/pull/220)
+
 ## 27.0.3
 
 ### Fixed
