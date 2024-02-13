@@ -4,10 +4,10 @@ tr[data-locked='true'] .fileactions .action.action-menu.permanent {
 }
 .locking-inline-state.icon-password {
 	padding: 17px 23px;
-	margin-right: -45px;
-	top: -5px;
+	right: -1px;
+	top: 0px;
 	width: 44px;
-	position: relative;
+	position: absolute;
 	opacity: 0.5;
 }
 
