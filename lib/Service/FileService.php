@@ -130,7 +130,7 @@ class FileService {
 	 * @throws NoUserException
 	 */
 	public function getFileFromAbsoluteUri(string $uri): Node {
-		list($root, $userId, $path) = explode('/', trim($uri, '/') . '/', 3);
+		[$root, $userId, $path] = explode('/', trim($uri, '/') . '/', 3);
 		if ($root !== 'files') {
 			throw new NotFoundException();
 		}
