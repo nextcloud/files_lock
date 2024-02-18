@@ -1,6 +1,8 @@
 OC.L10N.register(
     "files_lock",
     {
+    "File is currently locked by %s" : "Dosya şu anda %s tarafından kilitlenmiş",
+    "File is not locked" : "Dosya kilitli değil",
     "File can only be unlocked by providing a valid owner lock token" : "Dosyanın kilidini yalnızca geçerli bir sahip kilidi kodu ile açabilir",
     "File can only be unlocked by the owner of the lock" : "Dosyanın kilidini yalnızca kilitleyen kişi açabilir",
     "Temporary files lock" : "Geçici dosya kilidi",
