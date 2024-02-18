@@ -4,7 +4,7 @@
     "File can only be unlocked by providing a valid owner lock token" : "Filen kan endast låsas upp genom att tillhandahålla en giltig token för ägarlåset.",
     "File can only be unlocked by the owner of the lock" : "Fil kan endast låsas upp av låsets ägare",
     "Temporary files lock" : "Tillfällig låsning av filer",
-    "Temporary lock your files" : "Tillfälligt låsa dina filer",
+    "Temporary lock your files" : "Lås dina filer för tillfället",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Låt dina användare tillfälligt låsa sina filer för att undvika konflikter när de arbetar med delade filer.",
     "Locked by {user}" : "Låst av {user}",
     "Locked by {app}" : "Låst av {app}",
