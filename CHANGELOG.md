@@ -1,5 +1,17 @@
 # Changelog
 
+## 29.0.0-beta.1
+
+### Added
+
+- Compatibility with Nextcloud 29
+- feat: Add API parameters to specify the lock type @juliushaertl [#199](https://github.com/nextcloud/files_lock/pull/199)
+- feat: translate controller status messages @skjnldsv [#231](https://github.com/nextcloud/files_lock/pull/231)
+
+### Other
+
+- chore: upgrade phpunit workflows @skjnldsv [#232](https://github.com/nextcloud/files_lock/pull/232)
+
 ## 28.0.1
 
 ### Fixed
