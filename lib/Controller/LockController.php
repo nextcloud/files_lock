@@ -150,7 +150,7 @@ class LockController extends OCSController {
 		if ($data->getStatus() === Http::STATUS_LOCKED) {
 			/** @var FileLock $lock */
 			$lock = $data->getData();
-			$message = $this->l10n->t('File is currently locked by %s', [$lock->getOwner()]);
+			$message = $this->l10n->t('File is currently locked by %s', [$lock->getDisplayName()]);
 		}
 		if ($data->getStatus() === Http::STATUS_PRECONDITION_FAILED) {
 			/** @var FileLock $lock */
