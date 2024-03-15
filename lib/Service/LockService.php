@@ -231,7 +231,7 @@ class LockService {
 		$isSameType = $request->getType() === $current->getType();
 
 		// Check the token for token based locks
-		if ($request->getType() === ILock::TYPE_TOKEN) {
+		if ($current->getType() === ILock::TYPE_TOKEN) {
 			if ($isSameToken || ($this->allowUserOverride && $isSameUser)) {
 				return;
 			}
