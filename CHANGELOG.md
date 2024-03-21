@@ -1,5 +1,13 @@
 # Changelog
 
+## 29.0.0-beta.2
+
+### Fixed
+
+- fix: Use lock owner display name on error response @juliushaertl [#251](https://github.com/nextcloud/files_lock/pull/251)
+- Return proper lock type in webdav response @juliushaertl [#253](https://github.com/nextcloud/files_lock/pull/253)
+- fix: Allow to unlock based on the current lock not the requested one to allow lock owners to unlock in any case @juliushaertl [#252](https://github.com/nextcloud/files_lock/pull/252)
+
 ## 29.0.0-beta.1
 
 ### Added
