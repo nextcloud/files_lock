@@ -1,5 +1,17 @@
 # Changelog
 
+## 28.0.3
+
+### Added
+
+- feat: translate controller status messages @backportbot[bot] [#267](https://github.com/nextcloud/files_lock/pull/267)
+
+### Fixed
+
+- fix: Allow to unlock based on the current lock not the requested one to allow lock owners to unlock in any case @backportbot[bot] [#255](https://github.com/nextcloud/files_lock/pull/255)
+- fix: Use lock owner display name on error response @backportbot[bot] [#269](https://github.com/nextcloud/files_lock/pull/269)
+- Return proper lock type in webdav response @backportbot[bot] [#266](https://github.com/nextcloud/files_lock/pull/266)
+
 ## 28.0.2
 
 ### Added
