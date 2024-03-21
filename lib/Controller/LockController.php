@@ -45,6 +45,7 @@ use OCP\AppFramework\OCSController;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
+use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserSession;
 
@@ -55,19 +56,24 @@ use OCP\IUserSession;
  */
 class LockController extends OCSController {
 	use TLogger;
-
 	private IUserSession $userSession;
 	private FileService $fileService;
 	private LockService $lockService;
+	private IL10N $l10n;
 	private int $ocsVersion;
 
 	public function __construct(
-		IRequest $request, IUserSession $userSession, FileService $fileService, LockService $lockService
+		IRequest $request,
+		IUserSession $userSession,
+		FileService $fileService,
+		LockService $lockService,
+		IL10N $l10n
 	) {
 		parent::__construct(Application::APP_ID, $request);
 		$this->userSession = $userSession;
 		$this->fileService = $fileService;
 		$this->lockService = $lockService;
+		$this->l10n = $l10n;
 
 		// We need to overload some implementation from the OCSController here
 		// to be able to push a custom message and data when returning other
@@ -147,12 +153,12 @@ class LockController extends OCSController {
 		if ($data->getStatus() === Http::STATUS_LOCKED) {
 			/** @var FileLock $lock */
 			$lock = $data->getData();
-			$message = 'File is currently locked by ' . $lock->getOwner();
+			$message = $this->l10n->t('File is currently locked by %s', [$lock->getOwner()]);
 		}
 		if ($data->getStatus() === Http::STATUS_PRECONDITION_FAILED) {
 			/** @var FileLock $lock */
 			$lock = $data->getData();
-			$message = 'File is not locked';
+			$message = $this->l10n->t('File is not locked');
 		}
 
 		$containedData = $data->getData();
