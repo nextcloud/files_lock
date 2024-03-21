@@ -157,9 +157,7 @@ class LockPlugin extends SabreLockPlugin {
 				return null;
 			}
 
-			$type = $lock->getType();
-
-			return $type !== ILock::TYPE_TOKEN ? $type : ILock::TYPE_USER;
+			return $lock->getType();
 		});
 
 		$propFind->handle(Application::DAV_PROPERTY_LOCK_EDITOR, function () use ($nodeId) {
