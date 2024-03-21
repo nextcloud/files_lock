@@ -1,5 +1,21 @@
 # Changelog
 
+## 27.0.5
+
+### Added
+
+- feat: translate controller status messages @backportbot[bot] [#268](https://github.com/nextcloud/files_lock/pull/268)
+
+### Fixed
+
+- fix: Use lock owner display name on error response @backportbot[bot] [#270](https://github.com/nextcloud/files_lock/pull/270)
+- Return proper lock type in webdav response @backportbot[bot] [#265](https://github.com/nextcloud/files_lock/pull/265)
+- fix: Allow to unlock based on the current lock not the requested one to allow lock owners to unlock in any case @backportbot[bot] [#254](https://github.com/nextcloud/files_lock/pull/254)
+
+### Other
+
+- Fix lock state icon position in detailed files' lists @Jerome-Herbinet [#176](https://github.com/nextcloud/files_lock/pull/176)
+
 ## 27.0.4
 
 ### Added
