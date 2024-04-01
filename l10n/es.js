@@ -1,6 +1,8 @@
 OC.L10N.register(
     "files_lock",
     {
+    "File is currently locked by %s" : "El archivo está actualmente bloqueado por %s",
+    "File is not locked" : "El archivo no está bloqueado",
     "File can only be unlocked by providing a valid owner lock token" : "El archivo solo se puede desbloquear proporcionando un token de bloqueo de propietario válido",
     "File can only be unlocked by the owner of the lock" : "El archivo solo puede ser desbloqueado por el propietario del bloqueo",
     "Temporary files lock" : "Bloqueo temporal de archivos",
