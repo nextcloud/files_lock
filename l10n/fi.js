@@ -1,6 +1,8 @@
 OC.L10N.register(
     "files_lock",
     {
+    "File is currently locked by %s" : "Tiedoston on tällä hetkellä lukinnut %s",
+    "File is not locked" : "Tiedosto ei ole lukittu",
     "File can only be unlocked by providing a valid owner lock token" : "Tiedoston lukituksen avaaminen onnistuu vain antamalla kelvollisen omistajan lukkopoletin",
     "File can only be unlocked by the owner of the lock" : "Tiedoston lukituksen voi poistaa vain lukituksen omistaja",
     "Temporary files lock" : "Väliaikainen tiedostojen lukitus",
