@@ -333,24 +333,13 @@ class LockService {
 	public function injectMetadata(FileLock $lock): FileLock {
 		$displayName = null;
 		if ($lock->getType() === ILock::TYPE_USER) {
-			if (!method_exists($this->userManager, 'getDisplayName')) {
-				// TODO: Remove once 25 is the minimum supported version
-				$displayName = $this->userManager->get($lock->getOwner())->getDisplayName();
-			} else {
-				$displayName = $this->userManager->getDisplayName($lock->getOwner());
-			}
+			$displayName = $this->userManager->getDisplayName($lock->getOwner());
 		}
 		if ($lock->getType() === ILock::TYPE_APP) {
 			$displayName = $this->getAppName($lock->getOwner()) ?? null;
 		}
 		if ($lock->getType() === ILock::TYPE_TOKEN) {
-			if (!method_exists($this->userManager, 'getDisplayName')) {
-				// TODO: Remove once 25 is the minimum supported version
-				$user = $this->userManager->get($lock->getOwner());
-				$displayName = $user ? $user->getDisplayName(): $lock->getDisplayName();
-			} else {
-				$displayName = $this->userManager->getDisplayName($lock->getOwner()) ?? $lock->getDisplayName();
-			}
+			$displayName = $this->userManager->getDisplayName($lock->getOwner()) ?? $lock->getDisplayName();
 		}
 
 		if ($displayName) {
