@@ -44,7 +44,6 @@ use OCA\FilesLock\Tools\Traits\TArrayTools;
 use OCP\DB\QueryBuilder\ICompositeExpression;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
-use OCP\ILogger;
 use Psr\Log\LoggerInterface;
 
 class ExtendedQueryBuilder extends QueryBuilder {
@@ -59,19 +58,11 @@ class ExtendedQueryBuilder extends QueryBuilder {
 	 * ExtendedQueryBuilder constructor.
 	 */
 	public function __construct() {
-		if (\OCP\Util::getVersion()[0] >= 24) {
-			parent::__construct(
-				OC::$server->get(IDBConnection::class),
-				OC::$server->get(SystemConfig::class),
-				OC::$server->get(LoggerInterface::class)
-			);
-		} else {
-			parent::__construct(
-				OC::$server->get(IDBConnection::class),
-				OC::$server->get(SystemConfig::class),
-				OC::$server->get(ILogger::class)
-			);
-		}
+		parent::__construct(
+			OC::$server->get(IDBConnection::class),
+			OC::$server->get(SystemConfig::class),
+			OC::$server->get(LoggerInterface::class)
+		);
 	}
 
 
