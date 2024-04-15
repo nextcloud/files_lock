@@ -169,7 +169,7 @@ class LockService {
 				$known->getType() === $lockScope->getType() && ($known->getOwner() === $lockScope->getOwner() || $known->getToken() === $lockScope->getOwner())
 			) {
 				$known->setTimeout(
-					$known->getTimeout() - $known->getETA() + $this->configService->getTimeoutSeconds()
+					$known->getETA() !== FileLock::ETA_INFINITE ? $known->getTimeout() - $known->getETA() + $this->configService->getTimeoutSeconds() : 0
 				);
 				$this->notice('extending existing lock', false, ['fileLock' => $known]);
 				$this->locksRequest->update($known);
