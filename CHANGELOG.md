@@ -1,5 +1,12 @@
 # Changelog
 
+## 27.0.6
+
+### Fixed
+
+- fix: Only update lock timeout when it is not infinite @backportbot[bot] [#291](https://github.com/nextcloud/files_lock/pull/291)
+- fix/error display name @backportbot[bot] [#279](https://github.com/nextcloud/files_lock/pull/279)
+
 ## 27.0.5
 
 ### Added
