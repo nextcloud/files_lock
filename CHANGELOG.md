@@ -1,5 +1,25 @@
 # Changelog
 
+## 29.0.0
+
+### Added
+
+- feat: Add API parameters to specify the lock type @juliushaertl [#199](https://github.com/nextcloud/files_lock/pull/199)
+- feat: translate controller status messages @skjnldsv [#231](https://github.com/nextcloud/files_lock/pull/231)
+
+### Fixed
+
+- fix: Use lock owner display name on error response @juliushaertl [#251](https://github.com/nextcloud/files_lock/pull/251)
+- fix: Allow to unlock based on the current lock not the requested one to allow lock owners to unlock in any case @juliushaertl [#252](https://github.com/nextcloud/files_lock/pull/252)
+- Return proper lock type in webdav response @juliushaertl [#253](https://github.com/nextcloud/files_lock/pull/253)
+- fix/error display name @juliushaertl [#278](https://github.com/nextcloud/files_lock/pull/278)
+- fix: Only update lock timeout when it is not infinite @juliushaertl [#288](https://github.com/nextcloud/files_lock/pull/288)
+
+### Other
+
+- chore: upgrade phpunit workflows @skjnldsv [#232](https://github.com/nextcloud/files_lock/pull/232)
+- ci(litmus): Bump php version to 8.1 @juliushaertl [#289](https://github.com/nextcloud/files_lock/pull/289)
+
 ## 29.0.0-beta.2
 
 ### Fixed
