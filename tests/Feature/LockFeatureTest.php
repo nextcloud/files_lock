@@ -30,6 +30,7 @@ use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\ILockManager;
 use OCP\Files\Lock\LockContext;
 use OCP\Lock\ManuallyLockedException;
+use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
 use Test\TestCase;
 use Test\Util\User\Dummy;
@@ -43,6 +44,8 @@ class LockFeatureTest extends TestCase {
 
 	private LockManager $lockManager;
 	private IRootFolder $rootFolder;
+	private ITimeFactory $timeFactory;
+	private IShareManager $shareManager;
 	private ?int $time = null;
 
 	public static function setUpBeforeClass(): void {
