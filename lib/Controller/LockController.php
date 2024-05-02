@@ -67,10 +67,6 @@ class LockController extends OCSController {
 		private IL10N $l10n,
 	) {
 		parent::__construct(Application::APP_ID, $request);
-		$this->userSession = $userSession;
-		$this->fileService = $fileService;
-		$this->lockService = $lockService;
-		$this->l10n = $l10n;
 
 		// We need to overload some implementation from the OCSController here
 		// to be able to push a custom message and data when returning other
