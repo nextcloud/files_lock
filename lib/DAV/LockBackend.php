@@ -39,27 +39,14 @@ use OCP\Files\Node;
 use OCP\Files\NotFoundException;
 use Sabre\DAV\Locks\Backend\BackendInterface;
 use Sabre\DAV\Locks\LockInfo;
-use Sabre\DAV\Server;
 
 class LockBackend implements BackendInterface {
-	/** @var FileService */
-	private $fileService;
-
-	/** @var LockService */
-	private $lockService;
-
-	/** @var bool */
-	private $absolute = false;
-
 	public function __construct(
-		Server $server, FileService $fileService, LockService $lockService, bool $absolute
+		private FileService $fileService,
+		private LockService $lockService,
+		private bool $absolute
 	) {
-		$this->server = $server;
-		$this->fileService = $fileService;
-		$this->lockService = $lockService;
-		$this->absolute = $absolute;
 	}
-
 
 	/**
 	 * @param string $uri

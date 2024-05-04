@@ -58,7 +58,7 @@ class LockPlugin extends SabreLockPlugin {
 				$absolute = true;
 				break;
 		}
-		$this->locksBackend = new LockBackend($server, $this->fileService, $this->lockService, $absolute);
+		$this->locksBackend = new LockBackend($this->fileService, $this->lockService, $absolute);
 		$server->on('propFind', [$this, 'customProperties']);
 		parent::initialize($server);
 	}
