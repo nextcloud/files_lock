@@ -85,7 +85,7 @@ const inlineAction = new FileAction({
 		const node = nodes[0]
 		const state = getLockStateFromAttributes(node)
 
-		return (node.permissions & Permission.UPDATE) !== 0 && state.isLocked
+		return state.isLocked
 	},
 })
 
@@ -115,8 +115,10 @@ const menuAction = new FileAction({
 		}
 
 		const canToggleLock = canLock(nodes[0]) || canUnlock(nodes[0])
+		const isLocked = getLockStateFromAttributes(nodes[0]).isLocked
+		const isUpdatable = (nodes[0].permissions & Permission.UPDATE) !== 0
 
-		return nodes[0].type === FileType.File && canToggleLock && (nodes[0].permissions & Permission.UPDATE) !== 0
+		return nodes[0].type === FileType.File && canToggleLock && (isUpdatable || isLocked)
 	},
 
 	async exec(node: Node) {
