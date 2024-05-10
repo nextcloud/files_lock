@@ -1,5 +1,11 @@
 # Changelog
 
+## 27.0.7
+
+### Fixed
+
+- fix: Show lock status for read only files and allow unlocking @juliushaertl [#307](https://github.com/nextcloud/files_lock/pull/307)
+
 ## 27.0.6
 
 ### Fixed
