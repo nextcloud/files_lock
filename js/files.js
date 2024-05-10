@@ -107,7 +107,7 @@
 						return OC.generateUrl(`/avatar/${lockOwner}/32`)
 					}
 				},
-				permissions: OC.PERMISSION_UPDATE,
+				permissions: OC.PERMISSION_READ,
 				actionHandler: function () {}
 			})
 
@@ -127,7 +127,7 @@
 				mime: 'file',
 				order: -140,
 				type: OCA.Files.FileActions.TYPE_INLINE,
-				permissions: OC.PERMISSION_UPDATE,
+				permissions: OC.PERMISSION_READ,
 				actionHandler: self.switchLock
 			})
 		},
