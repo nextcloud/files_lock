@@ -1,5 +1,17 @@
 # Changelog
 
+## 29.0.1
+
+### Fixed
+
+- fix/error display name @juliushaertl [#278](https://github.com/nextcloud/files_lock/pull/278)
+- fix: Show lock status for read only files and allow unlocking @backportbot[bot] [#309](https://github.com/nextcloud/files_lock/pull/309)
+- fix: Only update lock timeout when it is not infinite @juliushaertl [#288](https://github.com/nextcloud/files_lock/pull/288)
+
+### Other
+
+- ci(litmus): Bump php version to 8.1 @juliushaertl [#289](https://github.com/nextcloud/files_lock/pull/289)
+
 ## 29.0.0
 
 ### Added
