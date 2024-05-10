@@ -1,5 +1,11 @@
 # Changelog
 
+## 28.0.5
+
+### Fixed
+
+- fix: Show lock status for read only files and allow unlocking @backportbot[bot] [#308](https://github.com/nextcloud/files_lock/pull/308)
+
 ## 28.0.4
 
 ### Fixed
