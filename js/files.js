@@ -83,7 +83,7 @@
 				mime: 'file',
 				order: -139,
 				iconClass: 'icon-password',
-				permissions: OC.PERMISSION_UPDATE,
+				permissions: OC.PERMISSION_READ,
 				actionHandler: self.switchLock
 			})
 			fileList.fileActions.registerAction({
