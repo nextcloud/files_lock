@@ -31,7 +31,6 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\AppInfo;
 
-use Closure;
 use OC\Files\Filesystem;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\FilesLock\Capability;
@@ -45,19 +44,12 @@ use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\Files\Lock\ILockManager;
-use OCP\IServerContainer;
 use OCP\IUserSession;
+use OCP\Server;
 use OCP\Util;
-use Throwable;
 
-/**
- * Class Application
- *
- * @package OCA\FilesLock\AppInfo
- */
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'files_lock';
-
 
 	public const DAV_PROPERTY_LOCK = '{http://nextcloud.org/ns}lock';
 	public const DAV_PROPERTY_LOCK_OWNER_TYPE = '{http://nextcloud.org/ns}lock-owner-type';
@@ -68,30 +60,10 @@ class Application extends App implements IBootstrap {
 	public const DAV_PROPERTY_LOCK_TIMEOUT = '{http://nextcloud.org/ns}lock-timeout';
 	public const DAV_PROPERTY_LOCK_TOKEN = '{http://nextcloud.org/ns}lock-token';
 
-
-	/** @var IUserSession */
-	private $userSession;
-
-	/** @var FileService */
-	private $fileService;
-
-	/** @var LockService */
-	private $lockService;
-
-	private ILockManager $lockManager;
-
-
-	/**
-	 * @param array $params
-	 */
 	public function __construct(array $params = []) {
 		parent::__construct(self::APP_ID, $params);
 	}
 
-
-	/**
-	 * @param IRegistrationContext $context
-	 */
 	public function register(IRegistrationContext $context): void {
 		$context->registerCapability(Capability::class);
 		$context->registerEventListener(
@@ -100,46 +72,29 @@ class Application extends App implements IBootstrap {
 		);
 	}
 
-
-	/**
-	 * @param IBootContext $context
-	 *
-	 * @throws Throwable
-	 */
 	public function boot(IBootContext $context): void {
-		$context->injectFn(Closure::fromCallable([$this, 'registerHooks']));
+		$this->registerHooks();
 
 		$context->injectFn(function (ILockManager $lockManager) use ($context) {
-			$lockManager->registerLockProvider($context->getAppContainer()->get(LockProvider::class));
+			$lockManager->registerLazyLockProvider(LockProvider::class);
 		});
 	}
 
-
-	/**
-	 * @param IServerContainer $container
-	 */
-	public function registerHooks(IServerContainer $container) {
-		$this->userSession = $container->get(IUserSession::class);
-		$this->fileService = $container->get(FileService::class);
-		$this->lockService = $container->get(LockService::class);
-		$this->lockManager = $container->get(ILockManager::class);
-
+	public function registerHooks(): void {
 		Util::connectHook('OC_Filesystem', 'preSetup', $this, 'addStorageWrapper');
 	}
 
-	/**
-	 * @internal
-	 */
-	public function addStorageWrapper() {
+	/** @internal */
+	public function addStorageWrapper(): void {
 		Filesystem::addStorageWrapper(
 			'files_lock', function ($mountPoint, $storage) {
 				return new LockWrapper(
 					[
 						'storage' => $storage,
-						'lock_manager' => $this->lockManager,
-						'user_session' => $this->userSession,
-						'file_service' => $this->fileService,
-						'lock_service' => $this->lockService
+						'lock_manager' => Server::get(ILockManager::class),
+						'user_session' => Server::get(IUserSession::class),
+						'file_service' => Server::get(FileService::class),
+						'lock_service' => Server::get(LockService::class)
 					]
 				);
 			}, 10

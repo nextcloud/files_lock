@@ -183,12 +183,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/nextcloud-deps/ocp.git",
-                "reference": "9af4248bbeff8ff43d45195d68530fd2674b12c8"
+                "reference": "dab486b51ddb24e713d6eab3abb18bd2fc9bcc18"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nextcloud-deps/ocp/zipball/9af4248bbeff8ff43d45195d68530fd2674b12c8",
-                "reference": "9af4248bbeff8ff43d45195d68530fd2674b12c8",
+                "url": "https://api.github.com/repos/nextcloud-deps/ocp/zipball/dab486b51ddb24e713d6eab3abb18bd2fc9bcc18",
+                "reference": "dab486b51ddb24e713d6eab3abb18bd2fc9bcc18",
                 "shasum": ""
             },
             "require": {
@@ -220,7 +220,7 @@
                 "issues": "https://github.com/nextcloud-deps/ocp/issues",
                 "source": "https://github.com/nextcloud-deps/ocp/tree/master"
             },
-            "time": "2024-05-12T00:37:28+00:00"
+            "time": "2024-05-13T12:22:19+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -400,16 +400,16 @@
         },
         {
             "name": "php-cs-fixer/shim",
-            "version": "v3.49.0",
+            "version": "v3.56.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHP-CS-Fixer/shim.git",
-                "reference": "f7d3219cac46632f12362c9aa7c2ac0d2fe92c52"
+                "reference": "98c0b531f2e7a43a4da2449498398f484b29df50"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHP-CS-Fixer/shim/zipball/f7d3219cac46632f12362c9aa7c2ac0d2fe92c52",
-                "reference": "f7d3219cac46632f12362c9aa7c2ac0d2fe92c52",
+                "url": "https://api.github.com/repos/PHP-CS-Fixer/shim/zipball/98c0b531f2e7a43a4da2449498398f484b29df50",
+                "reference": "98c0b531f2e7a43a4da2449498398f484b29df50",
                 "shasum": ""
             },
             "require": {
@@ -446,9 +446,9 @@
             "description": "A tool to automatically fix PHP code style",
             "support": {
                 "issues": "https://github.com/PHP-CS-Fixer/shim/issues",
-                "source": "https://github.com/PHP-CS-Fixer/shim/tree/v3.49.0"
+                "source": "https://github.com/PHP-CS-Fixer/shim/tree/v3.56.1"
             },
-            "time": "2024-02-02T00:42:09+00:00"
+            "time": "2024-05-10T11:31:44+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -1486,16 +1486,16 @@
         },
         {
             "name": "sabre/xml",
-            "version": "2.2.6",
+            "version": "2.2.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sabre-io/xml.git",
-                "reference": "9cde7cdab1e50893cc83b037b40cd47bfde42a2b"
+                "reference": "f1d53d55976bbd4cf3e640dda6ebc31120c71a4e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sabre-io/xml/zipball/9cde7cdab1e50893cc83b037b40cd47bfde42a2b",
-                "reference": "9cde7cdab1e50893cc83b037b40cd47bfde42a2b",
+                "url": "https://api.github.com/repos/sabre-io/xml/zipball/f1d53d55976bbd4cf3e640dda6ebc31120c71a4e",
+                "reference": "f1d53d55976bbd4cf3e640dda6ebc31120c71a4e",
                 "shasum": ""
             },
             "require": {
@@ -1551,7 +1551,7 @@
                 "issues": "https://github.com/sabre-io/xml/issues",
                 "source": "https://github.com/fruux/sabre-xml"
             },
-            "time": "2023-06-28T12:56:05+00:00"
+            "time": "2024-04-18T10:15:43+00:00"
         },
         {
             "name": "sebastian/cli-parser",
