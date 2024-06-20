@@ -1,6 +1,6 @@
 {
   "name": "files_lock",
-  "version": "28.0.5",
+  "version": "28.0.6",
   "license": "AGPL-3.0-or-later",
   "private": true,
   "type": "module",
