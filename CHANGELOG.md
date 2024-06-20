@@ -1,5 +1,11 @@
 # Changelog
 
+## 28.0.6
+
+### Changed
+
+- Upgrade dependencies
+
 ## 28.0.5
 
 ### Fixed
