@@ -18,7 +18,3 @@ License: AGPL-3.0-or-later
 Files: tests/phpunit.xml tests/psalm-baseline.xml tests/stub.phpstub tests/litmus/0001-Comment-out-collection-locking-tests.patch
 Copyright: 2022 Nextcloud GmbH and Nextcloud contributors
 License: AGPL-3.0-or-later
-
-Files: img/app.svg img/app-dark.svg
-Copyright: 2018-2024 Google LLC
-License: Apache-2.0
