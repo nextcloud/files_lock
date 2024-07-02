@@ -1,12 +1,15 @@
+<!--
+  - SPDX-FileCopyrightText: 2019 Nextcloud GmbH and Nextcloud contributors
+  - SPDX-License-Identifier: AGPL-3.0-or-later
+-->
 # Temporary files lock
+
+[![REUSE status](https://api.reuse.software/badge/github.com/nextcloud/files_lock)](https://api.reuse.software/info/github.com/nextcloud/files_lock)
 
 ![](screenshots/0.7.0.png)
 
 **Files Lock** allows your users to temporary lock a file to avoid other users' edits.  
 By default, files locked using this app will be locked indefinitely.
-
-
-
 
 ### Settings
 
