@@ -4,6 +4,19 @@
 -->
 # Changelog
 
+## 30.0.0
+
+### Fixed
+
+- fix: Show lock status for read only files and allow unlocking @juliushaertl [#306](https://github.com/nextcloud/files_lock/pull/306)
+
+### Other
+
+- refactor: remove unnecessary assignment @kesselb [#301](https://github.com/nextcloud/files_lock/pull/301)
+- Fix some deprecation warnings @kesselb [#302](https://github.com/nextcloud/files_lock/pull/302)
+- perf(boot): Initialize storage wrapper and lock manager more lazy @juliushaertl [#297](https://github.com/nextcloud/files_lock/pull/297)
+- Add SPDX header @AndyScherzinger [#326](https://github.com/nextcloud/files_lock/pull/326)
+
 ## 29.0.0
 
 ### Added
