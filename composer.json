@@ -5,7 +5,7 @@
         "nextcloud/coding-standard": "^1.0",
         "psalm/phar": "^5.2",
         "sabre/dav": "^4.3",
-        "nextcloud/ocp": "dev-master"
+        "nextcloud/ocp": "dev-stable29"
     },
 	"config": {
 		"platform": {
