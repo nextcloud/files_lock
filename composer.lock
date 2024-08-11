@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c9396dd8b5881d43d8d5e2fe265842f1",
+    "content-hash": "4793cea19a2af3c211eb6909741384c1",
     "packages": [],
     "packages-dev": [
         {
@@ -179,16 +179,16 @@
         },
         {
             "name": "nextcloud/ocp",
-            "version": "dev-master",
+            "version": "dev-stable29",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nextcloud-deps/ocp.git",
-                "reference": "36edf19f7eb41155c1168e6993ad8760ab18a1df"
+                "reference": "53059f1bbcdd624fa1783591da5575faa4284d15"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nextcloud-deps/ocp/zipball/36edf19f7eb41155c1168e6993ad8760ab18a1df",
-                "reference": "36edf19f7eb41155c1168e6993ad8760ab18a1df",
+                "url": "https://api.github.com/repos/nextcloud-deps/ocp/zipball/53059f1bbcdd624fa1783591da5575faa4284d15",
+                "reference": "53059f1bbcdd624fa1783591da5575faa4284d15",
                 "shasum": ""
             },
             "require": {
@@ -198,11 +198,10 @@
                 "psr/event-dispatcher": "^1.0",
                 "psr/log": "^1.1.4"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "30.0.0-dev"
+                    "dev-stable29": "29.0.0-dev"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -218,9 +217,9 @@
             "description": "Composer package containing Nextcloud's public API (classes, interfaces)",
             "support": {
                 "issues": "https://github.com/nextcloud-deps/ocp/issues",
-                "source": "https://github.com/nextcloud-deps/ocp/tree/master"
+                "source": "https://github.com/nextcloud-deps/ocp/tree/stable29"
             },
-            "time": "2024-04-10T00:32:39+00:00"
+            "time": "2024-08-09T00:38:21+00:00"
         },
         {
             "name": "nikic/php-parser",
