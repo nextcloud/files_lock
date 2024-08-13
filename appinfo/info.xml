@@ -32,6 +32,10 @@ Allow your users to temporary lock their files to avoid conflicts while working 
 	<repository>https://github.com/nextcloud/files_lock.git</repository>
 	<screenshot>https://raw.githubusercontent.com/nextcloud/files_lock/main/screenshots/0.7.0.png</screenshot>
 
+	<dependencies>
+		<nextcloud min-version="30" max-version="30"/>
+	</dependencies>
+
 	<background-jobs>
 		<job>OCA\FilesLock\Cron\Unlock</job>
 	</background-jobs>
@@ -45,8 +49,4 @@ Allow your users to temporary lock their files to avoid conflicts while working 
 			<plugin>OCA\FilesLock\DAV\LockPlugin</plugin>
 		</plugins>
 	</sabre>
-
-	<dependencies>
-		<nextcloud min-version="30" max-version="30"/>
-	</dependencies>
 </info>
