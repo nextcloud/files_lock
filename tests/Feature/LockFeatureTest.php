@@ -315,6 +315,64 @@ class LockFeatureTest extends TestCase {
 		});
 	}
 
+	/**
+	 * Ensure that a lock can be extended and the same lock is kept
+	 */
+	public function testExtendLock() {
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, 15);
+
+		// Create a file and lock it
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('test-file', 'AAA');
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+		$locks = $this->lockManager->getLocks($file->getId());
+
+		// We should have one lock for that file with 15 minutes ETA
+		$this->assertCount(1, $locks);
+		$this->assertEquals(15 * 60, $locks[0]->getEta());
+
+		// going to the future we see the ETA to be 5 minutes
+		$this->toTheFuture(10 * 60);
+		$locks = $this->lockManager->getLocks($file->getId());
+		$this->assertCount(1, $locks);
+		$this->assertEquals(5 * 60, $locks[0]->getEta());
+		$id = $locks[0]->getId();
+
+		// Extend the lock (lock again)
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+
+		// The lock should only be extended, so same ID but fresh ETA
+		$locks = $this->lockManager->getLocks($file->getId());
+		$this->assertCount(1, $locks);
+		$this->assertEquals(15 * 60, $locks[0]->getEta());
+		$this->assertEquals($id, $locks[0]->getId());
+	}
+
+	/**
+	 * Regression test for https://github.com/nextcloud/files_lock/issues/130
+	 */
+	public function testExtendInfiniteLock() {
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, '0');
+
+		// Create a file and lock it
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('test-file', 'AAA');
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+		$locks = $this->lockManager->getLocks($file->getId());
+
+		// We should have one lock for that file with infinite ETA
+		$this->assertCount(1, $locks);
+		$this->assertEquals(FileLock::ETA_INFINITE, $locks[0]->getEta());
+		$id = $locks[0]->getId();
+
+		// Extend the lock (lock again)
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+
+		// The lock should only be extended, and keep the infinite ETA
+		$locks = $this->lockManager->getLocks($file->getId());
+		$this->assertCount(1, $locks);
+		$this->assertEquals(FileLock::ETA_INFINITE, $locks[0]->getEta());
+		$this->assertEquals($id, $locks[0]->getId());
+	}
+
 	private function loginAndGetUserFolder(string $userId) {
 		$this->loginAsUser($userId);
 		return $this->rootFolder->getUserFolder($userId);
