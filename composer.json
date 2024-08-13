@@ -1,28 +1,28 @@
 {
-		"name": "nextcloud/files_lock",
-		"require-dev": {
-				"phpunit/phpunit": "^9.5",
-				"nextcloud/coding-standard": "^1.2",
-				"psalm/phar": "^5.25",
-				"sabre/dav": "^4.6",
-				"nextcloud/ocp": "dev-master"
-		},
+	"name": "nextcloud/files_lock",
+	"license": "AGPL",
+	"require-dev": {
+		"phpunit/phpunit": "^9.5",
+		"nextcloud/coding-standard": "^1.2",
+		"psalm/phar": "^5.25",
+		"sabre/dav": "^4.6",
+		"nextcloud/ocp": "dev-master"
+	},
 	"config": {
 		"platform": {
 			"php": "8.1"
 		}
 	},
-		"license": "AGPL",
-		"require": {
-			"php": "^8.1"
-		},
-		"scripts": {
-			"lint": "find . -name \\*.php -not -path './vendor/*' -print0 | xargs -0 -n1 php -l",
-			"cs:check": "php-cs-fixer fix --dry-run --diff",
-			"cs:fix": "php-cs-fixer fix",
-			"psalm": "psalm.phar",
-			"test:unit": "phpunit -c tests/phpunit.xml"
-		},
+	"require": {
+		"php": "^8.1"
+	},
+	"scripts": {
+		"lint": "find . -name \\*.php -not -path './vendor/*' -print0 | xargs -0 -n1 php -l",
+		"cs:check": "php-cs-fixer fix --dry-run --diff",
+		"cs:fix": "php-cs-fixer fix",
+		"psalm": "psalm.phar",
+		"test:unit": "phpunit -c tests/phpunit.xml"
+	},
 	"autoload-dev": {
 		"psr-4": {
 			"OCP\\": "vendor/nextcloud/ocp/OCP"
