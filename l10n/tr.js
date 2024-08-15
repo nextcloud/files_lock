@@ -11,7 +11,6 @@ OC.L10N.register(
     "Locked by {user}" : "{user} tarafından kilitlenmiş",
     "Locked by {app}" : "{app} tarafından kilitlenmiş",
     "Unlock file" : "Dosya kilidini aç",
-    "Lock file" : "Dosyayı kilitle",
-    "Locked by {0}" : "{0} tarafından kilitlenmiş"
+    "Lock file" : "Dosyayı kilitle"
 },
 "nplurals=2; plural=(n > 1);");

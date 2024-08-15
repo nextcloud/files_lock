@@ -11,7 +11,6 @@ OC.L10N.register(
     "Locked by {user}" : "Lukittu käyttäjän {user} toimesta",
     "Locked by {app}" : "Lukittu sovelluksen {app} toimesta",
     "Unlock file" : "Vapauta tiedoston lukitus",
-    "Lock file" : "Lukitse tiedosto",
-    "Locked by {0}" : "Lukituksen teki {0}"
+    "Lock file" : "Lukitse tiedosto"
 },
 "nplurals=2; plural=(n != 1);");

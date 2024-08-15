@@ -11,7 +11,6 @@ OC.L10N.register(
     "Locked by {user}" : "Låst av {user}",
     "Locked by {app}" : "Låst av {app}",
     "Unlock file" : "Lås opp fil",
-    "Lock file" : "Lås fil",
-    "Locked by {0}" : "Låst av {0}"
+    "Lock file" : "Lås fil"
 },
 "nplurals=2; plural=(n != 1);");

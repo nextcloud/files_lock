@@ -7,7 +7,6 @@ OC.L10N.register(
     "Temporary lock your files" : "Bloqueu temporalment els fitxers",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Permeteu als usuaris blocar temporalment els fitxers per a evitar conflictes en treballar en fitxers compartits.",
     "Unlock file" : "Desbloca el fitxer",
-    "Lock file" : "Bloca el fitxer",
-    "Locked by {0}" : "Blocat per {0}"
+    "Lock file" : "Bloca el fitxer"
 },
 "nplurals=2; plural=(n != 1);");
