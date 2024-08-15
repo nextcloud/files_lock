@@ -9,7 +9,6 @@ OC.L10N.register(
     "Locked by {user}" : "Blocat de {user}",
     "Locked by {app}" : "Blocat de {app}",
     "Unlock file" : "Deblochează fișierul",
-    "Lock file" : "Blochează fișierul",
-    "Locked by {0}" : "Blochat de {0}"
+    "Lock file" : "Blochează fișierul"
 },
 "nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));");

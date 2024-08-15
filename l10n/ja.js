@@ -11,7 +11,6 @@ OC.L10N.register(
     "Locked by {user}" : "{user} によってロックされました",
     "Locked by {app}" : "{app} によってロックされました",
     "Unlock file" : "ファイルのロックを解除",
-    "Lock file" : "ファイルをロック",
-    "Locked by {0}" : "{0}によってロックされました"
+    "Lock file" : "ファイルをロック"
 },
 "nplurals=1; plural=0;");

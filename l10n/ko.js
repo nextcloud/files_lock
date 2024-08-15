@@ -9,7 +9,6 @@ OC.L10N.register(
     "Locked by {user}" : "{user}이(가) 잠금",
     "Locked by {app}" : "{app}이(가) 잠금",
     "Unlock file" : "파일 잠금해제",
-    "Lock file" : "파일 잠금",
-    "Locked by {0}" : "[0]에 의해 잠김"
+    "Lock file" : "파일 잠금"
 },
 "nplurals=1; plural=0;");
