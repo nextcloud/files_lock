@@ -9,7 +9,6 @@
     "Locked by {user}" : "Bloqueado por {user}",
     "Locked by {app}" : "Bloqueado por {app}",
     "Unlock file" : "Destravar arquivo",
-    "Lock file" : "Travar arquivo",
-    "Locked by {0}" : "Travado por {0}"
+    "Lock file" : "Travar arquivo"
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }

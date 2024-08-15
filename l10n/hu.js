@@ -7,7 +7,6 @@ OC.L10N.register(
     "Temporary lock your files" : "Fájlok ideiglenes zárolása",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Lehetővé teszi a felhasználóinak, hogy ideiglenesen zárolják a fájljaikat, hogy elkerüljék az ütközéseket, ha megosztott fájlokon dolgoznak.",
     "Unlock file" : "Fájl feloldása",
-    "Lock file" : "Fájl zárolása",
-    "Locked by {0}" : "{0} zárolta"
+    "Lock file" : "Fájl zárolása"
 },
 "nplurals=2; plural=(n != 1);");

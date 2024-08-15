@@ -9,7 +9,6 @@
     "Locked by {user}" : "由 {user} 鎖上",
     "Locked by {app}" : "由 {app} 鎖上",
     "Unlock file" : "解鎖檔案",
-    "Lock file" : "上鎖檔案",
-    "Locked by {0}" : "由 {0} 上鎖"
+    "Lock file" : "上鎖檔案"
 },"pluralForm" :"nplurals=1; plural=0;"
 }
