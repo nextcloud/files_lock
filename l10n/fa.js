@@ -7,7 +7,6 @@ OC.L10N.register(
     "Temporary lock your files" : "موقتا پرونده‌هایتان را قفل کنید",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "به کاربران خود اجازه دهید پرونده‌ها خود را به طور موقت قفل کنند تا در حین کار بر روی پرونده‌ها به اشتراک گذاشته شده دچار تداخل نشوند.",
     "Unlock file" : "باز کردن قفل پرونده",
-    "Lock file" : "قفل کردن پرونده",
-    "Locked by {0}" : "قفل شده توسط {0}"
+    "Lock file" : "قفل کردن پرونده"
 },
 "nplurals=2; plural=(n > 1);");

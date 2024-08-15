@@ -11,7 +11,6 @@ OC.L10N.register(
     "Locked by {user}" : "Bloqueado por {user}",
     "Locked by {app}" : "Bloqueado por {app}",
     "Unlock file" : "Desbloquear ficheiro",
-    "Lock file" : "Bloquear ficheiro",
-    "Locked by {0}" : "Bloqueado por {0}"
+    "Lock file" : "Bloquear ficheiro"
 },
 "nplurals=2; plural=(n != 1);");
