@@ -6,15 +6,20 @@
 
 use OC\Files\Lock\LockManager;
 use OCA\FilesLock\AppInfo\Application;
+use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\ConfigService;
 use OCP\AppFramework\Utility\ITimeFactory;
+use OCP\Files\File;
 use OCP\Files\IRootFolder;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\ILockManager;
 use OCP\Files\Lock\LockContext;
+use OCP\IConfig;
+use OCP\IUserManager;
 use OCP\Lock\ManuallyLockedException;
 use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
+use PHPUnit\Framework\MockObject\MockObject;
 use Test\TestCase;
 use Test\Util\User\Dummy;
 
@@ -25,25 +30,25 @@ class LockFeatureTest extends TestCase {
 	public const TEST_USER1 = "test-user1";
 	public const TEST_USER2 = "test-user2";
 
-	private LockManager $lockManager;
-	private IRootFolder $rootFolder;
-	private ITimeFactory $timeFactory;
-	private IShareManager $shareManager;
-	private ?int $time = null;
+	protected LockManager $lockManager;
+	protected IRootFolder $rootFolder;
+	protected ITimeFactory&MockObject $timeFactory;
+	protected IShareManager $shareManager;
+	protected ?int $time = null;
 
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 		$backend = new Dummy();
 		$backend->createUser(self::TEST_USER1, self::TEST_USER1);
 		$backend->createUser(self::TEST_USER2, self::TEST_USER2);
-		\OC::$server->getUserManager()->registerBackend($backend);
+		\OCP\Server::get(IUserManager::class)->registerBackend($backend);
 	}
 
 	public function setUp(): void {
 		parent::setUp();
 		$this->time = null;
-		$this->lockManager = \OC::$server->get(ILockManager::class);
-		$this->rootFolder = \OC::$server->get(IRootFolder::class);
+		$this->lockManager = \OCP\Server::get(ILockManager::class);
+		$this->rootFolder = \OCP\Server::get(IRootFolder::class);
 		$this->timeFactory = $this->createMock(ITimeFactory::class);
 		$this->timeFactory->expects(self::any())
 			->method('getTime')
@@ -54,22 +59,23 @@ class LockFeatureTest extends TestCase {
 				return time();
 			});
 		$folder = $this->loginAndGetUserFolder(self::TEST_USER1);
-		$folder->delete('testfile');
-		$folder->delete('testfile2');
-		$folder->delete('testfile3');
+		$folder->delete('test-file');
+		$folder->delete('test-file2');
+		$folder->delete('test-file3');
 		\OC_Hook::$thrownExceptions = [];
 		$this->overwriteService(ITimeFactory::class, $this->timeFactory);
 	}
 
 	public function testLockUser() {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
-			->newFile('testfile', 'AAA');
+			->newFile('test-file', 'AAA');
 		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
 		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
 		$file->putContent('BBB');
 
+		/** @var File */
 		$file = $this->loginAndGetUserFolder(self::TEST_USER2)
-			->get('testfile');
+			->get('test-file');
 		try {
 			$file->putContent('CCC');
 			$this->fail('Expected to throw a ManuallyLockedException');
@@ -78,14 +84,16 @@ class LockFeatureTest extends TestCase {
 			self::assertEquals('BBB', $file->getContent());
 		}
 
+		/** @var File */
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
-			->get('testfile');
+			->get('test-file');
 		$file->putContent('DDD');
 		self::assertEquals('DDD', $file->getContent());
 
 		$this->lockManager->unlock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+		/** @var File */
 		$file = $this->loginAndGetUserFolder(self::TEST_USER2)
-			->get('testfile');
+			->get('test-file');
 		$file->putContent('EEE');
 		self::assertEquals('EEE', $file->getContent());
 	}
@@ -173,15 +181,16 @@ class LockFeatureTest extends TestCase {
 	}
 
 	public function testLockUserExpire() {
-		\OC::$server->getConfig()->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, 30);
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, 30);
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
-			->newFile('testfile-expire', 'AAA');
+			->newFile('test-file-expire', 'AAA');
 		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
 		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
 		$file->putContent('BBB');
 
+		/** @var File */
 		$file = $this->loginAndGetUserFolder(self::TEST_USER2)
-			->get('testfile-expire');
+			->get('test-file-expire');
 		try {
 			$file->putContent('CCC');
 			$this->fail('Expected to throw a ManuallyLockedException');
@@ -196,15 +205,16 @@ class LockFeatureTest extends TestCase {
 	}
 
 	public function testLockUserInfinite() {
-		\OC::$server->getConfig()->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, 0);
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, 0);
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
-			->newFile('testfile-infinite', 'AAA');
+			->newFile('test-file-infinite', 'AAA');
 		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
 		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
 		$file->putContent('BBB');
 
+		/** @var File */
 		$file = $this->loginAndGetUserFolder(self::TEST_USER2)
-			->get('testfile-infinite');
+			->get('test-file-infinite');
 		try {
 			$file->putContent('CCC');
 			$this->fail('Expected to throw a ManuallyLockedException');
@@ -214,8 +224,9 @@ class LockFeatureTest extends TestCase {
 		}
 
 		$this->toTheFuture(3600);
+		/** @var File */
 		$file = $this->loginAndGetUserFolder(self::TEST_USER2)
-			->get('testfile-infinite');
+			->get('test-file-infinite');
 		try {
 			$file->putContent('DDD');
 			$this->fail('Expected to throw a ManuallyLockedException');
@@ -227,7 +238,7 @@ class LockFeatureTest extends TestCase {
 
 	public function testLockApp() {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
-			->newFile('testfile2', 'AAA');
+			->newFile('test-file2', 'AAA');
 		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
 		$scope = new LockContext($file, ILock::TYPE_APP, 'collaborative_app');
 		$this->lockManager->lock($scope);
@@ -255,7 +266,7 @@ class LockFeatureTest extends TestCase {
 
 	public function testLockDifferentApps() {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
-			->newFile('testfile3', 'AAA');
+			->newFile('test-file3', 'AAA');
 		$scope = new LockContext($file, ILock::TYPE_APP, 'collaborative_app');
 		$this->lockManager->lock($scope);
 
@@ -281,7 +292,7 @@ class LockFeatureTest extends TestCase {
 	public function testLockDifferentAppsPublic() {
 		self::logout();
 		$file = $this->rootFolder->getUserFolder(self::TEST_USER1)
-			->newFile('testfile_public', 'AAA');
+			->newFile('test-file_public', 'AAA');
 		$scope = new LockContext($file, ILock::TYPE_APP, 'collaborative_app');
 		$this->lockManager->lock($scope);
 
@@ -304,13 +315,71 @@ class LockFeatureTest extends TestCase {
 		});
 	}
 
+	/**
+	 * Ensure that a lock can be extended and the same lock is kept
+	 */
+	public function testExtendLock() {
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, 15);
+
+		// Create a file and lock it
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('test-file', 'AAA');
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+		$locks = $this->lockManager->getLocks($file->getId());
+
+		// We should have one lock for that file with 15 minutes ETA
+		$this->assertCount(1, $locks);
+		$this->assertEquals(15 * 60, $locks[0]->getEta());
+
+		// going to the future we see the ETA to be 5 minutes
+		$this->toTheFuture(10 * 60);
+		$locks = $this->lockManager->getLocks($file->getId());
+		$this->assertCount(1, $locks);
+		$this->assertEquals(5 * 60, $locks[0]->getEta());
+		$id = $locks[0]->getId();
+
+		// Extend the lock (lock again)
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+
+		// The lock should only be extended, so same ID but fresh ETA
+		$locks = $this->lockManager->getLocks($file->getId());
+		$this->assertCount(1, $locks);
+		$this->assertEquals(15 * 60, $locks[0]->getEta());
+		$this->assertEquals($id, $locks[0]->getId());
+	}
+
+	/**
+	 * Regression test for https://github.com/nextcloud/files_lock/issues/130
+	 */
+	public function testExtendInfiniteLock() {
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, '0');
+
+		// Create a file and lock it
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('test-file', 'AAA');
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+		$locks = $this->lockManager->getLocks($file->getId());
+
+		// We should have one lock for that file with infinite ETA
+		$this->assertCount(1, $locks);
+		$this->assertEquals(FileLock::ETA_INFINITE, $locks[0]->getEta());
+		$id = $locks[0]->getId();
+
+		// Extend the lock (lock again)
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+
+		// The lock should only be extended, and keep the infinite ETA
+		$locks = $this->lockManager->getLocks($file->getId());
+		$this->assertCount(1, $locks);
+		$this->assertEquals(FileLock::ETA_INFINITE, $locks[0]->getEta());
+		$this->assertEquals($id, $locks[0]->getId());
+	}
+
 	private function loginAndGetUserFolder(string $userId) {
 		$this->loginAsUser($userId);
 		return $this->rootFolder->getUserFolder($userId);
 	}
 
 	private function shareFileWithUser(\OCP\Files\File $file, $owner, $user) {
-		$this->shareManager = \OC::$server->getShareManager();
+		$this->shareManager = \OCP\Server::get(IShareManager::class);
 		$share1 = $this->shareManager->newShare();
 		$share1->setNode($file)
 			->setSharedBy($owner)
@@ -329,11 +398,11 @@ class LockFeatureTest extends TestCase {
 	public function tearDown(): void {
 		parent::tearDown();
 		$folder = $this->rootFolder->getUserFolder(self::TEST_USER1);
-		$folder->delete('testfile');
+		$folder->delete('test-file');
 		$folder->delete('etag_test');
-		$folder->delete('testfile2');
-		$folder->delete('testfile3');
-		$folder->delete('testfile-infinite');
-		$folder->delete('testfile_public');
+		$folder->delete('test-file2');
+		$folder->delete('test-file3');
+		$folder->delete('test-file-infinite');
+		$folder->delete('test-file_public');
 	}
 }
