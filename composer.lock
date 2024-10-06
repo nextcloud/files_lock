@@ -184,12 +184,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/nextcloud-deps/ocp.git",
-                "reference": "130396c54bc430193a77bced3025a315e9560396"
+                "reference": "dfcf4583e63fea987ad58585bb5f11c65cc05e82"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nextcloud-deps/ocp/zipball/130396c54bc430193a77bced3025a315e9560396",
-                "reference": "130396c54bc430193a77bced3025a315e9560396",
+                "url": "https://api.github.com/repos/nextcloud-deps/ocp/zipball/dfcf4583e63fea987ad58585bb5f11c65cc05e82",
+                "reference": "dfcf4583e63fea987ad58585bb5f11c65cc05e82",
                 "shasum": ""
             },
             "require": {
@@ -203,7 +203,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "30.0.0-dev"
+                    "dev-master": "31.0.0-dev"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -221,7 +221,7 @@
                 "issues": "https://github.com/nextcloud-deps/ocp/issues",
                 "source": "https://github.com/nextcloud-deps/ocp/tree/master"
             },
-            "time": "2024-08-13T00:39:06+00:00"
+            "time": "2024-10-05T00:42:05+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -2578,7 +2578,7 @@
     "platform": {
         "php": "^8.1"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "platform-overrides": {
         "php": "8.1"
     },
