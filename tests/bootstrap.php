@@ -17,6 +17,8 @@ require_once __DIR__ . '/../../../lib/base.php';
 \OC::$composerAutoloader->addPsr4('Tests\\', OC::$SERVERROOT . '/tests/', true);
 
 // load all enabled apps
-\OC_App::loadApps();
+\OCP\Server::get(\OCP\App\IAppManager::class)->loadApps();
+\OCP\Server::get(\OCP\App\IAppManager::class)->enableApp('files_lock', true);
+\OC_App::updateApp('files_lock');
 
 set_include_path(get_include_path() . PATH_SEPARATOR . '/usr/share/php');
