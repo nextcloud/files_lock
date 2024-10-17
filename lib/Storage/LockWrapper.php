@@ -127,7 +127,7 @@ class LockWrapper extends Wrapper {
 	}
 
 
-	public function rename($path1, $path2) {
+	public function rename($path1, $path2): bool {
 		if (strpos($path1, $path2) === 0) {
 			$part = substr($path1, strlen($path2));
 			//This is a rename of the transfer file to the original file
@@ -149,7 +149,7 @@ class LockWrapper extends Wrapper {
 			   && parent::rename($path1, $path2);
 	}
 
-	public function copy($path1, $path2) {
+	public function copy($path1, $path2): bool {
 		$permissions =
 			$this->file_exists($path2) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
 
@@ -160,28 +160,28 @@ class LockWrapper extends Wrapper {
 			   && parent::copy($path1, $path2);
 	}
 
-	public function touch($path, $mtime = null) {
+	public function touch($path, $mtime = null): bool {
 		$permissions =
 			$this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
 
 		return $this->checkPermissions($path, $permissions) && parent::touch($path, $mtime);
 	}
 
-	public function mkdir($path) {
+	public function mkdir($path): bool {
 		return $this->checkPermissions($path, Constants::PERMISSION_CREATE) && parent::mkdir($path);
 	}
 
-	public function rmdir($path) {
+	public function rmdir($path): bool {
 		return $this->checkPermissions($path, Constants::PERMISSION_DELETE)
 			   && parent::rmdir($path);
 	}
 
-	public function unlink($path) {
+	public function unlink($path): bool {
 		return $this->checkPermissions($path, Constants::PERMISSION_DELETE)
 			   && parent::unlink($path);
 	}
 
-	public function file_put_contents($path, $data) {
+	public function file_put_contents($path, $data): int|float|false {
 		$permissions =
 			$this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
 
@@ -206,7 +206,7 @@ class LockWrapper extends Wrapper {
 		return $this->checkPermissions($path, $permissions) ? parent::writeStream($path, $stream, $size) : 0;
 	}
 
-	public function file_get_contents($path) {
+	public function file_get_contents($path): string|false {
 		if (!$this->checkPermissions($path, Constants::PERMISSION_READ)) {
 			return false;
 		}
