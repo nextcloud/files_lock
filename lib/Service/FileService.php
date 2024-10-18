@@ -45,7 +45,7 @@ class FileService {
 	 */
 	public function getFileFromId(string $userId, int $fileId): Node {
 		$files = $this->rootFolder->getUserFolder($userId)
-								  ->getById($fileId);
+			->getById($fileId);
 
 		if (sizeof($files) === 0) {
 			throw new NotFoundException();
@@ -71,7 +71,7 @@ class FileService {
 
 		$path = '/' . substr($path, 6);
 		$file = $this->rootFolder->getUserFolder($userId)
-								 ->get($path);
+			->get($path);
 
 		return $file;
 	}
@@ -93,7 +93,7 @@ class FileService {
 
 		$path = '/' . $uri;
 		$file = $this->rootFolder->getUserFolder($userId)
-								 ->get($path);
+			->get($path);
 
 		return $file;
 	}
@@ -114,7 +114,7 @@ class FileService {
 		}
 		$path = '/' . $path;
 		$file = $this->rootFolder->getUserFolder($userId)
-								 ->get($path);
+			->get($path);
 
 		return $file;
 	}

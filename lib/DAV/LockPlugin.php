@@ -84,7 +84,7 @@ class LockPlugin extends SabreLockPlugin {
 			$ids[] = (string)$id;
 		}
 
-		$ids[] = (string) $directory->getId();
+		$ids[] = (string)$directory->getId();
 		// the lock service will take care of the caching
 		$this->lockService->getLockForNodeIds($ids);
 	}

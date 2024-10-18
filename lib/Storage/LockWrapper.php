@@ -120,7 +120,7 @@ class LockWrapper extends Wrapper {
 					return true;
 				}
 			}
-		} catch (NoLockProviderException | LockNotFoundException | InvalidPathException | NotFoundException $e) {
+		} catch (NoLockProviderException|LockNotFoundException|InvalidPathException|NotFoundException $e) {
 		}
 
 		return false;

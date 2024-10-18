@@ -67,7 +67,7 @@ class LocksRequestBuilder extends CoreRequestBuilder {
 		$qb = $this->getQueryBuilder();
 
 		$qb->select('l.id', 'l.user_id', 'l.file_id', 'l.token', 'l.creation', 'l.type', 'l.ttl', 'l.owner')
-		   ->from(self::TABLE_LOCKS, 'l');
+			->from(self::TABLE_LOCKS, 'l');
 
 		$qb->setDefaultSelectAlias('l');
 
