@@ -159,7 +159,7 @@ class LockController extends OCSController {
 		Exception $e,
 		array $more = [],
 		int $status = Http::STATUS_INTERNAL_SERVER_ERROR,
-		bool $log = true
+		bool $log = true,
 	): DataResponse {
 		$data = array_merge(
 			$more,

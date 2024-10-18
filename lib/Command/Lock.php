@@ -62,7 +62,7 @@ class Lock extends Base {
 	 */
 	public function __construct(
 		IUserManager $userManager, LocksRequest $locksRequest, FileService $fileService,
-		LockService $lockService, ConfigService $configService
+		LockService $lockService, ConfigService $configService,
 	) {
 		parent::__construct();
 
@@ -80,14 +80,14 @@ class Lock extends Base {
 	protected function configure() {
 		parent::configure();
 		$this->setName('files:lock')
-			 ->addOption('unlock', 'u', InputOption::VALUE_NONE, 'unlock a file')
-			 ->addOption(
-			 	'uninstall', '', InputOption::VALUE_NONE, 'fully uninstall the app from your Nextcloud'
-			 )
-			 ->addOption('status', 's', InputOption::VALUE_NONE, 'returns lock status of the file')
-			 ->addArgument('file_id', InputArgument::OPTIONAL, 'Id of the locked file', 0)
-			 ->addArgument('user_id', InputArgument::OPTIONAL, 'owner of the lock', '')
-			 ->setDescription('lock a file to a user');
+			->addOption('unlock', 'u', InputOption::VALUE_NONE, 'unlock a file')
+			->addOption(
+				'uninstall', '', InputOption::VALUE_NONE, 'fully uninstall the app from your Nextcloud'
+			)
+			->addOption('status', 's', InputOption::VALUE_NONE, 'returns lock status of the file')
+			->addArgument('file_id', InputArgument::OPTIONAL, 'Id of the locked file', 0)
+			->addArgument('user_id', InputArgument::OPTIONAL, 'owner of the lock', '')
+			->setDescription('lock a file to a user');
 	}
 
 

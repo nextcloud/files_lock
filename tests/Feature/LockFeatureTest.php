@@ -27,8 +27,8 @@ use Test\Util\User\Dummy;
  * @group DB
  */
 class LockFeatureTest extends TestCase {
-	public const TEST_USER1 = "test-user1";
-	public const TEST_USER2 = "test-user2";
+	public const TEST_USER1 = 'test-user1';
+	public const TEST_USER2 = 'test-user2';
 
 	protected LockManager $lockManager;
 	protected IRootFolder $rootFolder;

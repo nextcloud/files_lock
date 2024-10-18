@@ -26,7 +26,7 @@ class LockBackend implements BackendInterface {
 	public function __construct(
 		private FileService $fileService,
 		private LockService $lockService,
-		private bool $absolute
+		private bool $absolute,
 	) {
 	}
 

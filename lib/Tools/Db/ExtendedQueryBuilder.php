@@ -183,7 +183,7 @@ class ExtendedQueryBuilder extends QueryBuilder {
 	 * @deprecated - should be removed
 	 */
 	public function exprFieldWithinJsonFormat(
-		IQueryBuilder $qb, string $field, string $fieldRight, string $alias = ''
+		IQueryBuilder $qb, string $field, string $fieldRight, string $alias = '',
 	): string {
 		$func = $qb->func();
 		$expr = $qb->expr();
@@ -212,7 +212,7 @@ class ExtendedQueryBuilder extends QueryBuilder {
 	 * @deprecated - should be removed
 	 */
 	public function exprValueWithinJsonFormat(
-		IQueryBuilder $qb, string $field, string $value, bool $eq = true, bool $cs = true
+		IQueryBuilder $qb, string $field, string $value, bool $eq = true, bool $cs = true,
 	): string {
 		$dbConn = $this->getConnection();
 		$expr = $qb->expr();
@@ -434,7 +434,7 @@ class ExtendedQueryBuilder extends QueryBuilder {
 	public function exprLimitEmpty(
 		string $field,
 		bool $orNull = false,
-		string $alias = ''
+		string $alias = '',
 	): ICompositeExpression {
 		if ($this->getType() === DBALQueryBuilder::SELECT) {
 			$field = (($alias === '') ? $this->getDefaultSelectAlias() : $alias) . '.' . $field;
@@ -460,7 +460,7 @@ class ExtendedQueryBuilder extends QueryBuilder {
 	public function exprLimitNull(
 		string $field,
 		bool $orEmpty = false,
-		string $alias = ''
+		string $alias = '',
 	): ICompositeExpression {
 		if ($this->getType() === DBALQueryBuilder::SELECT) {
 			$field = (($alias === '') ? $this->getDefaultSelectAlias() : $alias) . '.' . $field;
@@ -489,7 +489,7 @@ class ExtendedQueryBuilder extends QueryBuilder {
 		string $field,
 		array $values,
 		string $alias = '',
-		bool $cs = true
+		bool $cs = true,
 	): ICompositeExpression {
 		if ($this->getType() === DBALQueryBuilder::SELECT) {
 			$field = (($alias === '') ? $this->getDefaultSelectAlias() : $alias) . '.' . $field;
@@ -785,7 +785,7 @@ class ExtendedQueryBuilder extends QueryBuilder {
 	public function exprFilterEmpty(
 		string $field,
 		bool $norNull = false,
-		string $alias = ''
+		string $alias = '',
 	): ICompositeExpression {
 		if ($this->getType() === DBALQueryBuilder::SELECT) {
 			$field = (($alias === '') ? $this->getDefaultSelectAlias() : $alias) . '.' . $field;
@@ -811,7 +811,7 @@ class ExtendedQueryBuilder extends QueryBuilder {
 	public function exprFilterNull(
 		string $field,
 		bool $norEmpty = false,
-		string $alias = ''
+		string $alias = '',
 	): ICompositeExpression {
 		if ($this->getType() === DBALQueryBuilder::SELECT) {
 			$field = (($alias === '') ? $this->getDefaultSelectAlias() : $alias) . '.' . $field;
@@ -840,7 +840,7 @@ class ExtendedQueryBuilder extends QueryBuilder {
 		string $field,
 		array $values,
 		string $alias = '',
-		bool $cs = true
+		bool $cs = true,
 	): ICompositeExpression {
 		if ($this->getType() === DBALQueryBuilder::SELECT) {
 			$field = (($alias === '') ? $this->getDefaultSelectAlias() : $alias) . '.' . $field;
@@ -933,7 +933,7 @@ class ExtendedQueryBuilder extends QueryBuilder {
 		array $data,
 		ExtendedQueryBuilder $qb,
 		string $object,
-		array $params
+		array $params,
 	): IQueryRow {
 		$fromField = $this->get('modelFromField', $params);
 		if ($fromField !== '') {
@@ -1010,7 +1010,7 @@ class ExtendedQueryBuilder extends QueryBuilder {
 		string $table,
 		array $fields,
 		string $alias = '',
-		bool $distinct = false
+		bool $distinct = false,
 	): self {
 		$selectFields = array_map(
 			function (string $item) use ($alias) {
@@ -1029,7 +1029,7 @@ class ExtendedQueryBuilder extends QueryBuilder {
 		}
 
 		$this->from($table, $alias)
-			 ->setDefaultSelectAlias($alias);
+			->setDefaultSelectAlias($alias);
 
 		return $this;
 	}
@@ -1047,7 +1047,7 @@ class ExtendedQueryBuilder extends QueryBuilder {
 		array $fields,
 		string $alias,
 		string $prefix,
-		array $default = []
+		array $default = [],
 	): self {
 		$prefix = trim($prefix) . '_';
 		$grouping = true;
