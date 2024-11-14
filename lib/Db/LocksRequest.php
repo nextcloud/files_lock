@@ -27,11 +27,12 @@ class LocksRequest extends LocksRequestBuilder {
 	public function save(FileLock $lock) {
 		$qb = $this->getLocksInsertSql();
 		$qb->setValue('user_id', $qb->createNamedParameter($lock->getOwner()))
-		   ->setValue('file_id', $qb->createNamedParameter($lock->getFileId()))
-		   ->setValue('token', $qb->createNamedParameter($lock->getToken()))
-		   ->setValue('creation', $qb->createNamedParameter($lock->getCreatedAt()))
-		   ->setValue('type', $qb->createNamedParameter($lock->getType()))
-		   ->setValue('ttl', $qb->createNamedParameter($lock->getTimeout()));
+			->setValue('file_id', $qb->createNamedParameter($lock->getFileId()))
+			->setValue('token', $qb->createNamedParameter($lock->getToken()))
+			->setValue('creation', $qb->createNamedParameter($lock->getCreatedAt()))
+			->setValue('type', $qb->createNamedParameter($lock->getType()))
+			->setValue('ttl', $qb->createNamedParameter($lock->getTimeout()))
+			->setValue('owner', $qb->createNamedParameter($lock->getDisplayName()));
 
 		try {
 			$qb->execute();
