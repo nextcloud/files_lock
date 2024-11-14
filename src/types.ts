@@ -6,6 +6,7 @@
 export enum LockType {
 	User = 0,
 	App = 1,
+	Token = 2,
 }
 
 export type LockState = {
