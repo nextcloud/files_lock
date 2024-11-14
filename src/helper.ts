@@ -41,6 +41,10 @@ export const canUnlock = (node: Node): boolean => {
 		return true
 	}
 
+	if (state.lockOwnerType === LockType.Token && state.lockOwner === getCurrentUser()?.uid) {
+		return true
+	}
+
 	return false
 }
 
