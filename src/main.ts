@@ -11,6 +11,7 @@ import {
 	FileType,
 	registerFileAction,
 } from '@nextcloud/files'
+import { getDialogBuilder, DialogSeverity } from '@nextcloud/dialogs'
 import { translate as t } from '@nextcloud/l10n'
 import { emit } from '@nextcloud/event-bus'
 import { lockFile, unlockFile } from './api'
@@ -22,6 +23,8 @@ import {
 	getLockStateFromAttributes,
 } from './helper'
 import { getCurrentUser } from '@nextcloud/auth'
+
+import '@nextcloud/dialogs/style.css'
 
 import LockSvg from '@mdi/svg/svg/lock.svg?raw'
 import LockOpenSvg from '@mdi/svg/svg/lock-open-variant.svg?raw'
@@ -122,6 +125,30 @@ const menuAction = new FileAction({
 	},
 
 	async exec(node: Node) {
+		const lock = getLockStateFromAttributes(node)
+
+		if (lock?.lockOwnerType === LockType.Token) {
+			const dialog = getDialogBuilder('Unlock file manually')
+				.setText(t('files_lock', 'This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file.'))
+				.setSeverity(DialogSeverity.Warning)
+				.addButton({
+					label: t('files_lock', 'Keep lock'),
+					callback: () => {
+						dialog.hide()
+					},
+				})
+				.addButton({
+					label: t('files_lock', 'Force unlock'),
+					callback: () => {
+						switchLock(node)
+					},
+					type: 'warning',
+				})
+				.build()
+			dialog.show()
+			return
+		}
+
 		return await switchLock(node)
 	},
 
