@@ -31,7 +31,8 @@ class LocksRequest extends LocksRequestBuilder {
 			->setValue('token', $qb->createNamedParameter($lock->getToken()))
 			->setValue('creation', $qb->createNamedParameter($lock->getCreatedAt()))
 			->setValue('type', $qb->createNamedParameter($lock->getType()))
-			->setValue('ttl', $qb->createNamedParameter($lock->getTimeout()));
+			->setValue('ttl', $qb->createNamedParameter($lock->getTimeout()))
+			->setValue('owner', $qb->createNamedParameter($lock->getDisplayName()));
 
 		try {
 			$qb->execute();
