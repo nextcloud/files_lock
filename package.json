@@ -14,7 +14,7 @@
     "stylelint:fix": "stylelint src/**/*.vue --fix"
   },
   "dependencies": {
-    "@mdi/svg": "^7.3.67",
+    "@mdi/svg": "^7.4.47",
     "@nextcloud/auth": "^2.2.1",
     "@nextcloud/axios": "^2.4.0",
     "@nextcloud/event-bus": "^3.1.0",
