@@ -1,85 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="5.13.1@086b94371304750d1c673315321a55d15fc59015">
-  <file src="lib/DAV/LockBackend.php">
-    <UndefinedThisPropertyAssignment>
-      <code><![CDATA[$this->server]]></code>
-    </UndefinedThisPropertyAssignment>
-  </file>
+<files psalm-version="5.26.1@d747f6500b38ac4f7dfc5edbcae6e4b637d7add0">
   <file src="lib/DAV/LockPlugin.php">
     <UndefinedClass>
-      <code>CachingTree</code>
-      <code>Directory</code>
-      <code>FakeLockerPlugin</code>
-      <code>File</code>
-      <code>FilesPlugin</code>
-      <code>ObjectTree</code>
+      <code><![CDATA[CachingTree]]></code>
+      <code><![CDATA[Directory]]></code>
+      <code><![CDATA[FakeLockerPlugin]]></code>
+      <code><![CDATA[File]]></code>
+      <code><![CDATA[FilesPlugin]]></code>
+      <code><![CDATA[ObjectTree]]></code>
     </UndefinedClass>
   </file>
   <file src="lib/Db/CoreQueryBuilder.php">
     <MissingDependency>
-      <code>ExtendedQueryBuilder</code>
+      <code><![CDATA[ExtendedQueryBuilder]]></code>
     </MissingDependency>
   </file>
   <file src="lib/Db/CoreRequestBuilder.php">
     <MissingDependency>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>CoreQueryBuilder</code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[CoreQueryBuilder]]></code>
     </MissingDependency>
   </file>
   <file src="lib/Db/LocksRequest.php">
     <MissingDependency>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
-      <code>$qb</code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
+      <code><![CDATA[$qb]]></code>
     </MissingDependency>
     <UndefinedClass>
-      <code>UniqueConstraintViolationException</code>
+      <code><![CDATA[UniqueConstraintViolationException]]></code>
     </UndefinedClass>
   </file>
   <file src="lib/Db/LocksRequestBuilder.php">
     <MissingDependency>
-      <code>CoreQueryBuilder</code>
-      <code>CoreQueryBuilder</code>
-      <code>CoreQueryBuilder</code>
-      <code>CoreQueryBuilder</code>
-      <code>CoreQueryBuilder</code>
-      <code>CoreQueryBuilder</code>
+      <code><![CDATA[CoreQueryBuilder]]></code>
+      <code><![CDATA[CoreQueryBuilder]]></code>
+      <code><![CDATA[CoreQueryBuilder]]></code>
+      <code><![CDATA[CoreQueryBuilder]]></code>
+      <code><![CDATA[CoreQueryBuilder]]></code>
+      <code><![CDATA[CoreQueryBuilder]]></code>
     </MissingDependency>
   </file>
   <file src="lib/LockProvider.php">
     <RedundantCondition>
-      <code>$lock</code>
+      <code><![CDATA[$lock]]></code>
     </RedundantCondition>
   </file>
   <file src="lib/Service/FileService.php">
@@ -88,28 +84,28 @@
       <code><![CDATA[$this->rootFolder]]></code>
       <code><![CDATA[$this->rootFolder]]></code>
       <code><![CDATA[$this->rootFolder]]></code>
-      <code>IRootFolder</code>
-      <code>IRootFolder</code>
+      <code><![CDATA[IRootFolder]]></code>
+      <code><![CDATA[IRootFolder]]></code>
     </MissingDependency>
   </file>
   <file src="lib/Tools/Traits/TArrayTools.php">
     <TypeDoesNotContainNull>
-      <code>$arr === null</code>
-      <code>$arr === null</code>
-      <code>$arr === null</code>
-      <code>$arr === null</code>
-      <code>$arr === null</code>
-      <code>$arr === null</code>
-      <code>$arr === null</code>
+      <code><![CDATA[$arr === null]]></code>
+      <code><![CDATA[$arr === null]]></code>
+      <code><![CDATA[$arr === null]]></code>
+      <code><![CDATA[$arr === null]]></code>
+      <code><![CDATA[$arr === null]]></code>
+      <code><![CDATA[$arr === null]]></code>
+      <code><![CDATA[$arr === null]]></code>
     </TypeDoesNotContainNull>
   </file>
   <file src="lib/Tools/Traits/TSetup.php">
     <MismatchingDocblockParamType>
-      <code>string</code>
-      <code>string</code>
+      <code><![CDATA[string]]></code>
+      <code><![CDATA[string]]></code>
     </MismatchingDocblockParamType>
     <MismatchingDocblockReturnType>
-      <code>string</code>
+      <code><![CDATA[string]]></code>
     </MismatchingDocblockReturnType>
   </file>
 </files>
