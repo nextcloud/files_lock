@@ -1,7 +1,17 @@
 # SPDX-FileCopyrightText: 2022 Nextcloud GmbH and Nextcloud contributors
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: CC0-1.0
+
 version: 2
 updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: daily
+      timezone: Europe/Paris
+    labels:
+      - "3. to review"
+      - "dependencies"
+
   - package-ecosystem: composer
     directory: "/"
     schedule:
@@ -10,7 +20,11 @@ updates:
       time: "03:00"
       timezone: Europe/Paris
     open-pull-requests-limit: 10
-  - package-ecosystem: "npm"
+    labels:
+      - "3. to review"
+      - "dependencies"
+
+  - package-ecosystem: npm
     directory: "/"
     schedule:
       interval: weekly
@@ -18,3 +32,55 @@ updates:
       time: "03:00"
       timezone: Europe/Paris
     open-pull-requests-limit: 10
+    labels:
+      - "3. to review"
+      - "dependencies"
+
+  # Main stableXX npm
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: saturday
+      time: "03:00"
+      timezone: Europe/Paris
+    target-branch: stable30
+    labels:
+      - "3. to review"
+      - "dependencies"
+    ignore:
+      # ignore all GitHub linguist patch updates
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: saturday
+      time: "03:00"
+      timezone: Europe/Paris
+    target-branch: stable29
+    labels:
+      - "3. to review"
+      - "dependencies"
+    ignore:
+      # ignore all GitHub linguist patch updates
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: saturday
+      time: "03:00"
+      timezone: Europe/Paris
+    target-branch: stable28
+    labels:
+      - "3. to review"
+      - "dependencies"
+    ignore:
+      # ignore all GitHub linguist patch updates
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
