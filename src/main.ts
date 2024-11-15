@@ -68,6 +68,11 @@ const inlineAction = new FileAction({
 		const node = nodes[0]
 
 		const state = getLockStateFromAttributes(node)
+
+		if (!state.isLocked) {
+			return ''
+		}
+
 		if (state.isLocked && state.lockOwnerType !== LockType.App && state.lockOwner !== getCurrentUser()?.uid) {
 			return generateAvatarSvg(state.lockOwner)
 		}
@@ -84,6 +89,10 @@ const inlineAction = new FileAction({
 		if (nodes.length !== 1) {
 			return false
 		}
+
+		// FIXME: Currently enabled is not re-evaluated when emitting an updated node object through files:node:updated
+		// Therefor we need to also have a unlocked state as the inline action is then always rendered
+		return true
 
 		const node = nodes[0]
 		const state = getLockStateFromAttributes(node)
