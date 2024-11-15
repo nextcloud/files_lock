@@ -24,7 +24,7 @@
     "vue": "^2.7.14"
   },
   "devDependencies": {
-    "@nextcloud/browserslist-config": "^3.0.0",
+    "@nextcloud/browserslist-config": "^3.0.1",
     "@nextcloud/eslint-config": "^8.3.0",
     "@nextcloud/stylelint-config": "^2.3.1",
     "@nextcloud/vite-config": "^1.1.0",
