@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import Vue from 'vue'
 import {
 	FileAction,
 	type Node,
@@ -32,18 +31,18 @@ const switchLock = async (node: Node) => {
 		const state = getLockStateFromAttributes(node)
 		if (!state.isLocked) {
 			const data = await lockFile(node)
-			Vue.set(node.attributes, 'lock', '1')
-			Vue.set(node.attributes, 'lock-owner', data.userId)
-			Vue.set(node.attributes, 'lock-owner-displayname', data.displayName)
-			Vue.set(node.attributes, 'lock-owner-type', data.type)
-			Vue.set(node.attributes, 'lock-time', data.creation)
+			node.attributes.lock = '1'
+			node.attributes['lock-owner'] = data.userId
+			node.attributes['lock-owner-displayname'] = data.displayName
+			node.attributes['lock-owner-type'] = data.type
+			node.attributes['lock-time'] = data.creation
 		} else {
 			await unlockFile(node)
-			Vue.set(node.attributes, 'lock', '')
-			Vue.set(node.attributes, 'lock-owner', '')
-			Vue.set(node.attributes, 'lock-owner-displayname', '')
-			Vue.set(node.attributes, 'lock-owner-type', '')
-			Vue.set(node.attributes, 'lock-time', '')
+			node.attributes.lock = ''
+			node.attributes['lock-owner'] = ''
+			node.attributes['lock-owner-displayname'] = ''
+			node.attributes['lock-owner-type'] = ''
+			node.attributes['lock-time'] = ''
 		}
 		emit('files:node:updated', node)
 		return true
