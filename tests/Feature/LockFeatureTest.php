@@ -304,6 +304,33 @@ class LockFeatureTest extends TestCase {
 		});
 	}
 
+	public function testUnlockStaleClientLock() {
+		// Create a file and lock it as the desktop client would
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('test-file-client', 'AAA');
+		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
+
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_TOKEN, self::TEST_USER1));
+		$locks = $this->lockManager->getLocks($file->getId());
+		$this->assertCount(1, $locks);
+
+		// Other users cannot unlock
+		try {
+			$this->lockManager->unlock(new LockContext($file, ILock::TYPE_TOKEN, self::TEST_USER2));
+			$locks = [];
+		} catch (\OCP\PreConditionNotMetException $e) {
+			$locks = $this->lockManager->getLocks($file->getId());
+		}
+		$this->assertCount(1, $locks);
+
+
+		// The owner can stil force unlock it as done through the OCS controller
+		\OCP\Server::get(\OCA\FilesLock\Service\LockService::class)->enableUserOverride();
+		$this->lockManager->unlock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+
+		$locks = $this->lockManager->getLocks($file->getId());
+		$this->assertCount(0, $locks);
+	}
+
 	private function loginAndGetUserFolder(string $userId) {
 		$this->loginAsUser($userId);
 		return $this->rootFolder->getUserFolder($userId);
