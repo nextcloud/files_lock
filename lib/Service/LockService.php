@@ -24,6 +24,7 @@ use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
 use OCP\Files\NotFoundException;
 use OCP\IL10N;
+use OCP\IRequest;
 use OCP\IUserManager;
 use OCP\IUserSession;
 
@@ -43,6 +44,7 @@ class LockService {
 	private IAppManager $appManager;
 	private IEventDispatcher $eventDispatcher;
 	private IUserSession $userSession;
+	private IRequest $request;
 
 
 	private array $locks = [];
@@ -61,6 +63,7 @@ class LockService {
 		IAppManager $appManager,
 		IEventDispatcher $eventDispatcher,
 		IUserSession $userSession,
+		IRequest $request,
 	) {
 		$this->l10n = $l10n;
 		$this->userManager = $userManager;
@@ -70,6 +73,7 @@ class LockService {
 		$this->appManager = $appManager;
 		$this->eventDispatcher = $eventDispatcher;
 		$this->userSession = $userSession;
+		$this->request = $request;
 
 		$this->setup('app', 'files_lock');
 	}
@@ -162,9 +166,9 @@ class LockService {
 			$this->generateToken($lock);
 			$lock->setCreation(time());
 			$this->notice('locking file', false, ['fileLock' => $lock]);
+			$this->injectMetadata($lock);
 			$this->locksRequest->save($lock);
 			$this->propagateEtag($lockScope);
-			$this->injectMetadata($lock);
 			return $lock;
 		}
 	}
@@ -317,13 +321,33 @@ class LockService {
 			$displayName = $this->getAppName($lock->getOwner()) ?? null;
 		}
 		if ($lock->getType() === ILock::TYPE_TOKEN) {
-			$displayName = $this->userManager->getDisplayName($lock->getOwner()) ?? $lock->getDisplayName();
+			$clientHint = $this->getClientHint();
+			$displayName = $lock->getDisplayName() ?: (
+				$this->userManager->getDisplayName($lock->getOwner()) . ' ' .
+				($clientHint ? ('(' . $clientHint . ')') : '')
+			);
 		}
 
 		if ($displayName) {
 			$lock->setDisplayName($displayName);
 		}
 		return $lock;
+	}
+
+	private function getClientHint(): ?string {
+		if ($this->request->isUserAgent([IRequest::USER_AGENT_CLIENT_DESKTOP])) {
+			return $this->l10n->t('Desktop client');
+		}
+
+		if ($this->request->isUserAgent([IRequest::USER_AGENT_CLIENT_IOS])) {
+			return $this->l10n->t('iOS client');
+		}
+
+		if ($this->request->isUserAgent([IRequest::USER_AGENT_CLIENT_ANDROID])) {
+			return $this->l10n->t('Android client');
+		}
+
+		return null;
 	}
 
 	/**
