@@ -1,4 +1,7 @@
 { "translations": {
+    "Desktop client" : "Klien desktop",
+    "iOS client" : "Klien iOS",
+    "Android client" : "Klien Android",
     "Unlock file" : "Buka kunci berkas",
     "Lock file" : "Kunci berkas"
 },"pluralForm" :"nplurals=1; plural=0;"

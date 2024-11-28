@@ -1,6 +1,9 @@
 OC.L10N.register(
     "files_lock",
     {
+    "Desktop client" : "Klijent za osobna računala",
+    "iOS client" : "Klijent za iOS",
+    "Android client" : "Klijent za Android",
     "Temporary files lock" : "Privremeno zaključavanje datoteka",
     "Temporary lock your files" : "Privremeno zaključajte datoteke",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Omogućite korisnicima da privremeno zaključaju datoteke kako bi izbjegli nepodudaranja tijekom rada s dijeljenim datotekama.",
