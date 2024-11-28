@@ -1,6 +1,8 @@
 OC.L10N.register(
     "files_lock",
     {
+    "Desktop client" : "Cliente de escritorio",
+    "Android client" : "Cliente Android",
     "Unlock file" : "Desbloquear archivo",
     "Lock file" : "Bloquear archivo"
 },

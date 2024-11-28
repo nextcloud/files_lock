@@ -3,6 +3,9 @@ OC.L10N.register(
     {
     "File can only be unlocked by providing a valid owner lock token" : "Файл может быть разблокирован только вводом действительного токена блокировки, подтверждающим владение файлом",
     "File can only be unlocked by the owner of the lock" : "Файл может быть разблокирован только тем, кто установил блокировку",
+    "Desktop client" : "Клиент для ПК",
+    "iOS client" : "клиент для iOS",
+    "Android client" : "клиент для Android",
     "Temporary files lock" : "Временная блокировка файлов",
     "Temporary lock your files" : "Временная блокировка файлов",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Разрешить пользователям временно блокировать файлы во избежание конфликтов при совместной работе с файлами.",

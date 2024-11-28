@@ -5,6 +5,8 @@ OC.L10N.register(
     "File is not locked" : "File is not locked",
     "File can only be unlocked by providing a valid owner lock token" : "File can only be unlocked by providing a valid owner lock token",
     "File can only be unlocked by the owner of the lock" : "File can only be unlocked by the owner of the lock",
+    "Desktop client" : "Desktop client",
+    "Android client" : "Android client",
     "Temporary files lock" : "Temporary files lock",
     "Temporary lock your files" : "Temporary lock your files",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Allow your users to temporary lock their files to avoid conflicts while working on shared files.",

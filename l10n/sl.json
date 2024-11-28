@@ -1,5 +1,8 @@
 { "translations": {
     "File can only be unlocked by the owner of the lock" : "Datoteko lahko odklene le lastnik datoteke",
+    "Desktop client" : "Odjemalec za namizne računalnike",
+    "iOS client" : "Odjemalec za iOS",
+    "Android client" : "Odjemalec za Android",
     "Temporary files lock" : "Začasno zaklepanje datotek",
     "Temporary lock your files" : "Začasno zaklepanje datotek v uporabi",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Omogoča uporabnikom začasno zaklepanje datotek za preprečevanje sporov pri delu z datotekami v souporabi.",
