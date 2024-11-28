@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "File can only be unlocked by providing a valid owner lock token" : "Fișierul poate fi deblocat numai prin furnizarea unui token de blocare a proprietarului valid",
     "File can only be unlocked by the owner of the lock" : "Fișierul poate fi deblocat numai de către deținătorul fișierului",
+    "Desktop client" : "Client desktop",
     "Temporary files lock" : "Blocaj temporar de fișiere",
     "Temporary lock your files" : "Blochează-ți  temporar fișierele",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Permite utilizatorilor sa își blocheze temporar fișierele pentru a evita conflictele în timp ce lucrezi la fișiere partajate.",

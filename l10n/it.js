@@ -3,6 +3,9 @@ OC.L10N.register(
     {
     "File can only be unlocked by providing a valid owner lock token" : "Il file può essere sbloccato solo fornendo un token di sblocco valido del proprietario",
     "File can only be unlocked by the owner of the lock" : "Il file può essere sbloccato solo dal proprietario del blocco",
+    "Desktop client" : "Client desktop",
+    "iOS client" : "Client iOS",
+    "Android client" : "Client Android",
     "Temporary files lock" : "Blocco temporaneo dei file",
     "Temporary lock your files" : "Blocca temporaneamente i tuoi file",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Consenti ai tuoi utenti di bloccare temporaneamente i loro file per evitare conflitti mentre lavorano su file condivisi.",
