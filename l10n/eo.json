@@ -1,0 +1,6 @@
+{ "translations": {
+    "Desktop client" : "Labortabla kliento",
+    "iOS client" : "iOS-a kliento",
+    "Android client" : "Androida kliento"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

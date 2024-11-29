@@ -1,0 +1,6 @@
+{ "translations": {
+    "Desktop client" : "Cliente de Scriptorio",
+    "iOS client" : "Cliente iOS",
+    "Android client" : "Cliente Android"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

@@ -14,6 +14,9 @@ OC.L10N.register(
     "Locked by {user}" : "Låst av {user}",
     "Locked by {app}" : "Låst av {app}",
     "Unlock file" : "Lås upp fil",
-    "Lock file" : "Lås fil"
+    "Lock file" : "Lås fil",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Den här filen har låsts automatiskt av en klient. Att ta bort låset kan leda till en konflikt när filen sparas.",
+    "Keep lock" : "Behåll lås",
+    "Force unlock" : "Tvinga upplåsning"
 },
 "nplurals=2; plural=(n != 1);");

@@ -1,4 +1,7 @@
 { "translations": {
+    "Desktop client" : "Veceru pa ordenadores",
+    "iOS client" : "Veceru pa iOS",
+    "Android client" : "Veceru p'Android",
     "Unlock file" : "Desbloquiar el ficheru"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
