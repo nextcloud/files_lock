@@ -1,0 +1,6 @@
+{ "translations": {
+    "Desktop client" : "Töölaua klient",
+    "iOS client" : "iOS klient",
+    "Android client" : "Android klient"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}

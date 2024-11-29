@@ -1,0 +1,6 @@
+{ "translations": {
+    "Desktop client" : "захиалагчийн дэлгэц",
+    "iOS client" : "iOS үйлчлүүлэгч",
+    "Android client" : "Android хэрэглэгч"
+},"pluralForm" :"nplurals=2; plural=(n != 1);"
+}
