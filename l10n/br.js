@@ -1,6 +1,7 @@
 OC.L10N.register(
     "files_lock",
     {
+    "Desktop client" : "Kliant burev",
     "Temporary files lock" : "Restr prennet amzeriel",
     "Temporary lock your files" : "Prennan amzeriel o restroù",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Aotreit ho implijourien da brennañ evit ur pennad o restroù evit ampech kudennoù pa labouront war restroù rannet.",
