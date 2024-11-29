@@ -1,0 +1,6 @@
+{ "translations": {
+    "Desktop client" : "დესკტოპ კლიენტი",
+    "iOS client" : "iOS კლიენტი",
+    "Android client" : "Android კლიენტი"
+},"pluralForm" :"nplurals=2; plural=(n!=1);"
+}
