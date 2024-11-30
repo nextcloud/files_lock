@@ -14,6 +14,9 @@ OC.L10N.register(
     "Locked by {user}" : "Uzamčeno {user}",
     "Locked by {app}" : "Uzamčeno {app}",
     "Unlock file" : "Odemknout soubor",
-    "Lock file" : "Zamknout soubor"
+    "Lock file" : "Zamknout soubor",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Tento soubor byl automaticky uzamčen klientem. Odebrání zámku může vést ke konfliktu při ukládání souboru.",
+    "Keep lock" : "Ponechat zámek",
+    "Force unlock" : "Vynutit odemknutí"
 },
 "nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;");
