@@ -12,6 +12,7 @@ OC.L10N.register(
     "Locked by {user}" : "Заблокировано пользователем {user}",
     "Locked by {app}" : "Заблокировано приложением {app}",
     "Unlock file" : "Разблокировать файл",
-    "Lock file" : "Заблокировать файл"
+    "Lock file" : "Заблокировать файл",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Этот файл был автоматически заблокирован клиентом. Снятие блокировки может привести к конфликту при сохранении файла."
 },
 "nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);");
