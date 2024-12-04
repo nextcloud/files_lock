@@ -2,6 +2,7 @@
 \.idea/
 
 /build/
+/css/
 /js/
 /vendor/
 /node_modules/
