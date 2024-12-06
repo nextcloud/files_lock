@@ -12,6 +12,9 @@
     "Locked by {user}" : "Faoi ghlas ag {user}",
     "Locked by {app}" : "Faoi ghlas ag {app}",
     "Unlock file" : "Díghlasáil an comhad",
-    "Lock file" : "Comhad faoi ghlas"
+    "Lock file" : "Comhad faoi ghlas",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Tá an comhad seo glasáilte go huathoibríoch ag cliant. D'fhéadfadh coinbhleacht an comhad a shábháil má bhaintear an glas.",
+    "Keep lock" : "Coinnigh glas",
+    "Force unlock" : "Díghlasáil bhfeidhm"
 },"pluralForm" :"nplurals=5; plural=(n==1 ? 0 : n==2 ? 1 : n<7 ? 2 : n<11 ? 3 : 4);"
 }
