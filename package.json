@@ -30,7 +30,7 @@
     "@nextcloud/stylelint-config": "^3.0.1",
     "@nextcloud/vite-config": "^2.2.2",
     "@vue/tsconfig": "^0.4.0",
-    "prettier": "^3.4.1",
+    "prettier": "^3.4.2",
     "stylelint-config-css-modules": "^4.4.0",
     "typescript": "^5.7.2",
     "typescript-plugin-css-modules": "^5.1.0",
