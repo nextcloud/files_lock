@@ -14,6 +14,9 @@ OC.L10N.register(
     "Locked by {user}" : "Verrouillé par {user}",
     "Locked by {app}" : "Verrouillé par {app}",
     "Unlock file" : "Déverrouiller le fichier",
-    "Lock file" : "Verrouiller le fichier"
+    "Lock file" : "Verrouiller le fichier",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Ce fichier a été verrouillé automatiquement par un client. Supprimer le verrou peut conduire à un entrer en conflit lors de l'enregistrement du fichier.",
+    "Keep lock" : "Conserver le verrou",
+    "Force unlock" : "Forcer le déverrouillage"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
