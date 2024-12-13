@@ -14,6 +14,9 @@ OC.L10N.register(
     "Locked by {user}" : "Закључао корисник {user}",
     "Locked by {app}" : "Закључала апликација {app}",
     "Unlock file" : "Откључај фајл",
-    "Lock file" : "Закључај фајл"
+    "Lock file" : "Закључај фајл",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Клијент је аутоматски закључао овај фајл. Уклањање катанца може да изазове конфликте приликом чувања фајла.",
+    "Keep lock" : "Задржи катанац",
+    "Force unlock" : "Форсирај откључавање"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);");
