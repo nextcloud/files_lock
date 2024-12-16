@@ -8,7 +8,10 @@
 
 ![](screenshots/0.7.0.png)
 
-**Files Lock** allows your users to temporary lock a file to avoid other users' edits.  
+**Files Lock** allows your users to temporary lock a file to avoid other users' edits.  The app also supports automatic locking of files when they are opened in collaborative editing like Nextcloud Text or Nextcloud Office and automatic locking by the desktop client.
+
+Since some locks may become stale by design (e.g. when a user forgets to unlock or a desktop client is left offline and no automatic unlock is happening), the owner of a file can always unlock any existing locks. In addition admins can unlock any file using the `occ files:lock -u <fileId>` command.
+
 By default, files locked using this app will be locked indefinitely.
 
 ### Settings
