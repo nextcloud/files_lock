@@ -11,8 +11,8 @@ OC.L10N.register(
     "Temporary files lock" : "ۋاقىتلىق ھۆججەتلەر قۇلۇپلىنىدۇ",
     "Temporary lock your files" : "ھۆججەتلىرىڭىزنى ۋاقىتلىق قۇلۇپلاڭ",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "ئىشلەتكۈچىلەرنىڭ ئورتاق ھۆججەتلەرنى ئىشلەۋاتقاندا توقۇنۇشتىن ساقلىنىش ئۈچۈن ھۆججەتلىرىنى ۋاقىتلىق قۇلۇپلىشىغا يول قويۇڭ.",
-    "Locked by {user}" : "{ئىشلەتكۈچى} تەرىپىدىن قۇلۇپلانغان",
-    "Locked by {app}" : "{App} تەرىپىدىن قۇلۇپلانغان",
+    "Locked by {user}" : "{user} تەرىپىدىن قۇلۇپلانغان",
+    "Locked by {app}" : "{app} تەرىپىدىن قۇلۇپلانغان",
     "Unlock file" : "ھۆججەتنى ئېچىش",
     "Lock file" : "ھۆججەتنى قۇلۇپلاش"
 },

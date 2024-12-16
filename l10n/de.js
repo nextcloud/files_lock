@@ -14,6 +14,8 @@ OC.L10N.register(
     "Locked by {user}" : "Gesperrt von {user}",
     "Locked by {app}" : "Gesperrt von {app}",
     "Unlock file" : "Datei entsperren",
-    "Lock file" : "Datei sperren"
+    "Lock file" : "Datei sperren",
+    "Keep lock" : "Sperre behalten",
+    "Force unlock" : "Entsperren erzwingen"
 },
 "nplurals=2; plural=(n != 1);");
