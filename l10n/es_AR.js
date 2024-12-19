@@ -2,6 +2,7 @@ OC.L10N.register(
     "files_lock",
     {
     "Desktop client" : "Cliente de escritorio",
+    "iOS client" : "Cliente iOS",
     "Android client" : "Cliente Android",
     "Unlock file" : "Desbloquear archivo",
     "Lock file" : "Bloquear archivo"
