@@ -14,6 +14,9 @@ OC.L10N.register(
     "Locked by {user}" : "{user} tarafından kilitlenmiş",
     "Locked by {app}" : "{app} tarafından kilitlenmiş",
     "Unlock file" : "Dosya kilidini aç",
-    "Lock file" : "Dosyayı kilitle"
+    "Lock file" : "Dosyayı kilitle",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Bu dosya bir istemci tarafından otomatik olarak kilitlenmiş. Kilidi kaldırmak dosyayı kaydederken bir çakışmaya yol açabilir.",
+    "Keep lock" : "Kilitli kalsın",
+    "Force unlock" : "Kilit zorla açılsın"
 },
 "nplurals=2; plural=(n > 1);");

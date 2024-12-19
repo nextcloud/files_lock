@@ -4,6 +4,7 @@ OC.L10N.register(
     "File can only be unlocked by providing a valid owner lock token" : "El archivo solo puede ser desbloqueado al proporcionar un token de bloqueo de propietario válido",
     "File can only be unlocked by the owner of the lock" : "El archivo solo puede ser desbloqueado por el propietario del bloqueo",
     "Desktop client" : "Cliente de escritorio",
+    "iOS client" : "Cliente iOS",
     "Android client" : "Cliente Android",
     "Temporary files lock" : "Archivos temporalmente bloqueados",
     "Temporary lock your files" : "Bloquea temporalmente tus archivos",
