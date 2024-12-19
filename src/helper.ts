@@ -77,16 +77,16 @@ export const getInfoLabel = (node: Node): string => {
 
 	if (state.lockOwnerType === LockType.User) {
 		return state.isLocked
-			? t('files_lock', 'Locked by {user}', { user: state.lockOwnerDisplayName })
+			? t('files_lock', 'Manually locked by {user}', { user: state.lockOwnerDisplayName })
 			: ''
 
 	} else if (state.lockOwnerType === LockType.App) {
 		return state.isLocked
-			? t('files_lock', 'Locked by {app}', { app: state.lockOwnerDisplayName })
+			? t('files_lock', 'Locked by editing online in {app}', { app: state.lockOwnerDisplayName })
 			: ''
 	} else {
 		return state.isLocked
-			? t('files_lock', 'Locked by {user}', { user: state.lockOwnerDisplayName })
+			? t('files_lock', 'Automatically locked by {user}', { user: state.lockOwnerDisplayName })
 			: ''
 	}
 
