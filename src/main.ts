@@ -18,7 +18,6 @@ import { lockFile, unlockFile } from './api'
 import { LockType } from './types'
 import {
 	canLock, canUnlock,
-	generateAvatarSvg,
 	getInfoLabel,
 	getLockStateFromAttributes,
 } from './helper'
@@ -29,6 +28,8 @@ import '@nextcloud/dialogs/style.css'
 import LockSvg from '@mdi/svg/svg/lock.svg?raw'
 import LockOpenSvg from '@mdi/svg/svg/lock-open-variant.svg?raw'
 import LockEditSvg from '@mdi/svg/svg/pencil-lock.svg?raw'
+import LockMonitorSvg from '@mdi/svg/svg/monitor-lock.svg?raw'
+import LockAccountSvg from '@mdi/svg/svg/account-lock.svg?raw'
 
 const switchLock = async (node: Node) => {
 	try {
@@ -73,12 +74,16 @@ const inlineAction = new FileAction({
 			return ''
 		}
 
-		if (state.isLocked && state.lockOwnerType !== LockType.App && state.lockOwner !== getCurrentUser()?.uid) {
-			return generateAvatarSvg(state.lockOwner)
+		if (state.lockOwnerType === LockType.Token) {
+			return LockMonitorSvg
 		}
 
 		if (state.lockOwnerType === LockType.App) {
 			return LockEditSvg
+		}
+
+		if (state.lockOwner !== getCurrentUser()?.uid) {
+			return LockAccountSvg
 		}
 
 		return LockSvg
