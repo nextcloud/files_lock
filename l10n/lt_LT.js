@@ -10,8 +10,6 @@ OC.L10N.register(
     "Temporary files lock" : "Laikinasis failų užraktas",
     "Temporary lock your files" : "Laikinai užrakinti savo failus",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Leidžia naudotojams laikinai blokuoti savo failus, kad išvengti veiklos konfliktų dirbant su bendrinamais failais.",
-    "Locked by {user}" : "Užrakino {user}",
-    "Locked by {app}" : "Užrakino {app}",
     "Unlock file" : "Atrakinti failą",
     "Lock file" : "Užrakinti failą",
     "Keep lock" : "Palikti užraktą",

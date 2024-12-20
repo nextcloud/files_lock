@@ -9,8 +9,6 @@
     "Temporary files lock" : "Привремено закључавање фајлова",
     "Temporary lock your files" : "Закључај фајлове привремено",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Дозволите Вашим корисницима да привремено закључају своје фајлове да избегну конфликте док раде на дељеним фајловима.",
-    "Locked by {user}" : "Закључао корисник {user}",
-    "Locked by {app}" : "Закључала апликација {app}",
     "Unlock file" : "Откључај фајл",
     "Lock file" : "Закључај фајл",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Клијент је аутоматски закључао овај фајл. Уклањање катанца може да изазове конфликте приликом чувања фајла.",

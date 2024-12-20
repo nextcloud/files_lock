@@ -9,8 +9,6 @@
     "Temporary files lock" : "Bloqueo temporal de ficheiros",
     "Temporary lock your files" : "Bloquear temporalmente os seus ficheiros",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Permitir aos seus usuarios bloquear temporalmente os seus ficheiros para evitar conflitos mentres traballan en ficheiros compartidos.",
-    "Locked by {user}" : "Bloqueado por {user}",
-    "Locked by {app}" : "Bloqueado por {app}",
     "Unlock file" : "Desbloquear ficheiro",
     "Lock file" : "Bloquear ficheiro",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Este ficheiro foi bloqueado automaticamente por un cliente. A retirada do bloqueo pode provocar un conflito ao gardar o ficheiro.",

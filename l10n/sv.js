@@ -11,8 +11,6 @@ OC.L10N.register(
     "Temporary files lock" : "Tillfällig låsning av filer",
     "Temporary lock your files" : "Lås dina filer för tillfället",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Låt dina användare tillfälligt låsa sina filer för att undvika konflikter när de arbetar med delade filer.",
-    "Locked by {user}" : "Låst av {user}",
-    "Locked by {app}" : "Låst av {app}",
     "Unlock file" : "Lås upp fil",
     "Lock file" : "Lås fil",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Den här filen har låsts automatiskt av en klient. Att ta bort låset kan leda till en konflikt när filen sparas.",

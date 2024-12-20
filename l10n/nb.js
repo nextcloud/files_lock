@@ -11,8 +11,6 @@ OC.L10N.register(
     "Temporary files lock" : "Midlertidig fillås",
     "Temporary lock your files" : "Lås midlertidig filene dine",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "La brukerne låse filene midlertidig for å unngå konflikter mens de arbeider med delte filer.",
-    "Locked by {user}" : "Låst av {user}",
-    "Locked by {app}" : "Låst av {app}",
     "Unlock file" : "Lås opp fil",
     "Lock file" : "Lås fil"
 },
