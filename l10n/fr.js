@@ -11,8 +11,6 @@ OC.L10N.register(
     "Temporary files lock" : "Verrouillage temporaire des fichiers ",
     "Temporary lock your files" : "Verrouillez temporairement vos fichiers",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Autoriser vos utilisateurs à verrouiller temporairement leurs fichiers pour éviter des conflits lorsqu'ils travaillent sur des documents partagés.",
-    "Locked by {user}" : "Verrouillé par {user}",
-    "Locked by {app}" : "Verrouillé par {app}",
     "Unlock file" : "Déverrouiller le fichier",
     "Lock file" : "Verrouiller le fichier",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Ce fichier a été verrouillé automatiquement par un client. Supprimer le verrou peut conduire à un entrer en conflit lors de l'enregistrement du fichier.",

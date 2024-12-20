@@ -11,8 +11,6 @@ OC.L10N.register(
     "Temporary files lock" : "قفل الملفات مؤقتا",
     "Temporary lock your files" : "قفل ملفاتك مؤقتا",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "السماح للمستخدمين بإقفال الملفات الخاصة بهم مؤقتا لتجنب حدوث تعارُضات بينما يعملون على ملفات مشتركة. ",
-    "Locked by {user}" : "مُقفَلٌ من قبل {user}",
-    "Locked by {app}" : "مُقفَلٌ من قبل {app}",
     "Unlock file" : "فك قفل الملف",
     "Lock file" : "قفل الملف",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "هذا الملف تمّ قفله تلقائيًا بواسطة أحد العملاء. قد تؤدي إزالة القفل إلى حدوث تعارض في حفظ الملف.",

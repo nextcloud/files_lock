@@ -11,8 +11,6 @@ OC.L10N.register(
     "Temporary files lock" : "Temporary files lock",
     "Temporary lock your files" : "Temporary lock your files",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Allow your users to temporary lock their files to avoid conflicts while working on shared files.",
-    "Locked by {user}" : "Locked by {user}",
-    "Locked by {app}" : "Locked by {app}",
     "Unlock file" : "Unlock file",
     "Lock file" : "Lock file",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file.",
