@@ -11,8 +11,6 @@ OC.L10N.register(
     "Temporary files lock" : "暫時上鎖檔案",
     "Temporary lock your files" : "暫時將您的檔案上鎖",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "允許您的用戶將他們的檔案暫時上鎖，以免在處理分享檔案時出現抵觸。",
-    "Locked by {user}" : "由 {user} 鎖上",
-    "Locked by {app}" : "由 {app} 鎖上",
     "Unlock file" : "解鎖檔案",
     "Lock file" : "上鎖檔案",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "此檔案已被客戶端自動鎖定。移除鎖定可能會導致儲存檔案時發生衝突。",

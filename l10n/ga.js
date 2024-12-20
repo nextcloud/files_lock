@@ -11,8 +11,6 @@ OC.L10N.register(
     "Temporary files lock" : "Glasáil comhaid shealadacha",
     "Temporary lock your files" : "Glasáil do chuid comhad go sealadach",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Lig do d'úsáideoirí a gcuid comhad a ghlasáil go sealadach chun coinbhleachtaí a sheachaint agus iad ag obair ar chomhaid roinnte.",
-    "Locked by {user}" : "Faoi ghlas ag {user}",
-    "Locked by {app}" : "Faoi ghlas ag {app}",
     "Unlock file" : "Díghlasáil an comhad",
     "Lock file" : "Comhad faoi ghlas",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Tá an comhad seo glasáilte go huathoibríoch ag cliant. D'fhéadfadh coinbhleacht an comhad a shábháil má bhaintear an glas.",

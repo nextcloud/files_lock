@@ -9,8 +9,6 @@
     "Temporary files lock" : "Dočasný zámek souborů",
     "Temporary lock your files" : "Dočasně zamykejte své soubory",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Umožňuje vašim uživatelům dočasně uzamykat své soubory a vyhýbat se tak konfliktům při práci na sdílených souborech.",
-    "Locked by {user}" : "Uzamčeno {user}",
-    "Locked by {app}" : "Uzamčeno {app}",
     "Unlock file" : "Odemknout soubor",
     "Lock file" : "Zamknout soubor",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Tento soubor byl automaticky uzamčen klientem. Odebrání zámku může vést ke konfliktu při ukládání souboru.",
