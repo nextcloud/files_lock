@@ -259,7 +259,7 @@ class LockService {
 		}
 
 		if ($force) {
-			$userId = $lock->getOwner();
+			$userId = in_array($lock->getType(), [ILock::TYPE_USER, ILock::TYPE_TOKEN]) ? $lock->getOwner() : $userId;
 			$lockType = $lock->getType();
 		}
 
