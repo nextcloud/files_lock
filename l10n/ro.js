@@ -7,8 +7,6 @@ OC.L10N.register(
     "Temporary files lock" : "Blocaj temporar de fișiere",
     "Temporary lock your files" : "Blochează-ți  temporar fișierele",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Permite utilizatorilor sa își blocheze temporar fișierele pentru a evita conflictele în timp ce lucrezi la fișiere partajate.",
-    "Locked by {user}" : "Blocat de {user}",
-    "Locked by {app}" : "Blocat de {app}",
     "Unlock file" : "Deblochează fișierul",
     "Lock file" : "Blochează fișierul"
 },

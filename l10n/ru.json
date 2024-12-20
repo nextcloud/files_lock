@@ -9,8 +9,6 @@
     "Temporary files lock" : "Временная блокировка файлов",
     "Temporary lock your files" : "Временная блокировка файлов",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Разрешить пользователям временно блокировать файлы во избежание конфликтов при совместной работе с файлами.",
-    "Locked by {user}" : "Заблокировано пользователем {user}",
-    "Locked by {app}" : "Заблокировано приложением {app}",
     "Unlock file" : "Разблокировать файл",
     "Lock file" : "Заблокировать файл",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Этот файл был автоматически заблокирован клиентом. Снятие блокировки может привести к конфликту при сохранении файла.",
