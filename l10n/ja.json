@@ -9,7 +9,13 @@
     "Temporary files lock" : "一時的なファイルのロック ",
     "Temporary lock your files" : "ファイルを一時的にロック",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "ユーザーがファイルを一時的にロックして、共有ファイルで作業中にコンフリクトを避けることができます。",
+    "Manually locked by {user}" : "{user}が手動でロック",
+    "Locked by editing online in {app}" : "{app}のオンライン編集でロック",
+    "Automatically locked by {user}" : "{user}が自動でロック",
     "Unlock file" : "ファイルのロックを解除",
-    "Lock file" : "ファイルをロック"
+    "Lock file" : "ファイルをロック",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "このファイルはクライアントによって自動的にロックされています。ロックを解除すると、ファイルの保存が競合する可能性があります。",
+    "Keep lock" : "ロックを保持する",
+    "Force unlock" : "強制ロック解除"
 },"pluralForm" :"nplurals=1; plural=0;"
 }
