@@ -4,6 +4,27 @@
 -->
 # Changelog
 
+## 30.0.1
+
+### Added
+
+- fix: Use icons instead of avatar for locking indication [#472](https://github.com/nextcloud/files_lock/pull/472)
+
+### Fixed
+
+- Allow force unlock of automated client locks [#441](https://github.com/nextcloud/files_lock/pull/441)
+- fix: Use proper user when unlocking an app locked file with occ [#465](https://github.com/nextcloud/files_lock/pull/465)
+
+### Dependencies
+
+- Prepare composer files for Nextcloud 30 @susnux [#338](https://github.com/nextcloud/files_lock/pull/338)
+
+### Other
+
+- chore(CI): Adjust testing matrix for Nextcloud 30 on stable30 @nickvergessen [#341](https://github.com/nextcloud/files_lock/pull/341)
+- fix(ci): litmus test with current upload-artifact [#371](https://github.com/nextcloud/files_lock/pull/371)
+- chore(dev-deps): Bump nextcloud/ocp package @juliusknorr [#373](https://github.com/nextcloud/files_lock/pull/373)
+
 ## 30.0.0
 
 ### Fixed
