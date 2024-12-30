@@ -1,5 +1,20 @@
 # Changelog
 
+## 29.0.2
+
+### Added
+
+- fix: Use icons instead of avatar for locking indication [#473](https://github.com/nextcloud/files_lock/pull/473)
+
+### Fixed
+
+- Allow force unlock of automated client locks [#440](https://github.com/nextcloud/files_lock/pull/440)
+- fix: Use proper user when unlocking an app locked file with occ [#466](https://github.com/nextcloud/files_lock/pull/466)
+
+### Other
+
+- fix(ci): litmus test with current upload-artifact [#370](https://github.com/nextcloud/files_lock/pull/370)
+
 ## 29.0.1
 
 ### Fixed
