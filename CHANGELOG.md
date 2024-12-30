@@ -1,5 +1,11 @@
 # Changelog
 
+## 27.0.8
+
+### Fixed
+
+- Allow force unlock of automated client locks [#438](https://github.com/nextcloud/files_lock/pull/438)
+
 ## 27.0.7
 
 ### Fixed
