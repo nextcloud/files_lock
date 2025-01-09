@@ -4,6 +4,29 @@
 -->
 # Changelog
 
+## 31.0.0
+
+### Added
+
+- fix: Use icons instead of avatar for locking indication @juliusknorr [#471](https://github.com/nextcloud/files_lock/pull/471)
+
+### Fixed
+
+- Allow force unlock of automated client locks @juliusknorr [#391](https://github.com/nextcloud/files_lock/pull/391)
+- fix: Use proper user when unlocking an app locked file with occ @juliusknorr [#452](https://github.com/nextcloud/files_lock/pull/452)
+
+### Other
+
+- feat(deps): Add Nextcloud 31 support on main @nickvergessen [#342](https://github.com/nextcloud/files_lock/pull/342)
+- test: Add test for extending locks @susnux [#340](https://github.com/nextcloud/files_lock/pull/340)
+- chore: Fix indention of composer.json @susnux [#339](https://github.com/nextcloud/files_lock/pull/339)
+- Migrate reuse to toml format @AndyScherzinger [#353](https://github.com/nextcloud/files_lock/pull/353)
+- fix(api): return types for Storage\LockWrapper @max-nextcloud [#368](https://github.com/nextcloud/files_lock/pull/368)
+- fix(ci): litmus test with current upload-artifact @max-nextcloud [#367](https://github.com/nextcloud/files_lock/pull/367)
+- chore(dev-deps): Bump nextcloud/ocp package @juliusknorr [#372](https://github.com/nextcloud/files_lock/pull/372)
+- Revert "chore(deps): Bump vue from 2.7.15 to 3.5.13" @juliusknorr [#428](https://github.com/nextcloud/files_lock/pull/428)
+- docs: Extend basic app explanation @juliusknorr [#468](https://github.com/nextcloud/files_lock/pull/468)
+
 ## 30.0.0
 
 ### Fixed
