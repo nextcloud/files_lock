@@ -27,6 +27,7 @@ use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserManager;
 use OCP\IUserSession;
+use Psr\Log\LoggerInterface;
 
 class LockService {
 	public const PREFIX = 'files_lock';
@@ -45,6 +46,7 @@ class LockService {
 	private IEventDispatcher $eventDispatcher;
 	private IUserSession $userSession;
 	private IRequest $request;
+	private LoggerInterface $logger;
 
 
 	private array $locks = [];
@@ -64,6 +66,7 @@ class LockService {
 		IEventDispatcher $eventDispatcher,
 		IUserSession $userSession,
 		IRequest $request,
+		LoggerInterface $logger,
 	) {
 		$this->l10n = $l10n;
 		$this->userManager = $userManager;
@@ -74,6 +77,7 @@ class LockService {
 		$this->eventDispatcher = $eventDispatcher;
 		$this->userSession = $userSession;
 		$this->request = $request;
+		$this->logger = $logger;
 
 		$this->setup('app', 'files_lock');
 	}
@@ -289,6 +293,7 @@ class LockService {
 		try {
 			$locks = $this->locksRequest->getLocksOlderThan($timeout);
 		} catch (Exception $e) {
+			$this->logger->warning('Failed to get locks older then timeout', ['exception' => $e]);
 			return [];
 		}
 
