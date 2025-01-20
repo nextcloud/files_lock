@@ -35,6 +35,7 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Exception;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
+use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
 /**
@@ -146,8 +147,10 @@ class LocksRequest extends LocksRequestBuilder {
 	 * @throws Exception
 	 */
 	public function getLocksOlderThan(int $timeout): array {
+		$now = \OC::$server->get(ITimeFactory::class)->getTime();
+		$oldCreationTime = $now - $timeout * 60;
 		$qb = $this->getLocksSelectSql();
-		$qb->andWhere($qb->expr()->lt('l.creation', $qb->createNamedParameter($timeout * 60, IQueryBuilder::PARAM_INT)));
+		$qb->andWhere($qb->expr()->lt('l.creation', $qb->createNamedParameter($oldCreationTime, IQueryBuilder::PARAM_INT)));
 
 		return $this->getLocksFromRequest($qb);
 	}
