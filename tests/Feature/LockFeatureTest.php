@@ -8,6 +8,7 @@ use OC\Files\Lock\LockManager;
 use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\ConfigService;
+use OCA\FilesLock\Service\LockService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Files\File;
 use OCP\Files\IRootFolder;
@@ -202,6 +203,16 @@ class LockFeatureTest extends TestCase {
 		$this->toTheFuture(3600);
 		$file->putContent('CCC');
 		self::assertEquals('CCC', $file->getContent());
+	}
+
+	public function testExpiredLocksAreDeprecated() {
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, 30);
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
+			->newFile('test-expired-lock-is-deprecated', 'AAA');
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+		$this->toTheFuture(3600);
+		$deprecated = \OCP\Server::get(LockService::class)->getDeprecatedLocks();
+		self::assertNotEmpty($deprecated);
 	}
 
 	public function testLockUserInfinite() {
