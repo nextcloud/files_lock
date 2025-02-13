@@ -4,6 +4,12 @@
 -->
 # Changelog
 
+## 31.0.1
+
+### Fixed
+
+- fix(timeout): compare creation time to now - timeout [#530](https://github.com/nextcloud/files_lock/pull/530)
+
 ## 31.0.0
 
 ### Added
