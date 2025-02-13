@@ -38,7 +38,6 @@ use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
-use OCA\FilesLock\Tools\Traits\TLogger;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
@@ -48,6 +47,7 @@ use OCP\Files\Lock\OwnerLockedException;
 use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserSession;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class LockController
@@ -55,12 +55,13 @@ use OCP\IUserSession;
  * @package OCA\FilesLock\Controller
  */
 class LockController extends OCSController {
-	use TLogger;
 
 	private int $ocsVersion;
+	private LoggerInterface $logger;
 
 	public function __construct(
 		IRequest $request,
+		LoggerInterface $logger,
 		private IUserSession $userSession,
 		private FileService $fileService,
 		private LockService $lockService,
@@ -82,6 +83,7 @@ class LockController extends OCSController {
 		$this->registerResponder('xml', function ($data) {
 			return $this->buildOCSResponse('xml', $data);
 		});
+		$this->logger = $logger;
 	}
 
 
@@ -197,7 +199,7 @@ class LockController extends OCSController {
 		);
 
 		if ($log) {
-			$this->log(2, $status . ' - ' . json_encode($data));
+			$this->logger->warning('[warning] ' . $status . ' - ' . json_encode($data));
 		}
 
 		return new DataResponse($data, $status);
