@@ -14,7 +14,6 @@ use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
-use OCA\FilesLock\Tools\Traits\TLogger;
 use OCA\FilesLock\Tools\Traits\TStringTools;
 use OCP\App\IAppManager;
 use OCP\EventDispatcher\IEventDispatcher;
@@ -27,14 +26,13 @@ use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserManager;
 use OCP\IUserSession;
+use Psr\Log\LoggerInterface;
 
 class LockService {
 	public const PREFIX = 'files_lock';
 
 
 	use TStringTools;
-	use TLogger;
-
 
 	private IUserManager $userManager;
 	private IL10N $l10n;
@@ -45,6 +43,7 @@ class LockService {
 	private IEventDispatcher $eventDispatcher;
 	private IUserSession $userSession;
 	private IRequest $request;
+	private LoggerInterface $logger;
 
 
 	private array $locks = [];
@@ -64,6 +63,7 @@ class LockService {
 		IEventDispatcher $eventDispatcher,
 		IUserSession $userSession,
 		IRequest $request,
+		LoggerInterface $logger,
 	) {
 		$this->l10n = $l10n;
 		$this->userManager = $userManager;
@@ -74,8 +74,7 @@ class LockService {
 		$this->eventDispatcher = $eventDispatcher;
 		$this->userSession = $userSession;
 		$this->request = $request;
-
-		$this->setup('app', 'files_lock');
+		$this->logger = $logger;
 	}
 
 	/**
@@ -153,7 +152,7 @@ class LockService {
 				$known->setTimeout(
 					$known->getETA() !== FileLock::ETA_INFINITE ? $known->getTimeout() - $known->getETA() + $this->configService->getTimeoutSeconds() : 0
 				);
-				$this->notice('extending existing lock', false, ['fileLock' => $known]);
+				$this->logger->notice('extending existing lock', ['fileLock' => $known]);
 				$this->locksRequest->update($known);
 				$this->injectMetadata($known);
 				return $known;
@@ -165,7 +164,7 @@ class LockService {
 			$lock = FileLock::fromLockScope($lockScope, $this->configService->getTimeoutSeconds());
 			$this->generateToken($lock);
 			$lock->setCreation(time());
-			$this->notice('locking file', false, ['fileLock' => $lock]);
+			$this->logger->notice('locking file', ['fileLock' => $lock]);
 			$this->injectMetadata($lock);
 			$this->locksRequest->save($lock);
 			$this->propagateEtag($lockScope);
@@ -189,7 +188,7 @@ class LockService {
 	 * @throws UnauthorizedUnlockException
 	 */
 	public function unlock(LockContext $lock, bool $force = false): FileLock {
-		$this->notice('unlocking file', false, ['fileLock' => $lock]);
+		$this->logger->notice('unlocking file', ['fileLock' => $lock]);
 
 		$known = $this->getLockFromFileId($lock->getNode()->getId());
 		if (!$force) {
@@ -280,8 +279,8 @@ class LockService {
 	public function getDeprecatedLocks(): array {
 		$timeout = (int)$this->configService->getAppValue(ConfigService::LOCK_TIMEOUT);
 		if ($timeout === 0) {
-			$this->notice(
-				'ConfigService::LOCK_TIMEOUT is not numerical, using default', true, ['current' => $timeout]
+			$this->logger->notice(
+				'ConfigService::LOCK_TIMEOUT is not numerical, using default', ['current' => $timeout, 'exception' => new \Exception()]
 			);
 			$timeout = (int)$this->configService->defaults[ConfigService::LOCK_TIMEOUT];
 		}
@@ -289,6 +288,7 @@ class LockService {
 		try {
 			$locks = $this->locksRequest->getLocksOlderThan($timeout);
 		} catch (Exception $e) {
+			$this->logger->warning('Failed to get locks older then timeout', ['exception' => $e]);
 			return [];
 		}
 
@@ -376,7 +376,7 @@ class LockService {
 			}, $locks
 		);
 
-		$this->notice('removing locks', false, ['ids' => $ids]);
+		$this->logger->notice('removing locks', ['ids' => $ids]);
 
 		$this->locksRequest->removeIds($ids);
 	}
