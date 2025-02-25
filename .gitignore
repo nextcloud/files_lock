@@ -6,6 +6,7 @@
 /js/
 /vendor/
 /node_modules/
+/playwright-report/
 
 .php-cs-fixer.cache
 .phpunit.result.cache

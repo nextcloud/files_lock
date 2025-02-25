@@ -11,7 +11,8 @@
     "lint": "eslint --ext .js,.ts,.vue src",
     "lint:fix": "eslint --ext .js,.ts,.vue src --fix",
     "stylelint": "stylelint 'src/**/*.vue'",
-    "stylelint:fix": "stylelint src/**/*.vue --fix"
+    "stylelint:fix": "stylelint src/**/*.vue --fix",
+    "start:nextcloud": "node playwright/start-nextcloud-server.mjs"
   },
   "dependencies": {
     "@mdi/svg": "^7.4.47",
@@ -26,9 +27,11 @@
   },
   "devDependencies": {
     "@nextcloud/browserslist-config": "^3.0.1",
+    "@nextcloud/e2e-test-server": "^0.2.1",
     "@nextcloud/eslint-config": "^8.3.0",
     "@nextcloud/stylelint-config": "^2.3.1",
     "@nextcloud/vite-config": "^1.5.1",
+    "@playwright/test": "^1.50.1",
     "@vue/tsconfig": "^0.4.0",
     "prettier": "^3.0.3",
     "stylelint-config-css-modules": "^4.3.0",
@@ -52,7 +55,10 @@
     ]
   },
   "engines": {
-    "node": "^20",
-    "npm": "^9"
+    "node": "^23",
+    "npm": "^10"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.34.6"
   }
 }
