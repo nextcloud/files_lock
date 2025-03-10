@@ -50,6 +50,12 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      # Ensure we have a repo to call gh on below.
+      - name: Checkout
+        uses: actions/checkout@main
+        with:
+          fetch-depth: 1
+
       - name: Enable Pull Request Automerge
         if: startsWith(steps.branchname.outputs.branch, 'automated/noid/') && endsWith(steps.branchname.outputs.branch, 'update-nextcloud-ocp')
         run: gh pr merge --merge --auto "1"
