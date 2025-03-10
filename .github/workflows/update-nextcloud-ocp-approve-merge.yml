@@ -51,6 +51,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Enable Pull Request Automerge
+        if: startsWith(steps.branchname.outputs.branch, 'automated/noid/') && endsWith(steps.branchname.outputs.branch, 'update-nextcloud-ocp')
         run: gh pr merge --merge --auto "1"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
