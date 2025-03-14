@@ -96,11 +96,6 @@ const inlineAction = new FileAction({
 			return false
 		}
 
-		// FIXME: Currently enabled is not re-evaluated when emitting an updated node object through files:node:updated
-		// Therefor we need to also have a unlocked state as the inline action is then always rendered
-		// We currently hide them for the grid view via css
-		return true
-
 		const node = nodes[0]
 		const state = getLockStateFromAttributes(node)
 
