@@ -4,6 +4,18 @@
 -->
 # Changelog
 
+## 31.0.2
+
+### Fixed
+
+- fix: Hide empty inline menu entry in grid view [#603](https://github.com/nextcloud/files_lock/pull/603)
+
+### Other
+
+- Add playwright skeleton for e2e tests [#558](https://github.com/nextcloud/files_lock/pull/558)
+- chore(deps): bump deps of update-nextcloud-ocp-approve-merge @max-nextcloud [#573](https://github.com/nextcloud/files_lock/pull/573)
+- fix/nextcloud ocp approve merge @max-nextcloud [#585](https://github.com/nextcloud/files_lock/pull/585)
+
 ## 31.0.1
 
 ### Fixed
