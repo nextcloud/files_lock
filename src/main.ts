@@ -58,6 +58,28 @@ const switchLock = async (node: Node) => {
 	}
 }
 
+const getLockStateIcon = (node: Node) => {
+	const state = getLockStateFromAttributes(node)
+
+	if (!state.isLocked) {
+		return ''
+	}
+
+	if (state.lockOwnerType === LockType.Token) {
+		return LockMonitorSvg
+	}
+
+	if (state.lockOwnerType === LockType.App) {
+		return LockEditSvg
+	}
+
+	if (state.lockOwner !== getCurrentUser()?.uid) {
+		return LockAccountSvg
+	}
+
+	return LockSvg
+}
+
 const inlineAction = new FileAction({
 	id: 'lock_inline',
 	title: (nodes: Node[]) => nodes.length === 1 ? getInfoLabel(nodes[0]) : '',
@@ -68,26 +90,7 @@ const inlineAction = new FileAction({
 
 	iconSvgInline(nodes: Node[]) {
 		const node = nodes[0]
-
-		const state = getLockStateFromAttributes(node)
-
-		if (!state.isLocked) {
-			return ''
-		}
-
-		if (state.lockOwnerType === LockType.Token) {
-			return LockMonitorSvg
-		}
-
-		if (state.lockOwnerType === LockType.App) {
-			return LockEditSvg
-		}
-
-		if (state.lockOwner !== getCurrentUser()?.uid) {
-			return LockAccountSvg
-		}
-
-		return LockSvg
+		return getLockStateIcon(node)
 	},
 
 	enabled(nodes: Node[]) {
@@ -103,9 +106,27 @@ const inlineAction = new FileAction({
 	},
 })
 
+const menuInfo = new FileAction({
+	id: 'lock_info',
+	order: 25,
+	displayName: (nodes: Node[]) => getInfoLabel(nodes[0]),
+	iconSvgInline: (nodes: Node[]) => {
+		const node = nodes[0]
+		return getLockStateIcon(node)
+	},
+	enabled(nodes: Node[]) {
+		// Only works on single node
+		if (nodes.length !== 1) {
+			return false
+		}
+		const node = nodes[0]
+		const state = getLockStateFromAttributes(node)
+		return state.isLocked
+	},
+	async exec() {},
+})
 const menuAction = new FileAction({
 	id: 'lock',
-	title: (nodes: Node[]) => getInfoLabel(nodes[0]),
 	order: 25,
 
 	iconSvgInline(nodes: Node[]) {
@@ -166,4 +187,5 @@ const menuAction = new FileAction({
 })
 
 registerFileAction(inlineAction)
+registerFileAction(menuInfo)
 registerFileAction(menuAction)
