@@ -1,5 +1,16 @@
 # Changelog
 
+## 29.0.3
+
+### Fixed
+
+- fix: Hide empty inline menu entry in grid view [#601](https://github.com/nextcloud/files_lock/pull/601)
+- fix(timeout): compare creation time to now - timeout [#532](https://github.com/nextcloud/files_lock/pull/532)
+
+### Other
+
+- Add playwright skeleton for e2e tests @juliusknorr [#560](https://github.com/nextcloud/files_lock/pull/560)
+
 ## 29.0.2
 
 ### Added
