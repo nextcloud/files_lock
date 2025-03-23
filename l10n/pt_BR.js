@@ -12,6 +12,8 @@ OC.L10N.register(
     "Temporary lock your files" : "Travar temporariamente seus arquivos ",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Permitir que usuários bloqueiem temporariamente seus arquivos para evitar conflitos enquanto trabalham em arquivos compartilhados.",
     "Unlock file" : "Destravar arquivo",
-    "Lock file" : "Travar arquivo"
+    "Lock file" : "Travar arquivo",
+    "Keep lock" : "Manter o bloqueio",
+    "Force unlock" : "Forçar o desbloqueio"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
