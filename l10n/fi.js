@@ -11,7 +11,11 @@ OC.L10N.register(
     "Temporary files lock" : "Väliaikainen tiedostojen lukitus",
     "Temporary lock your files" : "Lukitse tiedostosi väliaikaisesti",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Salli käyttäjien väliaikaisesti lukita tiedostonsa välttääkseen ristiriitoja jaettujen tiedostojen kanssa työskennellessä.",
+    "Manually locked by {user}" : "Manuaalisesti lukittu käyttäjän {user} toimesta",
+    "Automatically locked by {user}" : "Automaattisesti lukittu käyttäjän {user} toimesta",
     "Unlock file" : "Vapauta tiedoston lukitus",
-    "Lock file" : "Lukitse tiedosto"
+    "Lock file" : "Lukitse tiedosto",
+    "Keep lock" : "Säilytä lukitus",
+    "Force unlock" : "Pakota lukituksen avaus"
 },
 "nplurals=2; plural=(n != 1);");
