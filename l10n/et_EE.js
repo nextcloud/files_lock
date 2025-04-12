@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Desktop client" : "Töölaua klient",
     "iOS client" : "iOS klient",
-    "Android client" : "Android klient"
+    "Android client" : "Android klient",
+    "Lock file" : "Lukusta fail"
 },
 "nplurals=2; plural=(n != 1);");
