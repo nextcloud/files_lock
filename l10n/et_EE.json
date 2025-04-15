@@ -2,6 +2,7 @@
     "Desktop client" : "Töölaua klient",
     "iOS client" : "iOS klient",
     "Android client" : "Android klient",
+    "Unlock file" : "Eemalda faili lukustus",
     "Lock file" : "Lukusta fail"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
