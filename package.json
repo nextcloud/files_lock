@@ -59,6 +59,6 @@
     "npm": "^10"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.35.0"
+    "@rollup/rollup-linux-x64-gnu": "^4.40.0"
   }
 }
