@@ -18,12 +18,13 @@
     "@mdi/svg": "^7.4.47",
     "@nextcloud/auth": "^2.5.1",
     "@nextcloud/axios": "^2.5.1",
-    "@nextcloud/dialogs": "^6.3.0",
+    "@nextcloud/dialogs": "^7.0.0-rc.0",
     "@nextcloud/event-bus": "^3.3.2",
     "@nextcloud/files": "^3.10.2",
     "@nextcloud/l10n": "^3.2.0",
     "@nextcloud/router": "^3.0.1",
-    "vue": "^2.7.14"
+    "@nextcloud/vue": "^9.0.0-rc.1",
+    "vue": "^3.5.13"
   },
   "devDependencies": {
     "@nextcloud/browserslist-config": "^3.0.1",
@@ -32,12 +33,12 @@
     "@nextcloud/stylelint-config": "^3.0.1",
     "@nextcloud/vite-config": "^2.3.5",
     "@playwright/test": "^1.52.0",
-    "@vue/tsconfig": "^0.4.0",
+    "@vue/tsconfig": "^0.7.0",
     "prettier": "^3.5.3",
     "stylelint-config-css-modules": "^4.4.0",
     "typescript": "^5.8.3",
     "typescript-plugin-css-modules": "^5.1.0",
-    "vite": "^6.3.3"
+    "vite": "^6.3.5"
   },
   "prettier": {
     "useTabs": true,
