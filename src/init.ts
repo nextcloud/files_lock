@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { registerDavProperty } from '@nextcloud/files'
+import { registerDavProperty } from '@nextcloud/files/dav'
 
 registerDavProperty('nc:lock', { nc: 'http://nextcloud.org/ns' })
 registerDavProperty('nc:lock-owner', { nc: 'http://nextcloud.org/ns' })

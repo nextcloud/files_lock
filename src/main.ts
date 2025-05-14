@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import Vue from 'vue'
 import {
 	FileAction,
 	type Node,
@@ -11,7 +10,7 @@ import {
 	FileType,
 	registerFileAction,
 } from '@nextcloud/files'
-import { getDialogBuilder, DialogSeverity } from '@nextcloud/dialogs'
+import { getDialogBuilder } from '@nextcloud/dialogs'
 import { translate as t } from '@nextcloud/l10n'
 import { emit } from '@nextcloud/event-bus'
 import { lockFile, unlockFile } from './api'
@@ -37,18 +36,18 @@ const switchLock = async (node: Node) => {
 		const state = getLockStateFromAttributes(node)
 		if (!state.isLocked) {
 			const data = await lockFile(node)
-			Vue.set(node.attributes, 'lock', '1')
-			Vue.set(node.attributes, 'lock-owner', data.userId)
-			Vue.set(node.attributes, 'lock-owner-displayname', data.displayName)
-			Vue.set(node.attributes, 'lock-owner-type', data.type)
-			Vue.set(node.attributes, 'lock-time', data.creation)
+			node.attributes.lock = '1'
+			node.attributes['lock-owner'] = data.userId
+			node.attributes['lock-owner-displayname'] = data.displayName
+			node.attributes['lock-owner-type'] = data.type
+			node.attributes['lock-time'] = data.creation
 		} else {
 			await unlockFile(node)
-			Vue.set(node.attributes, 'lock', '')
-			Vue.set(node.attributes, 'lock-owner', '')
-			Vue.set(node.attributes, 'lock-owner-displayname', '')
-			Vue.set(node.attributes, 'lock-owner-type', '')
-			Vue.set(node.attributes, 'lock-time', '')
+			node.attributes.lock = ''
+			node.attributes['lock-owner'] = ''
+			node.attributes['lock-owner-displayname'] = ''
+			node.attributes['lock-owner-type'] = ''
+			node.attributes['lock-time'] = ''
 		}
 		emit('files:node:updated', node)
 		return true
@@ -162,7 +161,7 @@ const menuAction = new FileAction({
 		if (lock?.lockOwnerType === LockType.Token) {
 			const dialog = getDialogBuilder('Unlock file manually')
 				.setText(t('files_lock', 'This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file.'))
-				.setSeverity(DialogSeverity.Warning)
+				.setSeverity('warning')
 				.addButton({
 					label: t('files_lock', 'Keep lock'),
 					callback: () => {
