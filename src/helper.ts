@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { type Node } from '@nextcloud/files'
+import { Permission, type Node } from '@nextcloud/files'
 import { generateUrl } from '@nextcloud/router'
 import { type LockState, LockType } from './types'
 import { translate as t } from '@nextcloud/l10n'
@@ -22,8 +22,9 @@ export const getLockStateFromAttributes = (node: Node): LockState => {
 
 export const canLock = (node: Node): boolean => {
 	const state = getLockStateFromAttributes(node)
+	const isUpdatable = (node.permissions & Permission.UPDATE) !== 0
 
-	if (!state.isLocked) {
+	if (!state.isLocked && isUpdatable) {
 		return true
 	}
 
@@ -32,9 +33,10 @@ export const canLock = (node: Node): boolean => {
 
 export const canUnlock = (node: Node): boolean => {
 	const state = getLockStateFromAttributes(node)
+	const isUpdatable = (node.permissions & Permission.UPDATE) !== 0
 
-	if (!state.isLocked) {
-		return false
+	if (!state.isLocked && isUpdatable) {
+		return true
 	}
 
 	if (state.lockOwnerType === LockType.User && state.lockOwner === getCurrentUser()?.uid) {
