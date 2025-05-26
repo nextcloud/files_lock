@@ -173,7 +173,7 @@ class LockController extends OCSController {
 		);
 
 		if ($log) {
-			$this->logger->warning('[warning] ' . $status . ' - ' . json_encode($data));
+			$this->logger->warning('[warning] ' . (string)$status . ' - ' . json_encode($data));
 		}
 
 		return new DataResponse($data, $status);
