@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SPDX-FileCopyrightText: 2019 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -23,22 +24,10 @@ use OCP\Lock\ManuallyLockedException;
 
 class LockWrapper extends Wrapper {
 	private ILockManager $lockManager;
+	private FileService $fileService;
+	private LockService $lockService;
+	private IUserSession $userSession;
 
-	/** @var FileService */
-	private $fileService;
-
-	/** @var LockService */
-	private $lockService;
-
-	/** @var IUserSession */
-	private $userSession;
-
-
-	/**
-	 * LockWrapper constructor.
-	 *
-	 * @param $arguments
-	 */
 	public function __construct($arguments) {
 		parent::__construct($arguments);
 

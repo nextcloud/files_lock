@@ -10,11 +10,10 @@ declare(strict_types=1);
 namespace OCA\FilesLock\Model;
 
 use JsonSerializable;
-use OCA\FilesLock\Tools\Db\IQueryRow;
-use OCA\FilesLock\Tools\Traits\TArrayTools;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
+use OCP\Server;
 use Sabre\DAV\Locks\LockInfo;
 
 /**
@@ -22,48 +21,25 @@ use Sabre\DAV\Locks\LockInfo;
  *
  * @package OCA\FilesLock\Service
  */
-class FileLock implements ILock, IQueryRow, JsonSerializable {
-	use TArrayTools;
-
+class FileLock implements ILock, JsonSerializable {
 	public const ETA_INFINITE = -1;
 
-	/** @var int */
-	private $id = 0;
-
-	/** @var string */
-	private $userId = '';
-
-	/** @var string */
-	private $uri = '';
-
-	/** @var string */
-	private $token = '';
-
-	/** @var int */
-	private $fileId = 0;
-
-	/** @var int */
-	private $timeout = 1800;
-
-	/** @var int */
-	private $creation = 0;
-
-	/** @var int */
-	private $lockType = ILock::TYPE_USER;
-
+	private int $id = 0;
+	private string $userId = '';
+	private string $uri = '';
+	private string $token = '';
+	private int $fileId = 0;
+	private int $timeout = 1800;
+	private int $creation = 0;
+	/** @var ILock::TYPE_* */
+	private int $lockType = ILock::TYPE_USER;
 	private ?string $displayName = null;
-
 	private string $owner = '';
-	private $scope = ILock::LOCK_EXCLUSIVE;
+	private int $scope = ILock::LOCK_EXCLUSIVE;
 
-	/**
-	 * FileLock constructor.
-	 *
-	 * @param int $timeout
-	 */
 	public function __construct(int $timeout = 1800) {
 		$this->timeout = $timeout;
-		$this->creation = \OC::$server->get(ITimeFactory::class)->getTime();
+		$this->creation = Server::get(ITimeFactory::class)->getTime();
 	}
 
 	public static function fromLockScope(LockContext $lockScope, int $timeout): FileLock {
@@ -74,144 +50,79 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $lock;
 	}
 
-
-	/**
-	 * @return int
-	 */
 	public function getId(): int {
 		return $this->id;
 	}
 
-	/**
-	 * @param int $id
-	 *
-	 * @return FileLock
-	 */
 	public function setId(int $id): self {
 		$this->id = $id;
 
 		return $this;
 	}
 
-
-	/**
-	 * @return string
-	 */
 	public function getUri(): string {
 		return $this->uri;
 	}
 
-	/**
-	 * @param string $uri
-	 *
-	 * @return FileLock
-	 */
 	public function setUri(string $uri): self {
 		$this->uri = $uri;
 
 		return $this;
 	}
 
-
-	/**
-	 * @return string
-	 */
 	public function getOwner(): string {
 		return $this->userId;
 	}
 
-	/**
-	 * @param string $userId
-	 *
-	 * @return FileLock
-	 */
 	public function setUserId(string $userId): self {
 		$this->userId = $userId;
 
 		return $this;
 	}
 
-
-	/**
-	 * @return int
-	 */
 	public function getFileId(): int {
 		return $this->fileId;
 	}
 
-	/**
-	 * @param int $fileId
-	 *
-	 * @return FileLock
-	 */
 	public function setFileId(int $fileId): self {
 		$this->fileId = $fileId;
 
 		return $this;
 	}
 
-
-	/**
-	 * @return string
-	 */
 	public function getToken(): string {
 		return $this->token;
 	}
 
-	/**
-	 * @param string $token
-	 *
-	 * @return FileLock
-	 */
 	public function setToken(string $token): self {
 		$this->token = $token;
 
 		return $this;
 	}
 
-
-	/**
-	 * @return int
-	 */
 	public function getTimeout(): int {
 		return $this->timeout;
 	}
 
-	/**
-	 * @param int $timeout
-	 *
-	 * @return FileLock
-	 */
 	public function setTimeout(int $timeout): self {
 		$this->timeout = $timeout;
 
 		return $this;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getETA(): int {
 		if ($this->getTimeout() <= 0) {
 			return self::ETA_INFINITE;
 		}
 		$end = $this->getCreatedAt() + $this->getTimeout();
-		$eta = $end - \OC::$server->get(ITimeFactory::class)->getTime();
+		$eta = $end - Server::get(ITimeFactory::class)->getTime();
 		return ($eta < 1) ? 0 : $eta;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getCreatedAt(): int {
 		return $this->creation;
 	}
 
-	/**
-	 * @param int $creation
-	 *
-	 * @return FileLock
-	 */
 	public function setCreation(int $creation): self {
 		$this->creation = $creation;
 
@@ -267,12 +178,8 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 	}
 
 
-	/**
-	 * @param array $data
-	 *
-	 * @return IQueryRow
-	 */
-	public function importFromDatabase(array $data):IQueryRow {
+
+	public function importFromDatabase(array $data): self {
 		$this->setId($this->getInt('id', $data));
 		$this->setUserId($this->get('user_id', $data));
 		$this->setFileId($this->getInt('file_id', $data));
@@ -285,26 +192,6 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $this;
 	}
 
-
-	/**
-	 * @param array $data
-	 */
-	public function import(array $data) {
-		$this->setId($this->getInt('id', $data));
-		$this->setUri($this->get('uri', $data));
-		$this->setUserId($this->get('userId', $data));
-		$this->setFileId($this->getInt('fileId', $data));
-		$this->setToken($this->get('token', $data));
-		$this->setCreation($this->getInt('creation', $data));
-		$this->setLockType($this->getInt('type', $data));
-		$this->setTimeout($this->getInt('ttl', $data));
-		$this->setDisplayName($this->get('owner', $data));
-	}
-
-
-	/**
-	 * @return array
-	 */
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),
@@ -321,5 +208,72 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 
 	public function __toString(): string {
 		return $this->getToken();
+	}
+
+	/**
+	 * @param string $k
+	 * @param array $arr
+	 * @param string $default
+	 *
+	 * @return string
+	 */
+	protected function get(string $k, array $arr, string $default = ''): string {
+		if (!array_key_exists($k, $arr)) {
+			$subs = explode('.', $k, 2);
+			if (sizeof($subs) > 1) {
+				if (!array_key_exists($subs[0], $arr)) {
+					return $default;
+				}
+
+				$r = $arr[$subs[0]];
+				if (!is_array($r)) {
+					return $default;
+				}
+
+				return $this->get($subs[1], $r, $default);
+			} else {
+				return $default;
+			}
+		}
+
+		if ($arr[$k] === null || !is_string($arr[$k]) && (!is_int($arr[$k]))) {
+			return $default;
+		}
+
+		return (string)$arr[$k];
+	}
+
+
+	/**
+	 * @param string $k
+	 * @param array $arr
+	 * @param int $default
+	 *
+	 * @return int
+	 */
+	protected function getInt(string $k, array $arr, int $default = 0): int {
+		if (!array_key_exists($k, $arr)) {
+			$subs = explode('.', $k, 2);
+			if (sizeof($subs) > 1) {
+				if (!array_key_exists($subs[0], $arr)) {
+					return $default;
+				}
+
+				$r = $arr[$subs[0]];
+				if (!is_array($r)) {
+					return $default;
+				}
+
+				return $this->getInt($subs[1], $r, $default);
+			} else {
+				return $default;
+			}
+		}
+
+		if ($arr[$k] === null) {
+			return $default;
+		}
+
+		return intval($arr[$k]);
 	}
 }

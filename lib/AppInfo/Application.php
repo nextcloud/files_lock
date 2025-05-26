@@ -53,7 +53,7 @@ class Application extends App implements IBootstrap {
 	public function boot(IBootContext $context): void {
 		$this->registerHooks();
 
-		$context->injectFn(function (ILockManager $lockManager) use ($context) {
+		$context->injectFn(function (ILockManager $lockManager) {
 			$lockManager->registerLazyLockProvider(LockProvider::class);
 		});
 	}
