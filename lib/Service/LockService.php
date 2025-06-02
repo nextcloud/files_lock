@@ -14,9 +14,7 @@ use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
-use OCA\FilesLock\Tools\Traits\TStringTools;
 use OCP\App\IAppManager;
-use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
@@ -31,50 +29,20 @@ use Psr\Log\LoggerInterface;
 class LockService {
 	public const PREFIX = 'files_lock';
 
-
-	use TStringTools;
-
-	private IUserManager $userManager;
-	private IL10N $l10n;
-	private LocksRequest $locksRequest;
-	private FileService $fileService;
-	private ConfigService $configService;
-	private IAppManager $appManager;
-	private IEventDispatcher $eventDispatcher;
-	private IUserSession $userSession;
-	private IRequest $request;
-	private LoggerInterface $logger;
-
-
-	private array $locks = [];
-	private bool $lockRetrieved = false;
 	private array $lockCache = [];
-	private ?array $directEditors = null;
 	private bool $allowUserOverride = false;
 
-
 	public function __construct(
-		IL10N $l10n,
-		IUserManager $userManager,
-		LocksRequest $locksRequest,
-		FileService $fileService,
-		ConfigService $configService,
-		IAppManager $appManager,
-		IEventDispatcher $eventDispatcher,
-		IUserSession $userSession,
-		IRequest $request,
-		LoggerInterface $logger,
+		private IL10N $l10n,
+		private IUserManager $userManager,
+		private LocksRequest $locksRequest,
+		private FileService $fileService,
+		private ConfigService $configService,
+		private IAppManager $appManager,
+		private IUserSession $userSession,
+		private IRequest $request,
+		private LoggerInterface $logger,
 	) {
-		$this->l10n = $l10n;
-		$this->userManager = $userManager;
-		$this->locksRequest = $locksRequest;
-		$this->fileService = $fileService;
-		$this->configService = $configService;
-		$this->appManager = $appManager;
-		$this->eventDispatcher = $eventDispatcher;
-		$this->userSession = $userSession;
-		$this->request = $request;
-		$this->logger = $logger;
 	}
 
 	/**
@@ -361,6 +329,30 @@ class LockService {
 		$lock->setToken(self::PREFIX . '/' . $this->uuid());
 	}
 
+	/**
+	 * Generate uuid: 2b5a7a87-8db1-445f-a17b-405790f91c80
+	 *
+	 * @param int $length
+	 *
+	 * @return string
+	 */
+	protected function uuid(int $length = 0): string {
+		$uuid = sprintf(
+			'%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+			mt_rand(0, 0xffff), mt_rand(0, 0xfff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000,
+			mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+		);
+
+		if ($length > 0) {
+			if ($length <= 16) {
+				$uuid = str_replace('-', '', $uuid);
+			}
+
+			$uuid = substr($uuid, 0, $length);
+		}
+
+		return $uuid;
+	}
 
 	/**
 	 * @param FileLock[] $locks
