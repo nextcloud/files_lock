@@ -8,7 +8,7 @@ OC.L10N.register(
     "Android client" : "Klient Android",
     "Temporary files lock" : "Tymczasowa blokada plików",
     "Temporary lock your files" : "Tymczasowo zablokuj swoje pliki",
-    "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Zezwól użytkownikom na tymczasowe blokowanie swoich plików, aby uniknąć konfliktów podczas pracy na udostępnionych plikach.",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Zezwalaj użytkownikom na tymczasowe blokowanie swoich plików, aby uniknąć konfliktów podczas pracy na udostępnionych plikach.",
     "Unlock file" : "Odblokuj plik",
     "Lock file" : "Zablokuj plik"
 },
