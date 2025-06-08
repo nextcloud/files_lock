@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="5.26.1@d747f6500b38ac4f7dfc5edbcae6e4b637d7add0">
+<files psalm-version="6.8.2@720ed6b578ac24f9543c65c3d4cecea0ff348ccd">
   <file src="lib/DAV/LockPlugin.php">
     <UndefinedClass>
       <code><![CDATA[CachingTree]]></code>
@@ -98,14 +98,5 @@
       <code><![CDATA[$arr === null]]></code>
       <code><![CDATA[$arr === null]]></code>
     </TypeDoesNotContainNull>
-  </file>
-  <file src="lib/Tools/Traits/TSetup.php">
-    <MismatchingDocblockParamType>
-      <code><![CDATA[string]]></code>
-      <code><![CDATA[string]]></code>
-    </MismatchingDocblockParamType>
-    <MismatchingDocblockReturnType>
-      <code><![CDATA[string]]></code>
-    </MismatchingDocblockReturnType>
   </file>
 </files>
