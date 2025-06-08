@@ -38,17 +38,7 @@ class LockFeatureTest extends TestCase {
 	protected IShareManager $shareManager;
 	protected ?int $time = null;
 
-	public static function setUpBeforeClass(): void {
-		parent::setUpBeforeClass();
-		$backend = new Dummy();
-		$backend->createUser(self::TEST_USER1, self::TEST_USER1);
-		$backend->createUser(self::TEST_USER2, self::TEST_USER2);
-		\OCP\Server::get(IUserManager::class)->registerBackend($backend);
-	}
-
 	public function setUp(): void {
-		parent::setUp();
-
 		$this->timeFactory = $this->createMock(ITimeFactory::class);
 		$this->timeFactory->method('getTime')
 			->willReturnCallback(function () {
@@ -70,6 +60,12 @@ class LockFeatureTest extends TestCase {
 				return new DateTimeImmutable('now');
 			});
 		$this->overwriteService(ITimeFactory::class, $this->timeFactory);
+
+		parent::setUp();
+		$backend = new Dummy();
+		$backend->createUser(self::TEST_USER1, self::TEST_USER1);
+		$backend->createUser(self::TEST_USER2, self::TEST_USER2);
+		\OCP\Server::get(IUserManager::class)->registerBackend($backend);
 
 		$this->lockManager = \OCP\Server::get(ILockManager::class);
 		$this->rootFolder = \OCP\Server::get(IRootFolder::class);
