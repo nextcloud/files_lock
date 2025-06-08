@@ -133,7 +133,6 @@ class LocksRequest {
 		$qb->where($qb->expr()->lt('l.creation', $qb->createNamedParameter($oldCreationTime, IQueryBuilder::PARAM_INT)));
 
 		$a = $this->getLocksFromRequest($qb);
-		var_dump($a);
 
 		return $a;
 	}
