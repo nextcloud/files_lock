@@ -5,7 +5,7 @@ OC.L10N.register(
     "File is not locked" : "Dosya kilitli değil",
     "File can only be unlocked by providing a valid owner lock token" : "Dosyanın kilidini yalnızca geçerli bir sahip kilidi kodu ile açabilir",
     "File can only be unlocked by the owner of the lock" : "Dosyanın kilidini yalnızca kilitleyen kişi açabilir",
-    "Desktop client" : "Masaüstü istemcisi",
+    "Desktop client" : "Bilgisayar istemcisi",
     "iOS client" : "iOS istemcisi",
     "Android client" : "Android istemcisi",
     "Temporary files lock" : "Geçici dosya kilidi",
