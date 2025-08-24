@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SPDX-FileCopyrightText: 2022 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -37,34 +38,42 @@ class LockFeatureTest extends TestCase {
 	protected IShareManager $shareManager;
 	protected ?int $time = null;
 
-	public static function setUpBeforeClass(): void {
-		parent::setUpBeforeClass();
-		$backend = new Dummy();
-		$backend->createUser(self::TEST_USER1, self::TEST_USER1);
-		$backend->createUser(self::TEST_USER2, self::TEST_USER2);
-		\OCP\Server::get(IUserManager::class)->registerBackend($backend);
-	}
-
 	public function setUp(): void {
-		parent::setUp();
-		$this->time = null;
-		$this->lockManager = \OCP\Server::get(ILockManager::class);
-		$this->rootFolder = \OCP\Server::get(IRootFolder::class);
 		$this->timeFactory = $this->createMock(ITimeFactory::class);
-		$this->timeFactory->expects(self::any())
-			->method('getTime')
+		$this->timeFactory->method('getTime')
 			->willReturnCallback(function () {
 				if ($this->time) {
 					return $this->time;
 				}
 				return time();
 			});
+		$this->timeFactory->method('getDateTime')
+			->willReturnCallback(function () {
+				return new DateTime();
+			});
+		$this->timeFactory->method('getTimeZone')
+			->willReturnCallback(function () {
+				return new DateTimeZone('UTC');
+			});
+		$this->timeFactory->method('now')
+			->willReturnCallback(function () {
+				return new DateTimeImmutable('now');
+			});
+		$this->overwriteService(ITimeFactory::class, $this->timeFactory);
+
+		parent::setUp();
+		$backend = new Dummy();
+		$backend->createUser(self::TEST_USER1, self::TEST_USER1);
+		$backend->createUser(self::TEST_USER2, self::TEST_USER2);
+		\OCP\Server::get(IUserManager::class)->registerBackend($backend);
+
+		$this->lockManager = \OCP\Server::get(ILockManager::class);
+		$this->rootFolder = \OCP\Server::get(IRootFolder::class);
 		$folder = $this->loginAndGetUserFolder(self::TEST_USER1);
 		$folder->delete('test-file');
 		$folder->delete('test-file2');
 		$folder->delete('test-file3');
 		\OC_Hook::$thrownExceptions = [];
-		$this->overwriteService(ITimeFactory::class, $this->timeFactory);
 	}
 
 	public function testLockUser() {
