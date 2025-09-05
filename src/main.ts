@@ -25,11 +25,11 @@ import { getCurrentUser } from '@nextcloud/auth'
 import '@nextcloud/dialogs/style.css'
 import './styles.css'
 
-import LockSvg from '@mdi/svg/svg/lock.svg?raw'
-import LockOpenSvg from '@mdi/svg/svg/lock-open-variant.svg?raw'
-import LockEditSvg from '@mdi/svg/svg/pencil-lock.svg?raw'
+import LockSvg from '@mdi/svg/svg/lock-outline.svg?raw'
+import LockOpenSvg from '@mdi/svg/svg/lock-open-variant-outline.svg?raw'
+import LockEditSvg from '@mdi/svg/svg/pencil-lock-outline.svg?raw'
 import LockMonitorSvg from '@mdi/svg/svg/monitor-lock.svg?raw'
-import LockAccountSvg from '@mdi/svg/svg/account-lock.svg?raw'
+import LockAccountSvg from '@mdi/svg/svg/account-lock-outline.svg?raw'
 
 const switchLock = async (node: Node) => {
 	try {
