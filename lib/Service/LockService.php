@@ -336,8 +336,8 @@ class LockService {
 		if ($lock->getType() === ILock::TYPE_TOKEN) {
 			$clientHint = $this->getClientHint();
 			$displayName = $lock->getDisplayName() ?: (
-				$this->userManager->getDisplayName($lock->getOwner()) . ' ' .
-				($clientHint ? ('(' . $clientHint . ')') : '')
+				$this->userManager->getDisplayName($lock->getOwner()) . ' '
+				. ($clientHint ? ('(' . $clientHint . ')') : '')
 			);
 		}
 
