@@ -4,6 +4,22 @@
 -->
 # Changelog
 
+## 32.0.0
+
+### Added
+
+- Update icons to outline style by @AndyScherzinger in [#789](https://github.com/nextcloud/files_lock/pull/789)
+
+### Fixed
+
+- Adjusted testing matrix for Nextcloud 32 by @nickvergessen in [#779](https://github.com/nextcloud/files_lock/pull/779)
+- Auto merge in OCP workflow by @max-nextcloud in [#614](https://github.com/nextcloud/files_lock/pull/614)
+
+### Other
+
+- NPM audits
+- Dependency updates
+
 ## 31.0.0
 
 ### Added
