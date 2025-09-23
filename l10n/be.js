@@ -2,6 +2,7 @@ OC.L10N.register(
     "files_lock",
     {
     "File is not locked" : "Файл не заблакаваны.",
+    "File can only be unlocked by providing a valid owner lock token" : "Файл можна разблакіраваць толькі шляхам прадастаўлення дзеючага токена блакіроўкі ўладальніка",
     "Unlock file" : "Разблакіраваць файл",
     "Lock file" : "Блакіраваць файл"
 },
