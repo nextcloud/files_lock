@@ -12,6 +12,8 @@ declare(strict_types=1);
 namespace OCA\FilesLock\Command;
 
 use OC\Core\Command\Base;
+use OC\DB\Connection;
+use OC\DB\SchemaWrapper;
 use OC\User\NoUserException;
 use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
@@ -26,6 +28,7 @@ use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\NotFoundException;
+use OCP\IDBConnection;
 use OCP\IUserManager;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
@@ -35,48 +38,17 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class Lock extends Base {
-	/** @var IUserManager */
-	private $userManager;
-
-	/** @var LocksRequest */
-	private $locksRequest;
-
-	/** @var FileService */
-	private $fileService;
-
-	/** @var LockService */
-	private $lockService;
-
-	/** @var ConfigService */
-	private $configService;
-
-
-	/**
-	 * CacheUpdate constructor.
-	 *
-	 * @param IUserManager $userManager
-	 * @param FileService $fileService
-	 * @param LockService $lockService
-	 * @param LocksRequest $locksRequest
-	 * @param ConfigService $configService
-	 */
 	public function __construct(
-		IUserManager $userManager, LocksRequest $locksRequest, FileService $fileService,
-		LockService $lockService, ConfigService $configService,
+		private IUserManager $userManager,
+		private LocksRequest $locksRequest,
+		private FileService $fileService,
+		private LockService $lockService,
+		private ConfigService $configService,
+		private IDBConnection $connection,
 	) {
 		parent::__construct();
-
-		$this->userManager = $userManager;
-		$this->locksRequest = $locksRequest;
-		$this->fileService = $fileService;
-		$this->lockService = $lockService;
-		$this->configService = $configService;
 	}
 
-
-	/**
-	 *
-	 */
 	protected function configure() {
 		parent::configure();
 		$this->setName('files:lock')
@@ -240,5 +212,43 @@ class Lock extends Base {
 		$output->writeln('<comment>FilesLock App fully uninstalled.</comment>');
 
 		throw new SuccessException();
+	}
+
+
+	/**
+	 *
+	 */
+	public function uninstall(): void {
+		$this->uninstallAppTables();
+		$this->removeFromJobs();
+		$this->removeFromMigrations();
+	}
+
+	public function uninstallAppTables() {
+		$dbConn = \OCP\Server::get(Connection::class);
+		$schema = new SchemaWrapper($dbConn);
+
+		foreach (array_keys(self::$tables) as $table) {
+			if ($schema->hasTable($table)) {
+				$schema->dropTable($table);
+			}
+		}
+
+		$schema->performDropTableCalls();
+	}
+
+	public function removeFromMigrations() {
+		$qb = $this->connection->getQueryBuilder();
+		$qb->delete('migrations');
+		$qb->where($qb->expr()->eq('app', 'files_lock'));
+
+		$qb->executeStatement();
+	}
+
+	public function removeFromJobs() {
+		$qb = $this->connection->getQueryBuilder();
+		$qb->delete('jobs');
+		$qb->where($qb->expr()->eq('class', 'OCA\FilesLock\Cron\Unlock'));
+		$qb->executeStatement();
 	}
 }
