@@ -9,11 +9,10 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Db;
 
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
-use Exception;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
 use OCP\AppFramework\Utility\ITimeFactory;
+use OCP\DB\Exception;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
 /**
@@ -25,7 +24,7 @@ class LocksRequest extends LocksRequestBuilder {
 	/**
 	 * @param FileLock $lock
 	 */
-	public function save(FileLock $lock) {
+	public function save(FileLock $lock): void {
 		$qb = $this->getLocksInsertSql();
 		$qb->setValue('user_id', $qb->createNamedParameter($lock->getOwner()))
 			->setValue('file_id', $qb->createNamedParameter($lock->getFileId()))
@@ -36,13 +35,17 @@ class LocksRequest extends LocksRequestBuilder {
 			->setValue('owner', $qb->createNamedParameter($lock->getDisplayName()));
 
 		try {
-			$qb->execute();
+			$qb->executeStatement();
 			$lock->setId($qb->getLastInsertId());
-		} catch (UniqueConstraintViolationException $e) {
+		} catch (Exception $e) {
+			if ($e->getReason() === Exception::REASON_UNIQUE_CONSTRAINT_VIOLATION) {
+				return;
+			}
+			throw $e;
 		}
 	}
 
-	public function update(FileLock $lock) {
+	public function update(FileLock $lock): void {
 		$qb = $this->getLocksUpdateSql();
 		$qb->set('token', $qb->createNamedParameter($lock->getToken()))
 			->set('ttl', $qb->createNamedParameter($lock->getTimeout()))
@@ -62,7 +65,7 @@ class LocksRequest extends LocksRequestBuilder {
 		$qb = $this->getLocksDeleteSql();
 		$qb->limitToId($lock->getId());
 
-		$qb->execute();
+		$qb->executeStatement();
 	}
 
 
@@ -77,7 +80,7 @@ class LocksRequest extends LocksRequestBuilder {
 		$qb = $this->getLocksDeleteSql();
 		$qb->limitToIds($ids);
 
-		$qb->execute();
+		$qb->executeStatement();
 	}
 
 
