@@ -75,7 +75,7 @@ class CoreRequestBuilder {
 		$qb->delete('migrations');
 		$qb->where($qb->exprLimitToDBField('app', 'files_lock', true, true));
 
-		$qb->execute();
+		$qb->executeStatement();
 	}
 
 	/**
@@ -85,6 +85,6 @@ class CoreRequestBuilder {
 		$qb = $this->getQueryBuilder();
 		$qb->delete('jobs');
 		$qb->where($qb->exprLimitToDBField('class', 'OCA\FilesLock\Cron\Unlock', true, true));
-		$qb->execute();
+		$qb->executeStatement();
 	}
 }
