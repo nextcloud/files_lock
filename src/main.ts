@@ -159,7 +159,7 @@ const menuAction = new FileAction({
 		const lock = getLockStateFromAttributes(node)
 
 		if (lock?.lockOwnerType === LockType.Token) {
-			const dialog = getDialogBuilder('Unlock file manually')
+			const dialog = getDialogBuilder(t('files_lock', 'files_lock', 'Unlock file manually'))
 				.setText(t('files_lock', 'This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file.'))
 				.setSeverity('warning')
 				.addButton({
