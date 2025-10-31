@@ -1,24 +1,20 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * SPDX-FileCopyrightText: 2016 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-define('PHPUNIT_RUN', 1);
+use OCP\App\IAppManager;
+use OCP\Server;
 
-$configDir = getenv('CONFIG_DIR');
-if ($configDir) {
-	define('PHPUNIT_CONFIG_DIR', $configDir);
+if (!defined('PHPUNIT_RUN')) {
+	define('PHPUNIT_RUN', 1);
 }
 
 require_once __DIR__ . '/../../../lib/base.php';
+require_once __DIR__ . '/../../../tests/autoload.php';
 
-\OC::$composerAutoloader->addPsr4('Test\\', OC::$SERVERROOT . '/tests/lib/', true);
-\OC::$composerAutoloader->addPsr4('Tests\\', OC::$SERVERROOT . '/tests/', true);
-
-// load all enabled apps
-\OCP\Server::get(\OCP\App\IAppManager::class)->loadApps();
-\OCP\Server::get(\OCP\App\IAppManager::class)->enableApp('files_lock', true);
-\OC_App::updateApp('files_lock');
-
-set_include_path(get_include_path() . PATH_SEPARATOR . '/usr/share/php');
+Server::get(IAppManager::class)->loadApp('files_lock');

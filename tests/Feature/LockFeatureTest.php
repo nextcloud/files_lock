@@ -65,6 +65,7 @@ class LockFeatureTest extends TestCase {
 		$folder->delete('test-file3');
 		\OC_Hook::$thrownExceptions = [];
 		$this->overwriteService(ITimeFactory::class, $this->timeFactory);
+		$this->toTheFuture(0);
 	}
 
 	public function testLockUser() {
@@ -432,7 +433,10 @@ class LockFeatureTest extends TestCase {
 	}
 
 	private function toTheFuture(int $seconds): void {
-		$this->time = time() + $seconds;
+		if ($this->time === null) {
+			$this->time = time();
+		}
+		$this->time += $seconds;
 	}
 
 	public function tearDown(): void {
