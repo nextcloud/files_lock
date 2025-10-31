@@ -35,8 +35,12 @@ export const canUnlock = (node: Node): boolean => {
 	const state = getLockStateFromAttributes(node)
 	const isUpdatable = (node.permissions & Permission.UPDATE) !== 0
 
-	if (!state.isLocked && isUpdatable) {
-		return true
+	if (!state.isLocked) {
+		return false
+	}
+
+	if (!isUpdatable) {
+		return false
 	}
 
 	if (state.lockOwnerType === LockType.User && state.lockOwner === getCurrentUser()?.uid) {
