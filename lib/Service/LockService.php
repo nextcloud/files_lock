@@ -16,6 +16,7 @@ use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Tools\Traits\TStringTools;
 use OCP\App\IAppManager;
+use OCP\Constants;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
@@ -142,6 +143,8 @@ class LockService {
 	}
 
 	public function lock(LockContext $lockScope): FileLock {
+		$this->canLock($lockScope);
+
 		try {
 			$known = $this->getLockFromFileId($lockScope->getNode()->getId());
 
@@ -203,6 +206,14 @@ class LockService {
 
 	public function enableUserOverride(): void {
 		$this->allowUserOverride = true;
+	}
+
+	public function canLock(LockContext $request, ?FileLock $current = null): void {
+		if (($request->getNode()->getPermissions() & Constants::PERMISSION_UPDATE) === 0) {
+			throw new UnauthorizedUnlockException(
+				$this->l10n->t('File can only be locked with update permissions.')
+			);
+		}
 	}
 
 	public function canUnlock(LockContext $request, FileLock $current): void {
