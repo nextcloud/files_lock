@@ -14,6 +14,7 @@
     "Automatically locked by {user}" : "Automatisch gesperrt durch {user}",
     "Unlock file" : "Datei entsperren",
     "Lock file" : "Datei sperren",
+    "files_lock" : "files_lock",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Diese Datei wurde automatisch von einem Client gesperrt. Das Entfernen der Sperre kann zu einem Konflikt beim Speichern der Datei führen.",
     "Keep lock" : "Sperre behalten",
     "Force unlock" : "Entsperren erzwingen"

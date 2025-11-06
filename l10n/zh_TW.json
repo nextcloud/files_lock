@@ -14,6 +14,7 @@
     "Automatically locked by {user}" : "由 {user} 自動鎖定",
     "Unlock file" : "解鎖檔案",
     "Lock file" : "上鎖檔案",
+    "files_lock" : "files_lock",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "此檔案已被客戶端自動鎖定。移除鎖定可能會導致儲存檔案時發生衝突。",
     "Keep lock" : "維持鎖定",
     "Force unlock" : "強制解鎖"

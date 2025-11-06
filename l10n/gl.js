@@ -16,6 +16,7 @@ OC.L10N.register(
     "Automatically locked by {user}" : "Bloqueado automaticamente por {user}",
     "Unlock file" : "Desbloquear ficheiro",
     "Lock file" : "Bloquear ficheiro",
+    "files_lock" : "ficheiros_bloqueados",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Este ficheiro foi bloqueado automaticamente por un cliente. A retirada do bloqueo pode provocar un conflito ao gardar o ficheiro.",
     "Keep lock" : "Manter o bloqueo",
     "Force unlock" : "Forzar o desbloqueo"
