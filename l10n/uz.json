@@ -1,4 +1,5 @@
 { "translations": {
-    "Unlock file" : "Faylni qulfdan chiqarish"
+    "Unlock file" : "Faylni qulfdan chiqarish",
+    "Lock file" : "Faylni qulflash"
 },"pluralForm" :"nplurals=1; plural=0;"
 }
