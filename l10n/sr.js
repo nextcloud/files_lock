@@ -16,6 +16,7 @@ OC.L10N.register(
     "Automatically locked by {user}" : "Аутоматски је закључао корисник {user}",
     "Unlock file" : "Откључај фајл",
     "Lock file" : "Закључај фајл",
+    "files_lock" : "files_lock",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Клијент је аутоматски закључао овај фајл. Уклањање катанца може да изазове конфликте приликом чувања фајла.",
     "Keep lock" : "Задржи катанац",
     "Force unlock" : "Форсирај откључавање"
