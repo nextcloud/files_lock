@@ -14,6 +14,7 @@
     "Automatically locked by {user}" : "Automatically locked by {user}",
     "Unlock file" : "Unlock file",
     "Lock file" : "Lock file",
+    "files_lock" : "files_lock",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file.",
     "Keep lock" : "Keep lock",
     "Force unlock" : "Force unlock"
