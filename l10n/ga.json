@@ -14,6 +14,7 @@
     "Automatically locked by {user}" : "Go huathoibríoch faoi ghlas ag{user}",
     "Unlock file" : "Díghlasáil an comhad",
     "Lock file" : "Comhad faoi ghlas",
+    "files_lock" : "glas_comhad",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Tá an comhad seo glasáilte go huathoibríoch ag cliant. D'fhéadfadh coinbhleacht an comhad a shábháil má bhaintear an glas.",
     "Keep lock" : "Coinnigh glas",
     "Force unlock" : "Díghlasáil bhfeidhm"
