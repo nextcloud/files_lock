@@ -14,6 +14,7 @@
     "Automatically locked by {user}" : "Trancado automaticamente por {user}",
     "Unlock file" : "Destrancar arquivo",
     "Lock file" : "Trancar arquivo",
+    "files_lock" : "Desbloquear arquivo manualmente",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Este arquivo foi trancado automaticamente por um cliente. A remoção do trancamento pode levar a um conflito ao salvar o arquivo.",
     "Keep lock" : "Manter o trancamento",
     "Force unlock" : "Forçar o destrancamento"
