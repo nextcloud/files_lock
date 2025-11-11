@@ -25,10 +25,10 @@ class Unlock extends TimedJob {
 	}
 
 	protected function run($argument): void {
-		$this->manageTimeoutLock();
+		$this->deleteExpiredLocks();
 	}
 
-	private function manageTimeoutLock(): void {
-		$this->lockService->removeLocks($this->lockService->getDeprecatedLocks());
+	private function deleteExpiredLocks(): void {
+		$this->lockService->removeLocks($this->lockService->getDeprecatedLocks(1000));
 	}
 }

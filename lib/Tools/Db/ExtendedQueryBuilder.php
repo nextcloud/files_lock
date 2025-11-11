@@ -101,7 +101,7 @@ class ExtendedQueryBuilder extends QueryBuilder {
 	 * @param array $ids
 	 */
 	public function limitToIds(array $ids): void {
-		$this->limitArray('id', $ids);
+		$this->limitInArray('id', $ids);
 	}
 
 	/**

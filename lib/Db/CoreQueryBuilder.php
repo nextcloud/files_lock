@@ -29,7 +29,7 @@ class CoreQueryBuilder extends ExtendedQueryBuilder {
 	 * @param array $ids
 	 */
 	public function limitToIds(array $ids): void {
-		$this->limitArray('id', $ids);
+		$this->limitInArray('id', $ids);
 	}
 
 	public function limitToFileIds(array $ids): void {

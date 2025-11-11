@@ -120,15 +120,20 @@ class LocksRequest extends LocksRequestBuilder {
 
 	/**
 	 * @param int $timeout in minutes
+	 * @param int $limit how many locks to retrieve (0 for all, default)
 	 *
 	 * @return FileLock[]
 	 * @throws Exception
 	 */
-	public function getLocksOlderThan(int $timeout): array {
+	public function getLocksOlderThan(int $timeout, int $limit = 0): array {
 		$now = \OC::$server->get(ITimeFactory::class)->getTime();
 		$oldCreationTime = $now - $timeout * 60;
 		$qb = $this->getLocksSelectSql();
 		$qb->andWhere($qb->expr()->lt('l.creation', $qb->createNamedParameter($oldCreationTime, IQueryBuilder::PARAM_INT)));
+
+		if ($limit !== 0) {
+			$qb->setMaxResults($limit);
+		}
 
 		return $this->getLocksFromRequest($qb);
 	}
