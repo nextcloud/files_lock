@@ -274,9 +274,11 @@ class LockService {
 
 
 	/**
+	 * @param int $limit how many locks to retrieve (0 for all, default)
+	 *
 	 * @return FileLock[]
 	 */
-	public function getDeprecatedLocks(): array {
+	public function getDeprecatedLocks(int $limit = 0): array {
 		$timeout = (int)$this->configService->getAppValue(ConfigService::LOCK_TIMEOUT);
 		if ($timeout === 0) {
 			$this->logger->notice(
@@ -286,7 +288,7 @@ class LockService {
 		}
 
 		try {
-			$locks = $this->locksRequest->getLocksOlderThan($timeout);
+			$locks = $this->locksRequest->getLocksOlderThan($timeout, $limit);
 		} catch (Exception $e) {
 			$this->logger->warning('Failed to get locks older then timeout', ['exception' => $e]);
 			return [];

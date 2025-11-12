@@ -216,6 +216,27 @@ class LockFeatureTest extends TestCase {
 		self::assertNotEmpty($deprecated);
 	}
 
+	public function testRemoveLocks(): void {
+		$service = \OCP\Server::get(LockService::class);
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, 30);
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('test-expired-lock-is-deprecated', 'AAA');
+		$lock1 = $this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+		$file2 = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('test-expired-lock-is-deprecated-2', 'AAA');
+		$lock2 = $this->lockManager->lock(new LockContext($file2, ILock::TYPE_USER, self::TEST_USER1));
+		$this->toTheFuture(3600);
+		$mapToTokens = fn (ILock $lock) => $lock->getToken();
+		$deprecated = array_map($mapToTokens, $service->getDeprecatedLocks());
+
+		self::assertContains($lock1->getToken(), $deprecated);
+		self::assertContains($lock2->getToken(), $deprecated);
+
+		$service->removeLocks([$lock1, $lock2]);
+		$deprecated = array_map($mapToTokens, $service->getDeprecatedLocks());
+
+		self::assertNotContains($lock1->getToken(), $deprecated);
+		self::assertNotContains($lock2->getToken(), $deprecated);
+	}
+
 	public function testLockUserInfinite() {
 		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, 0);
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
