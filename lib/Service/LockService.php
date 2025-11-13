@@ -16,6 +16,7 @@ use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Tools\Traits\TStringTools;
 use OCP\App\IAppManager;
+use OCP\Constants;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
@@ -142,6 +143,8 @@ class LockService {
 	}
 
 	public function lock(LockContext $lockScope): FileLock {
+		$this->canLock($lockScope);
+
 		try {
 			$known = $this->getLockFromFileId($lockScope->getNode()->getId());
 
@@ -203,6 +206,14 @@ class LockService {
 
 	public function enableUserOverride(): void {
 		$this->allowUserOverride = true;
+	}
+
+	public function canLock(LockContext $request, ?FileLock $current = null): void {
+		if (($request->getNode()->getPermissions() & Constants::PERMISSION_UPDATE) === 0) {
+			throw new UnauthorizedUnlockException(
+				$this->l10n->t('File can only be locked with update permissions.')
+			);
+		}
 	}
 
 	public function canUnlock(LockContext $request, FileLock $current): void {
@@ -274,9 +285,11 @@ class LockService {
 
 
 	/**
+	 * @param int $limit how many locks to retrieve (0 for all, default)
+	 *
 	 * @return FileLock[]
 	 */
-	public function getDeprecatedLocks(): array {
+	public function getDeprecatedLocks(int $limit = 0): array {
 		$timeout = (int)$this->configService->getAppValue(ConfigService::LOCK_TIMEOUT);
 		if ($timeout === 0) {
 			$this->logger->notice(
@@ -286,7 +299,7 @@ class LockService {
 		}
 
 		try {
-			$locks = $this->locksRequest->getLocksOlderThan($timeout);
+			$locks = $this->locksRequest->getLocksOlderThan($timeout, $limit);
 		} catch (Exception $e) {
 			$this->logger->warning('Failed to get locks older then timeout', ['exception' => $e]);
 			return [];
