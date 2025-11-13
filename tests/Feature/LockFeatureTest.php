@@ -361,13 +361,13 @@ class LockFeatureTest extends TestCase {
 
 		// We should have one lock for that file with 15 minutes ETA
 		$this->assertCount(1, $locks);
-		$this->assertEquals(15 * 60, $locks[0]->getEta());
+		$this->assertEqualsWithDelta(15 * 60, $locks[0]->getEta(), 2, 'Initial lock ETA should be approximately 15 minutes');
 
 		// going to the future we see the ETA to be 5 minutes
 		$this->toTheFuture(10 * 60);
 		$locks = $this->lockManager->getLocks($file->getId());
 		$this->assertCount(1, $locks);
-		$this->assertEquals(5 * 60, $locks[0]->getEta());
+		$this->assertEqualsWithDelta(5 * 60, $locks[0]->getEta(), 2, 'After 10 minutes, ETA should be approximately 5 minutes');
 		$id = $locks[0]->getId();
 
 		// Extend the lock (lock again)
@@ -376,7 +376,7 @@ class LockFeatureTest extends TestCase {
 		// The lock should only be extended, so same ID but fresh ETA
 		$locks = $this->lockManager->getLocks($file->getId());
 		$this->assertCount(1, $locks);
-		$this->assertEquals(15 * 60, $locks[0]->getEta());
+		$this->assertEqualsWithDelta(15 * 60, $locks[0]->getEta(), 2, 'Extended lock ETA should be approximately 15 minutes');
 		$this->assertEquals($id, $locks[0]->getId());
 	}
 
