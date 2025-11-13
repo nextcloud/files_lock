@@ -7,7 +7,6 @@ import Vue from 'vue'
 import {
 	FileAction,
 	type Node,
-	Permission,
 	FileType,
 	registerFileAction,
 } from '@nextcloud/files'
@@ -20,6 +19,7 @@ import {
 	canLock, canUnlock,
 	getInfoLabel,
 	getLockStateFromAttributes,
+	isUpdatable,
 } from './helper'
 import { getCurrentUser } from '@nextcloud/auth'
 
@@ -129,15 +129,15 @@ const menuAction = new FileAction({
 
 	enabled(nodes: Node[]) {
 		// Only works on single node
-		if (nodes.length !== 1) {
+		const node = nodes.length === 1 ? nodes[0] : null
+		if (!node) {
 			return false
 		}
 
-		const canToggleLock = canLock(nodes[0]) || canUnlock(nodes[0])
-		const isLocked = getLockStateFromAttributes(nodes[0]).isLocked
-		const isUpdatable = (nodes[0].permissions & Permission.UPDATE) !== 0
+		const canToggleLock = canLock(node) || canUnlock(node)
+		const isLocked = getLockStateFromAttributes(node).isLocked
 
-		return nodes[0].type === FileType.File && canToggleLock && (isUpdatable || isLocked)
+		return node.type === FileType.File && canToggleLock && (isUpdatable(node) || isLocked)
 	},
 
 	async exec(node: Node) {
