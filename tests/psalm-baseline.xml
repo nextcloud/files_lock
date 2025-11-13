@@ -59,9 +59,6 @@
       <code><![CDATA[$qb]]></code>
       <code><![CDATA[$qb]]></code>
     </MissingDependency>
-    <UndefinedClass>
-      <code><![CDATA[UniqueConstraintViolationException]]></code>
-    </UndefinedClass>
   </file>
   <file src="lib/Db/LocksRequestBuilder.php">
     <MissingDependency>
@@ -98,14 +95,5 @@
       <code><![CDATA[$arr === null]]></code>
       <code><![CDATA[$arr === null]]></code>
     </TypeDoesNotContainNull>
-  </file>
-  <file src="lib/Tools/Traits/TSetup.php">
-    <MismatchingDocblockParamType>
-      <code><![CDATA[string]]></code>
-      <code><![CDATA[string]]></code>
-    </MismatchingDocblockParamType>
-    <MismatchingDocblockReturnType>
-      <code><![CDATA[string]]></code>
-    </MismatchingDocblockReturnType>
   </file>
 </files>
