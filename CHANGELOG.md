@@ -4,6 +4,18 @@
 -->
 # Changelog
 
+## 31.0.3
+
+### Fixed
+
+- [stable31] Fix deletion of expired locks [#900](https://github.com/nextcloud/files_lock/pull/900)
+- [stable31] Fix lock checks and response error of read only shares [#902](https://github.com/nextcloud/files_lock/pull/902)
+
+### Other
+
+- chore(ci): fix auto merge in ocp workflow @max-nextcloud [#614](https://github.com/nextcloud/files_lock/pull/614)
+- [stable31] ci(actions): Update workflow actions [#876](https://github.com/nextcloud/files_lock/pull/876)
+
 ## 31.0.2
 
 ### Fixed
