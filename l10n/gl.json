@@ -1,6 +1,7 @@
 { "translations": {
     "File is currently locked by %s" : "O ficheiro está bloqueado por %s",
     "File is not locked" : "O ficheiro non está bloqueado",
+    "File can only be locked with update permissions." : "Só é posíbel bloquear o ficheiro con permisos de actualización.",
     "File can only be unlocked by providing a valid owner lock token" : "Só se pode desbloquear o ficheiro fornecendo un testemuño de bloqueo de propietario válido",
     "File can only be unlocked by the owner of the lock" : "O ficheiro só o pode desbloquear o propietario do bloqueo",
     "Desktop client" : "Cliente de escritorio",

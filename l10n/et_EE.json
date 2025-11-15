@@ -1,6 +1,7 @@
 { "translations": {
     "File is currently locked by %s" : "Faili praeguse lukustuse on lisanud „%s“",
     "File is not locked" : "Fail pole lukustatud",
+    "File can only be locked with update permissions." : "Faili lukustamiseks peavad olema muutmisõigused.",
     "File can only be unlocked by providing a valid owner lock token" : "Faili lukustust saab eemaldada vaid omaniku korrektse tunnusloa olemasolul",
     "File can only be unlocked by the owner of the lock" : "Faili lukustust saab vaid omanik eemaldada",
     "Desktop client" : "Töölaua klient",
