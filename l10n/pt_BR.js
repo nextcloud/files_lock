@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "File is currently locked by %s" : "O arquivo está atualmente trancado por %s",
     "File is not locked" : "O arquivo não está trancado",
+    "File can only be locked with update permissions." : "O arquivo só pode ser trancado com permissões de atualização.",
     "File can only be unlocked by providing a valid owner lock token" : "O arquivo só pode ser destrancado fornecendo um token de trancamento de proprietário válido",
     "File can only be unlocked by the owner of the lock" : "O arquivo só pode ser destrancado pelo proprietário do trancamento",
     "Desktop client" : "Cliente Desktop",

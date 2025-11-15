@@ -1,6 +1,7 @@
 { "translations": {
     "File is currently locked by %s" : "Faili kwa sasa imefungwa na %s",
     "File is not locked" : " Faili haijafungwa",
+    "File can only be locked with update permissions." : "Faili inaweza tu kufungwa kwa vibali vya kusasisha. ",
     "File can only be unlocked by providing a valid owner lock token" : "Faili inaweza tu kufunguliwa kwa kutoa tokeni halali ya kufuli ya mmiliki",
     "File can only be unlocked by the owner of the lock" : "Faili inaweza kufunguliwa na mmiliki wa kufuli tu",
     "Desktop client" : " Mteja wa Desktop ",
@@ -14,6 +15,7 @@
     "Automatically locked by {user}" : "Imefungwa kiotomatiki na {user}",
     "Unlock file" : "Fungua faili",
     "Lock file" : "Funga faili",
+    "files_lock" : "faili_kufuli",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Faili hii imefungwa kiotomatiki na mteja. Kuondoa kufuli kunaweza kusababisha mzozo kuhifadhi faili.",
     "Keep lock" : "Weka kufuli",
     "Force unlock" : "Lazimisha kufungua"

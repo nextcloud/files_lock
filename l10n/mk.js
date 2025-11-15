@@ -16,6 +16,7 @@ OC.L10N.register(
     "Automatically locked by {user}" : "Автоматски заклучена од {user}",
     "Unlock file" : "Отклучи датотека",
     "Lock file" : "Заклучи датотека",
+    "files_lock" : "files_lock",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Оваа датотека е автоматски заклучена од клиент. Отстранувањето на заклучувањето може да предизвика конфликт при зачувување.",
     "Keep lock" : "Задржи заклучување",
     "Force unlock" : "Принудно отклучи"

@@ -1,6 +1,7 @@
 { "translations": {
     "File is currently locked by %s" : "ファイルは現在 %s によってロックされています",
     "File is not locked" : "ファイルはロックされていません",
+    "File can only be locked with update permissions." : "ファイルは更新権限がある場合にのみロックできます。",
     "File can only be unlocked by providing a valid owner lock token" : "ファイルのロックを解除するには、所有者が持つ正しいロックトークンが必要です",
     "File can only be unlocked by the owner of the lock" : "ロックの所有者のみがファイルロックを解除できます",
     "Desktop client" : "デスクトップクライアント",
@@ -14,6 +15,7 @@
     "Automatically locked by {user}" : "{user}が自動でロック",
     "Unlock file" : "ファイルのロックを解除",
     "Lock file" : "ファイルをロック",
+    "files_lock" : "files_lock",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "このファイルはクライアントによって自動的にロックされています。ロックを解除すると、ファイルの保存が競合する可能性があります。",
     "Keep lock" : "ロックを保持する",
     "Force unlock" : "強制ロック解除"
