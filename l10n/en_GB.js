@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "File is currently locked by %s" : "File is currently locked by %s",
     "File is not locked" : "File is not locked",
+    "File can only be locked with update permissions." : "File can only be locked with update permissions.",
     "File can only be unlocked by providing a valid owner lock token" : "File can only be unlocked by providing a valid owner lock token",
     "File can only be unlocked by the owner of the lock" : "File can only be unlocked by the owner of the lock",
     "Desktop client" : "Desktop client",

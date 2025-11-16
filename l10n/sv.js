@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "File is currently locked by %s" : "Filen är för tillfället låst av %s",
     "File is not locked" : "Filen är inte låst",
+    "File can only be locked with update permissions." : "Filen kan bara låsas med uppdateringsbehörighet.",
     "File can only be unlocked by providing a valid owner lock token" : "Filen kan endast låsas upp genom att tillhandahålla en giltig token för ägarlåset.",
     "File can only be unlocked by the owner of the lock" : "Fil kan endast låsas upp av låsets ägare",
     "Desktop client" : "Desktopklient",
