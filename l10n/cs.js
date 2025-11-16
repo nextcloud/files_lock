@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "File is currently locked by %s" : "Soubor je v tuto chvíli uzamčen uživatelem %s",
     "File is not locked" : "Soubor není uzamčen",
+    "File can only be locked with update permissions." : "Soubor je možné uzamknout pouze s aktualizovanými oprávněními.",
     "File can only be unlocked by providing a valid owner lock token" : "Soubor je možné odemknout pouze zadáním platného tokenu zámku vlastníka",
     "File can only be unlocked by the owner of the lock" : "Soubor může být odemčen pouze vlastníkem zámku",
     "Desktop client" : "Klient pro počítač",
