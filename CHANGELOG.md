@@ -4,6 +4,12 @@
 -->
 # Changelog
 
+## 30.0.3
+
+### Fixed
+
+- Fix lock checks and response error [#863](https://github.com/nextcloud/files_lock/pull/863)
+
 ## 30.0.2
 
 ### Fixed
