@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "File is currently locked by %s" : "Tá an comhad faoi ghlas faoi láthair ag %s",
     "File is not locked" : "Níl an comhad faoi ghlas",
+    "File can only be locked with update permissions." : "Ní féidir comhad a ghlasáil ach amháin le ceadanna nuashonraithe.",
     "File can only be unlocked by providing a valid owner lock token" : "Ní féidir an comhad a dhíghlasáil ach trí chomhartha glas úinéara bailí a sholáthar",
     "File can only be unlocked by the owner of the lock" : "Ní féidir ach le húinéir an ghlais an comhad a dhíghlasáil",
     "Desktop client" : "Cliant deisce",
