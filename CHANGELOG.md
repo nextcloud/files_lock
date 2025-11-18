@@ -4,6 +4,19 @@
 -->
 # Changelog
 
+## 32.0.1
+
+### Fixed
+
+- [stable32] Fix lock deletion [#899](https://github.com/nextcloud/files_lock/pull/899)
+- [stable32] Make wording "Unlock file manually" translatable [#878](https://github.com/nextcloud/files_lock/pull/878)
+- [stable32] Fix lock checks and response error [#903](https://github.com/nextcloud/files_lock/pull/903)
+
+### Other
+
+- ci: Run litmus on server stable32 @juliusknorr [#858](https://github.com/nextcloud/files_lock/pull/858)
+- [stable32] ci(actions): Update workflow actions [#877](https://github.com/nextcloud/files_lock/pull/877)
+
 ## 32.0.0
 
 ### Added

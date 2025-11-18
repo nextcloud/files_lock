@@ -13,7 +13,7 @@ Allow your users to temporary lock their files to avoid conflicts while working 
 
 ]]>
 	</description>
-	<version>32.0.0</version>
+	<version>32.0.1</version>
 	<licence>agpl</licence>
 	<author>Maxence Lange</author>
 	<namespace>FilesLock</namespace>
