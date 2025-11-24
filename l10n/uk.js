@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "File is currently locked by %s" : "Файл заблоковано %s",
     "File is not locked" : "Файл не заблоковано",
+    "File can only be locked with update permissions." : "Файл можна заблокувати лише за наявности дозволів на внесення змін",
     "File can only be unlocked by providing a valid owner lock token" : "Файл можна розблокувати, якщо надати дійсний токен блокування, що належить власникові",
     "File can only be unlocked by the owner of the lock" : "Файл може розблокувати лише власник замка",
     "Desktop client" : "Клієнт для ПК",
