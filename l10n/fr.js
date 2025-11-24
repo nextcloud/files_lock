@@ -5,7 +5,7 @@ OC.L10N.register(
     "File is not locked" : "Le fichier n’est pas verrouillé",
     "File can only be unlocked by providing a valid owner lock token" : "Le fichier ne peut être déverrouillé qu'en fournissant un jeton de verrouillage propriétaire valide",
     "File can only be unlocked by the owner of the lock" : "Le fichier ne peut être déverrouillé que par le propriétaire du verrouillage",
-    "Desktop client" : "Client de bureau",
+    "Desktop client" : "client de bureau",
     "iOS client" : "Client iOS",
     "Android client" : "Client Android",
     "Temporary files lock" : "Verrouillage temporaire des fichiers ",
