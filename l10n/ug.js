@@ -1,8 +1,9 @@
 OC.L10N.register(
     "files_lock",
     {
-    "File is currently locked by %s" : "ھۆججەت ھازىر% s تەرىپىدىن قۇلۇپلاندى",
+    "File is currently locked by %s" : "ھۆججەت ھازىر %s تەرىپىدىن قۇلۇپلاندى",
     "File is not locked" : "ھۆججەت قۇلۇپلانمىدى",
+    "File can only be locked with update permissions." : "ھۆججەتنى پەقەت يېڭىلاش ئىجازىتى ئارقىلىقلا قۇلۇپلىغىلى بۇلىدۇ.",
     "File can only be unlocked by providing a valid owner lock token" : "ئىناۋەتلىك ئىگىنىڭ قۇلۇپ بەلگىسى بىلەن تەمىنلىگەندىلا ھۆججەتنى ئاچقىلى بولىدۇ",
     "File can only be unlocked by the owner of the lock" : "ھۆججەتنى قۇلۇپ ئىگىسىلا ئاچالايدۇ",
     "Desktop client" : "ئۈستەل يۈزى خېرىدارى",
@@ -11,7 +12,14 @@ OC.L10N.register(
     "Temporary files lock" : "ۋاقىتلىق ھۆججەتلەر قۇلۇپلىنىدۇ",
     "Temporary lock your files" : "ھۆججەتلىرىڭىزنى ۋاقىتلىق قۇلۇپلاڭ",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "ئىشلەتكۈچىلەرنىڭ ئورتاق ھۆججەتلەرنى ئىشلەۋاتقاندا توقۇنۇشتىن ساقلىنىش ئۈچۈن ھۆججەتلىرىنى ۋاقىتلىق قۇلۇپلىشىغا يول قويۇڭ.",
+    "Manually locked by {user}" : "{user} تەرىپىدىن قولدا قۇلۇپلانغان",
+    "Locked by editing online in {app}" : "{app} دا توردا تەھرىرلەش ئارقىلىق قۇلۇپلانغان",
+    "Automatically locked by {user}" : "{user} تەرىپىدىن ئاپتۇماتىك قۇلۇپلانغان",
     "Unlock file" : "ھۆججەتنى ئېچىش",
-    "Lock file" : "ھۆججەتنى قۇلۇپلاش"
+    "Lock file" : "ھۆججەتنى قۇلۇپلاش",
+    "files_lock" : "files_lock",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "بۇ ھۆججەت بىر خېرىدار تەرىپىدىن ئاپتوماتىك قۇلۇپلاندى. قۇلۇپنى ئېلىۋېتىش ھۆججەتنى ساقلاشتا توقۇنۇش كېلىپ چىقىشى مۇمكىن.",
+    "Keep lock" : "قۇلۇپنى ساقلاپ قال",
+    "Force unlock" : "مەجبۇرىي قۇلۇپسىزلا"
 },
 "nplurals=2; plural=(n != 1);");
