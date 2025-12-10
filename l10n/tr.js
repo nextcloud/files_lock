@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "File is currently locked by %s" : "Dosya şu anda %s tarafından kilitlenmiş",
     "File is not locked" : "Dosya kilitli değil",
+    "File can only be locked with update permissions." : "Dosya yalnızca güncelleme izni varsa kilitlenebilir.",
     "File can only be unlocked by providing a valid owner lock token" : "Dosyanın kilidini yalnızca geçerli bir sahip kilidi kodu ile açabilir",
     "File can only be unlocked by the owner of the lock" : "Dosyanın kilidini yalnızca kilitleyen kişi açabilir",
     "Desktop client" : "Bilgisayar istemcisi",
@@ -16,6 +17,7 @@ OC.L10N.register(
     "Automatically locked by {user}" : "{user} tarafından otomatik olarak kilitlenmiş",
     "Unlock file" : "Dosya kilidini aç",
     "Lock file" : "Dosyayı kilitle",
+    "files_lock" : "dosya_kilit",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Bu dosya bir istemci tarafından otomatik olarak kilitlenmiş. Kilidi kaldırmak dosyayı kaydederken bir çakışmaya yol açabilir.",
     "Keep lock" : "Kilitli kalsın",
     "Force unlock" : "Kilit zorla açılsın"
