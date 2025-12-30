@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SPDX-FileCopyrightText: 2019 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -136,8 +137,8 @@ class LockWrapper extends Wrapper {
 					   && parent::rename($path1, $path2);
 			}
 		}
-		$permissions =
-			$this->file_exists($path2) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+		$permissions
+			= $this->file_exists($path2) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
 		$sourceParent = dirname($path1);
 		if ($sourceParent === '.') {
 			$sourceParent = '';
@@ -150,8 +151,8 @@ class LockWrapper extends Wrapper {
 	}
 
 	public function copy($path1, $path2): bool {
-		$permissions =
-			$this->file_exists($path2) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+		$permissions
+			= $this->file_exists($path2) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
 
 		return $this->checkPermissions($path2, $permissions)
 			   && $this->checkPermissions(
@@ -161,8 +162,8 @@ class LockWrapper extends Wrapper {
 	}
 
 	public function touch($path, $mtime = null): bool {
-		$permissions =
-			$this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+		$permissions
+			= $this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
 
 		return $this->checkPermissions($path, $permissions) && parent::touch($path, $mtime);
 	}
@@ -182,8 +183,8 @@ class LockWrapper extends Wrapper {
 	}
 
 	public function file_put_contents($path, $data): int|float|false {
-		$permissions =
-			$this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+		$permissions
+			= $this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
 
 		return $this->checkPermissions($path, $permissions) ? parent::file_put_contents($path, $data) : false;
 	}
@@ -192,16 +193,16 @@ class LockWrapper extends Wrapper {
 		if ($mode === 'r' or $mode === 'rb') {
 			$permissions = Constants::PERMISSION_READ;
 		} else {
-			$permissions =
-				$this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+			$permissions
+				= $this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
 		}
 
 		return $this->checkPermissions($path, $permissions) ? parent::fopen($path, $mode) : false;
 	}
 
 	public function writeStream(string $path, $stream, ?int $size = null): int {
-		$permissions =
-			$this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+		$permissions
+			= $this->file_exists($path) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
 
 		return $this->checkPermissions($path, $permissions) ? parent::writeStream($path, $stream, $size) : 0;
 	}
