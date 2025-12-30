@@ -6,6 +6,7 @@
 import {
 	FileAction,
 	type Node,
+	type INode,
 	FileType,
 	registerFileAction,
 } from '@nextcloud/files'
@@ -81,24 +82,24 @@ const getLockStateIcon = (node: Node) => {
 
 const inlineAction = new FileAction({
 	id: 'lock_inline',
-	title: (nodes: Node[]) => nodes.length === 1 ? getInfoLabel(nodes[0]) : '',
+	title: ({ nodes }: { nodes: INode[] }) => nodes.length === 1 ? getInfoLabel(nodes[0] as Node) : '',
 	inline: () => true,
 	displayName: () => '',
 	exec: async () => null,
 	order: -10,
 
-	iconSvgInline(nodes: Node[]) {
-		const node = nodes[0]
+	iconSvgInline({ nodes }: { nodes: INode[] }) {
+		const node = nodes[0] as Node
 		return getLockStateIcon(node)
 	},
 
-	enabled(nodes: Node[]) {
+	enabled({ nodes }: { nodes: INode[] }) {
 		// Only works on single node
 		if (nodes.length !== 1) {
 			return false
 		}
 
-		const node = nodes[0]
+		const node = nodes[0] as Node
 		const state = getLockStateFromAttributes(node)
 
 		return state.isLocked
@@ -108,43 +109,45 @@ const inlineAction = new FileAction({
 const menuInfo = new FileAction({
 	id: 'lock_info',
 	order: 25,
-	displayName: (nodes: Node[]) => getInfoLabel(nodes[0]),
-	iconSvgInline: (nodes: Node[]) => {
-		const node = nodes[0]
+	displayName: ({ nodes }: { nodes: INode[] }) => getInfoLabel(nodes[0] as Node),
+	iconSvgInline: ({ nodes }: { nodes: INode[] }) => {
+		const node = nodes[0] as Node
 		return getLockStateIcon(node)
 	},
-	enabled(nodes: Node[]) {
+	enabled({ nodes }: { nodes: INode[] }) {
 		// Only works on single node
 		if (nodes.length !== 1) {
 			return false
 		}
-		const node = nodes[0]
+		const node = nodes[0] as Node
 		const state = getLockStateFromAttributes(node)
 		return state.isLocked
 	},
-	async exec() {},
+	async exec() {
+		return null
+	},
 })
 const menuAction = new FileAction({
 	id: 'lock',
 	order: 25,
 
-	iconSvgInline(nodes: Node[]) {
-		const node = nodes[0]
+	iconSvgInline({ nodes }: { nodes: INode[] }) {
+		const node = nodes[0] as Node
 		const state = getLockStateFromAttributes(node)
 		return state.isLocked ? LockOpenSvg : LockSvg
 	},
 
-	displayName(files) {
-		if (files.length !== 1) {
+	displayName({ nodes }: { nodes: INode[] }) {
+		if (nodes.length !== 1) {
 			return ''
 		}
-		const node = files[0]
+		const node = nodes[0] as Node
 		return getLockStateFromAttributes(node).isLocked ? t('files_lock', 'Unlock file') : t('files_lock', 'Lock file')
 	},
 
-	enabled(nodes: Node[]) {
+	enabled({ nodes }: { nodes: INode[] }) {
 		// Only works on single node
-		const node = nodes.length === 1 ? nodes[0] : null
+		const node = nodes.length === 1 ? (nodes[0] as Node) : null
 		if (!node) {
 			return false
 		}
@@ -155,7 +158,8 @@ const menuAction = new FileAction({
 		return node.type === FileType.File && canToggleLock && (isUpdatable(node) || isLocked)
 	},
 
-	async exec(node: Node) {
+	async exec({ nodes }: { nodes: INode[] }) {
+		const node = nodes[0] as Node
 		const lock = getLockStateFromAttributes(node)
 
 		if (lock?.lockOwnerType === LockType.Token) {
@@ -165,7 +169,7 @@ const menuAction = new FileAction({
 				.addButton({
 					label: t('files_lock', 'Keep lock'),
 					callback: () => {
-						dialog.hide()
+						// Dialog will close automatically
 					},
 				})
 				.addButton({
@@ -173,11 +177,10 @@ const menuAction = new FileAction({
 					callback: () => {
 						switchLock(node)
 					},
-					type: 'warning',
 				})
 				.build()
 			dialog.show()
-			return
+			return null
 		}
 
 		return await switchLock(node)
