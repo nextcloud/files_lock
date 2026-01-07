@@ -17,6 +17,9 @@ use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\BruteForceProtection;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
 use OCP\Files\Lock\ILock;
@@ -25,6 +28,8 @@ use OCP\Files\Lock\OwnerLockedException;
 use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserSession;
+use OCP\Share\Exceptions\ShareNotFound;
+use OCP\Share\IManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -44,6 +49,7 @@ class LockController extends OCSController {
 		private FileService $fileService,
 		private LockService $lockService,
 		private IL10N $l10n,
+		private IManager $shareManager,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -178,5 +184,31 @@ class LockController extends OCSController {
 		}
 
 		return new DataResponse($data, $status);
+	}
+
+	#[PublicPage]
+	#[NoCSRFRequired]
+	#[BruteForceProtection(action: 'files_lock_token')]
+	public function getLockByToken(string $token): DataResponse {
+		try {
+			$share = $this->shareManager->getShareByToken($token);
+			$fileId = $share->getNodeId();
+
+			try {
+				$lock = $this->lockService->getLockFromFileId($fileId);
+				$this->lockService->injectMetadata($lock);
+
+				return new DataResponse([
+					'locked' => true,
+					'lock' => $lock->jsonSerialize()
+				]);
+			} catch (LockNotFoundException) {
+				return new DataResponse(['locked' => false]);
+			}
+		} catch (ShareNotFound) {
+			$response = new DataResponse([], Http::STATUS_NOT_FOUND);
+			$response->throttle(['token' => $token]);
+			return $response;
+		}
 	}
 }

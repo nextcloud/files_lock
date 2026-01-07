@@ -23,6 +23,8 @@ use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
 use OCP\Files\NotFoundException;
+use OCP\Http\Client\IClientService;
+use OCP\IDBConnection;
 use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserManager;
@@ -65,6 +67,8 @@ class LockService {
 		IUserSession $userSession,
 		IRequest $request,
 		LoggerInterface $logger,
+		private IDBConnection $connection,
+		private IClientService $clientService,
 	) {
 		$this->l10n = $l10n;
 		$this->userManager = $userManager;
@@ -90,8 +94,9 @@ class LockService {
 
 		try {
 			$this->lockCache[$nodeId] = $this->getLockFromFileId($nodeId);
-		} catch (LockNotFoundException $e) {
-			$this->lockCache[$nodeId] = false;
+		} catch (LockNotFoundException) {
+			$remoteLock = $this->getRemoteLockForFileId($nodeId);
+			$this->lockCache[$nodeId] = $remoteLock ?? false;
 		}
 
 		return $this->lockCache[$nodeId];
@@ -110,7 +115,6 @@ class LockService {
 				$locks[$nodeId] = $this->lockCache[$nodeId];
 			} else {
 				$locksToRequest[] = $nodeId;
-				$this->lockCache[$nodeId] = false;
 			}
 		}
 		if (count($locksToRequest) === 0) {
@@ -163,7 +167,13 @@ class LockService {
 
 			$this->injectMetadata($known);
 			throw new OwnerLockedException($known);
-		} catch (LockNotFoundException $e) {
+		} catch (LockNotFoundException) {
+			$remoteLock = $this->getRemoteLockForFileId($lockScope->getNode()->getId());
+			if ($remoteLock !== null) {
+				$this->injectMetadata($remoteLock);
+				throw new OwnerLockedException($remoteLock);
+			}
+
 			$lock = FileLock::fromLockScope($lockScope, $this->configService->getTimeoutSeconds());
 			$this->generateToken($lock);
 			$lock->setCreation(time());
@@ -342,6 +352,9 @@ class LockService {
 		}
 
 		if ($displayName) {
+			if ($lock->getRemoteHost()) {
+				$displayName .= '@' . $lock->getRemoteHost();
+			}
 			$lock->setDisplayName($displayName);
 		}
 		return $lock;
@@ -400,5 +413,82 @@ class LockService {
 			'etag' => uniqid(),
 		]);
 		$node->getStorage()->getUpdater()->propagate($node->getInternalPath(), $node->getMTime());
+	}
+
+	public function getRemoteLockForFileId(int $fileId): ?FileLock {
+		try {
+			$qb = $this->connection->getQueryBuilder();
+			$mountPoint = $qb->select('mount_point')
+				->from('mounts')
+				->where($qb->expr()->eq('root_id', $qb->createNamedParameter($fileId)))
+				->andWhere($qb->expr()->eq('mount_provider_class', $qb->createNamedParameter('OCA\\Files_Sharing\\External\\MountProvider')))
+				->executeQuery()
+				->fetchOne();
+
+			if (!$mountPoint) {
+				return null;
+			}
+
+			$parts = explode('/', trim($mountPoint, '/'), 3);
+			$relativePath = (count($parts) >= 3 && $parts[1] === 'files') ? '/' . $parts[2] : null;
+
+			if (!$relativePath) {
+				return null;
+			}
+
+			$qb = $this->connection->getQueryBuilder();
+			$share = $qb->select('remote', 'share_token')
+				->from('share_external')
+				->where($qb->expr()->eq('mountpoint_hash', $qb->createNamedParameter(md5($relativePath))))
+				->executeQuery()
+				->fetch();
+
+			if (!$share) {
+				return null;
+			}
+
+			$remoteLockData = $this->getRemoteLock($share['remote'], $share['share_token']);
+			if (!$remoteLockData) {
+				return null;
+			}
+
+			$fileLock = new FileLock();
+			$fileLock->import($remoteLockData);
+
+			$remoteHost = parse_url($share['remote'], PHP_URL_HOST);
+			$fileLock->setRemoteHost($remoteHost);
+
+			$this->injectMetadata($fileLock);
+
+			$this->lockCache[$fileId] = $fileLock;
+
+			return $fileLock;
+		} catch (\Exception $e) {
+			$this->logger->debug('Failed to get remote lock: ' . $e->getMessage());
+			return null;
+		}
+	}
+
+	public function getRemoteLock(string $remoteUrl, string $shareToken): ?array {
+		$url = rtrim($remoteUrl, '/') . "/ocs/v2.php/apps/files_lock/lock/token/{$shareToken}";
+
+		try {
+			$response = $this->clientService->newClient()->get($url, [
+				'headers' => [
+					'OCS-APIRequest' => 'true',
+					'Accept' => 'application/json'
+				],
+				'timeout' => 5,
+			]);
+
+			$data = json_decode($response->getBody(), true);
+			if (!isset($data['ocs']['data']['locked']) || !$data['ocs']['data']['locked']) {
+				return null;
+			}
+
+			return $data['ocs']['data']['lock'];
+		} catch (\Exception) {
+			return null;
+		}
 	}
 }
