@@ -133,7 +133,7 @@ class LockWrapper extends Wrapper {
 			//This is a rename of the transfer file to the original file
 			if (strpos($part, '.ocTransferId') === 0) {
 				return $this->checkPermissions($path2, Constants::PERMISSION_CREATE)
-					   && parent::rename($path1, $path2);
+					&& parent::rename($path1, $path2);
 			}
 		}
 		$permissions =
@@ -144,9 +144,9 @@ class LockWrapper extends Wrapper {
 		}
 
 		return $this->checkPermissions($sourceParent, Constants::PERMISSION_DELETE)
-			   && $this->checkPermissions($path1, Constants::PERMISSION_UPDATE & Constants::PERMISSION_READ)
-			   && $this->checkPermissions($path2, $permissions)
-			   && parent::rename($path1, $path2);
+			&& $this->checkPermissions($path1, Constants::PERMISSION_UPDATE & Constants::PERMISSION_READ)
+			&& $this->checkPermissions($path2, $permissions)
+			&& parent::rename($path1, $path2);
 	}
 
 	public function copy($path1, $path2): bool {
@@ -154,10 +154,10 @@ class LockWrapper extends Wrapper {
 			$this->file_exists($path2) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
 
 		return $this->checkPermissions($path2, $permissions)
-			   && $this->checkPermissions(
-			   	$path1, Constants::PERMISSION_READ
-			   )
-			   && parent::copy($path1, $path2);
+			&& $this->checkPermissions(
+				$path1, Constants::PERMISSION_READ
+			)
+			&& parent::copy($path1, $path2);
 	}
 
 	public function touch($path, $mtime = null): bool {
@@ -173,12 +173,12 @@ class LockWrapper extends Wrapper {
 
 	public function rmdir($path): bool {
 		return $this->checkPermissions($path, Constants::PERMISSION_DELETE)
-			   && parent::rmdir($path);
+			&& parent::rmdir($path);
 	}
 
 	public function unlink($path): bool {
 		return $this->checkPermissions($path, Constants::PERMISSION_DELETE)
-			   && parent::unlink($path);
+			&& parent::unlink($path);
 	}
 
 	public function file_put_contents($path, $data): int|float|false {
