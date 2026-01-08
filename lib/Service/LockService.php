@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OCA\FilesLock\Service;
 
 use Exception;
+use OCA\Files_Sharing\External\Storage as ExternalStorage;
 use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
@@ -19,12 +20,12 @@ use OCP\App\IAppManager;
 use OCP\Constants;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\InvalidPathException;
+use OCP\Files\IRootFolder;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
 use OCP\Files\NotFoundException;
 use OCP\Http\Client\IClientService;
-use OCP\IDBConnection;
 use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserManager;
@@ -67,8 +68,8 @@ class LockService {
 		IUserSession $userSession,
 		IRequest $request,
 		LoggerInterface $logger,
-		private IDBConnection $connection,
 		private IClientService $clientService,
+		private IRootFolder $rootFolder,
 	) {
 		$this->l10n = $l10n;
 		$this->userManager = $userManager;
@@ -417,37 +418,32 @@ class LockService {
 
 	public function getRemoteLockForFileId(int $fileId): ?FileLock {
 		try {
-			$qb = $this->connection->getQueryBuilder();
-			$mountPoint = $qb->select('mount_point')
-				->from('mounts')
-				->where($qb->expr()->eq('root_id', $qb->createNamedParameter($fileId)))
-				->andWhere($qb->expr()->eq('mount_provider_class', $qb->createNamedParameter('OCA\\Files_Sharing\\External\\MountProvider')))
-				->executeQuery()
-				->fetchOne();
-
-			if (!$mountPoint) {
+			$user = $this->userSession->getUser();
+			if (!$user) {
 				return null;
 			}
 
-			$parts = explode('/', trim($mountPoint, '/'), 3);
-			$relativePath = (count($parts) >= 3 && $parts[1] === 'files') ? '/' . $parts[2] : null;
-
-			if (!$relativePath) {
+			$userFolder = $this->rootFolder->getUserFolder($user->getUID());
+			$nodes = $userFolder->getById($fileId);
+			if (empty($nodes)) {
 				return null;
 			}
 
-			$qb = $this->connection->getQueryBuilder();
-			$share = $qb->select('remote', 'share_token')
-				->from('share_external')
-				->where($qb->expr()->eq('mountpoint_hash', $qb->createNamedParameter(md5($relativePath))))
-				->executeQuery()
-				->fetch();
-
-			if (!$share) {
+			$node = $nodes[0];
+			$storage = $node->getStorage();
+			if (!$storage->instanceOfStorage(ExternalStorage::class)) {
 				return null;
 			}
 
-			$remoteLockData = $this->getRemoteLock($share['remote'], $share['share_token']);
+			$internalPath = $node->getInternalPath();
+
+			/** @var ExternalStorage $storage */
+			$remoteLockData = $this->getRemoteLock(
+				$storage->getRemote(),
+				$storage->getToken(),
+				$internalPath
+			);
+
 			if (!$remoteLockData) {
 				return null;
 			}
@@ -455,7 +451,7 @@ class LockService {
 			$fileLock = new FileLock();
 			$fileLock->import($remoteLockData);
 
-			$remoteHost = parse_url($share['remote'], PHP_URL_HOST);
+			$remoteHost = parse_url($storage->getRemote(), PHP_URL_HOST);
 			$fileLock->setRemoteHost($remoteHost);
 
 			$this->injectMetadata($fileLock);
@@ -469,8 +465,12 @@ class LockService {
 		}
 	}
 
-	public function getRemoteLock(string $remoteUrl, string $shareToken): ?array {
+	public function getRemoteLock(string $remoteUrl, string $shareToken, string $path = ''): ?array {
 		$url = rtrim($remoteUrl, '/') . "/ocs/v2.php/apps/files_lock/lock/token/{$shareToken}";
+
+		if ($path !== '') {
+			$url .= '?path=' . urlencode($path);
+		}
 
 		try {
 			$response = $this->clientService->newClient()->get($url, [

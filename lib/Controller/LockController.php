@@ -22,9 +22,11 @@ use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
+use OCP\Files\Folder;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
+use OCP\Files\NotFoundException;
 use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserSession;
@@ -189,10 +191,20 @@ class LockController extends OCSController {
 	#[PublicPage]
 	#[NoCSRFRequired]
 	#[BruteForceProtection(action: 'files_lock_token')]
-	public function getLockByToken(string $token): DataResponse {
+	public function getLockByToken(string $token, string $path = ''): DataResponse {
 		try {
 			$share = $this->shareManager->getShareByToken($token);
-			$fileId = $share->getNodeId();
+			$node = $share->getNode();
+
+			if ($path !== '' && $node instanceof Folder) {
+				try {
+					$node = $node->get(ltrim($path, '/'));
+				} catch (NotFoundException) {
+					return new DataResponse([], Http::STATUS_NOT_FOUND);
+				}
+			}
+
+			$fileId = $node->getId();
 
 			try {
 				$lock = $this->lockService->getLockFromFileId($fileId);
