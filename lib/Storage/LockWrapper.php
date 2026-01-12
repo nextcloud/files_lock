@@ -99,11 +99,7 @@ class LockWrapper extends Wrapper {
 	protected function isLocked(string $ownerId, string $path, string $viewerId, &$lock = null): bool {
 		try {
 			$file = $this->fileService->getFileFromPath($ownerId, $path);
-		} catch (NotFoundException $e) {
-			return false;
-		}
 
-		try {
 			// FIXME: too hacky - might be an issue if we start locking folders.
 			if ($file->getId() === null) {
 				return false;
@@ -121,7 +117,20 @@ class LockWrapper extends Wrapper {
 					return true;
 				}
 			}
-		} catch (NoLockProviderException|LockNotFoundException|InvalidPathException|NotFoundException $e) {
+		} catch (NoLockProviderException|LockNotFoundException|InvalidPathException|NotFoundException) {
+			$cache = $this->getCache();
+			$cacheEntry = $cache->get('');
+			$fileId = $cacheEntry ? $cacheEntry->getId() : null;
+
+			if ($fileId === null) {
+				return false;
+			}
+
+			$remoteLock = $this->lockService->getRemoteLockForFileId($fileId);
+			if ($remoteLock !== null) {
+				$lock = $remoteLock;
+				return true;
+			}
 		}
 
 		return false;

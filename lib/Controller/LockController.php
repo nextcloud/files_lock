@@ -17,14 +17,21 @@ use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\BruteForceProtection;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
+use OCP\Files\Folder;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
+use OCP\Files\NotFoundException;
 use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserSession;
+use OCP\Share\Exceptions\ShareNotFound;
+use OCP\Share\IManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -44,6 +51,7 @@ class LockController extends OCSController {
 		private FileService $fileService,
 		private LockService $lockService,
 		private IL10N $l10n,
+		private IManager $shareManager,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
@@ -178,5 +186,41 @@ class LockController extends OCSController {
 		}
 
 		return new DataResponse($data, $status);
+	}
+
+	#[PublicPage]
+	#[NoCSRFRequired]
+	#[BruteForceProtection(action: 'files_lock_token')]
+	public function getLockByToken(string $token, string $path = ''): DataResponse {
+		try {
+			$share = $this->shareManager->getShareByToken($token);
+			$node = $share->getNode();
+
+			if ($path !== '' && $node instanceof Folder) {
+				try {
+					$node = $node->get(ltrim($path, '/'));
+				} catch (NotFoundException) {
+					return new DataResponse([], Http::STATUS_NOT_FOUND);
+				}
+			}
+
+			$fileId = $node->getId();
+
+			try {
+				$lock = $this->lockService->getLockFromFileId($fileId);
+				$this->lockService->injectMetadata($lock);
+
+				return new DataResponse([
+					'locked' => true,
+					'lock' => $lock->jsonSerialize()
+				]);
+			} catch (LockNotFoundException) {
+				return new DataResponse(['locked' => false]);
+			}
+		} catch (ShareNotFound) {
+			$response = new DataResponse([], Http::STATUS_NOT_FOUND);
+			$response->throttle(['token' => $token]);
+			return $response;
+		}
 	}
 }
