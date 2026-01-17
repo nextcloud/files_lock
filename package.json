@@ -34,7 +34,7 @@
     "@nextcloud/vite-config": "^2.3.5",
     "@playwright/test": "^1.57.0",
     "@vue/tsconfig": "^0.8.1",
-    "prettier": "^3.7.4",
+    "prettier": "^3.8.0",
     "stylelint-config-css-modules": "^4.5.1",
     "typescript": "^5.9.3",
     "typescript-plugin-css-modules": "^5.2.0"
