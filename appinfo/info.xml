@@ -13,7 +13,7 @@ Allow your users to temporary lock their files to avoid conflicts while working 
 
 ]]>
 	</description>
-	<version>33.0.0-dev.0</version>
+	<version>34.0.0-dev.0</version>
 	<licence>agpl</licence>
 	<author>Maxence Lange</author>
 	<namespace>FilesLock</namespace>
@@ -33,7 +33,7 @@ Allow your users to temporary lock their files to avoid conflicts while working 
 	<screenshot>https://raw.githubusercontent.com/nextcloud/files_lock/main/screenshots/0.7.0.png</screenshot>
 
 	<dependencies>
-		<nextcloud min-version="33" max-version="33"/>
+		<nextcloud min-version="34" max-version="34"/>
 	</dependencies>
 
 	<background-jobs>
