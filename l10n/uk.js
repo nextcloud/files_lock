@@ -11,7 +11,7 @@ OC.L10N.register(
     "Android client" : "Клієнт Android",
     "Temporary files lock" : "Тимчасове блокування файлів",
     "Temporary lock your files" : "Тимчасово заблокувати ваші файли",
-    "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Дозвольте своїм користувачам тимчасово блокувати свої файли, щоб уникнути конфліктів під час роботи зі спільними файлами.",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Дозволити своїм користувачам тимчасово блокувати власні файли, щоб уникнути конфліктів під час роботи зі спільними файлами.",
     "Manually locked by {user}" : "Вручну заблоковано {user}",
     "Locked by editing online in {app}" : "Заблоковано шляхом редагування онлайн в {app}",
     "Automatically locked by {user}" : "Автоматично заблоковано за допомогою {user}",
