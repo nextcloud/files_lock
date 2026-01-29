@@ -56,6 +56,8 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 	private string $owner = '';
 	private $scope = ILock::LOCK_EXCLUSIVE;
 
+	private ?string $remoteHost = null;
+
 	/**
 	 * FileLock constructor.
 	 *
@@ -248,6 +250,15 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 
 	public function getDisplayName(): ?string {
 		return $this->displayName;
+	}
+
+	public function setRemoteHost(?string $remoteHost): self {
+		$this->remoteHost = $remoteHost;
+		return $this;
+	}
+
+	public function getRemoteHost(): ?string {
+		return $this->remoteHost;
 	}
 
 	/**

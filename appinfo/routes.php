@@ -11,5 +11,6 @@ return [
 	'ocs' => [
 		['name' => 'Lock#locking', 'url' => '/lock/{fileId}', 'verb' => 'PUT'],
 		['name' => 'Lock#unlocking', 'url' => '/lock/{fileId}', 'verb' => 'DELETE'],
+		['name' => 'Lock#getLockByToken', 'url' => '/lock/token/{token}', 'verb' => 'GET'],
 	]
 ];
