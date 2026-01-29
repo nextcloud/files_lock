@@ -1,11 +1,22 @@
 { "translations": {
+    "File is currently locked by %s" : "Datoteka je zaključana od %s",
+    "File is not locked" : "Datoteka nije zaključana",
+    "File can only be locked with update permissions." : "Datoteku je moguće zaključati samo uz dopuštenja za ažuriranje.",
+    "File can only be unlocked by providing a valid owner lock token" : "Datoteku je moguće otključati samo uz važeći token zaključavanja vlasnika.",
+    "File can only be unlocked by the owner of the lock" : "Datoteku može otključati samo vlasnik zaključavanja.",
     "Desktop client" : "Klijent za osobna računala",
     "iOS client" : "Klijent za iOS",
     "Android client" : "Klijent za Android",
     "Temporary files lock" : "Privremeno zaključavanje datoteka",
     "Temporary lock your files" : "Privremeno zaključajte datoteke",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Omogućite korisnicima da privremeno zaključaju datoteke kako bi izbjegli nepodudaranja tijekom rada s dijeljenim datotekama.",
+    "Manually locked by {user}" : "Ručno zaključana od {user}",
+    "Locked by editing online in {app}" : "Zaključano zbog uređivanja na mreži u aplikaciji {app}",
+    "Automatically locked by {user}" : "Automatski zaključano od {user}",
     "Unlock file" : "Otključaj datoteku",
-    "Lock file" : "Zaključaj datoteku"
+    "Lock file" : "Zaključaj datoteku",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Ovu je datoteku klijent automatski zaključao. Uklanjanje zaključavanja može dovesti do sukoba pri spremanju datoteke.",
+    "Keep lock" : "Zadrži zaključavanje",
+    "Force unlock" : "Prisilno otključaj"
 },"pluralForm" :"nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;"
 }
