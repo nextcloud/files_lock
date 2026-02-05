@@ -20,17 +20,13 @@ class LockProvider implements ILockProvider {
 	}
 
 	public function getLocks(int $fileId): array {
-		try {
-			$lock = $this->lockService->getLockFromFileId($fileId);
-			$this->lockService->injectMetadata($lock);
-		} catch (Exceptions\LockNotFoundException $e) {
+		$lock = $this->lockService->getLockForNodeId($fileId);
+		if (!$lock) {
 			return [];
 		}
 
-		if ($lock) {
-			return [$lock];
-		}
-		return [];
+		$this->lockService->injectMetadata($lock);
+		return [$lock];
 	}
 
 	/**

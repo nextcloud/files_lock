@@ -13,6 +13,7 @@ use OC\Files\Filesystem;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\FilesLock\Capability;
 use OCA\FilesLock\Listeners\LoadAdditionalScripts;
+use OCA\FilesLock\Listeners\PropfindPropertiesListener;
 use OCA\FilesLock\LockProvider;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
@@ -21,6 +22,7 @@ use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCP\Files\Events\BeforeRemotePropfindEvent;
 use OCP\Files\Lock\ILockManager;
 use OCP\IUserSession;
 use OCP\Server;
@@ -47,6 +49,10 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(
 			LoadAdditionalScriptsEvent::class,
 			LoadAdditionalScripts::class
+		);
+		$context->registerEventListener(
+			BeforeRemotePropfindEvent::class,
+			PropfindPropertiesListener::class
 		);
 	}
 
