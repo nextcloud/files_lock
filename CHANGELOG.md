@@ -4,6 +4,18 @@
 -->
 # Changelog
 
+## 33.0.0
+
+### Added
+
+- feat: add federated file locking by @benjaminfrueh [#989](https://github.com/nextcloud/files_lock/pull/989)
+
+### Other
+
+- chore/nextcloud files 4.0 by @juliusknorr [#950](https://github.com/nextcloud/files_lock/pull/950)
+- refactor(QueryBuilder): Port away from deprecated execute method by @CarlSchwan [#847](https://github.com/nextcloud/files_lock/pull/847)
+- feat(deps): Add Nextcloud 33 support on main by @nickvergessen [#780](https://github.com/nextcloud/files_lock/pull/780)
+
 ## 31.0.0
 
 ### Added
