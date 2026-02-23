@@ -162,6 +162,7 @@ class LockService {
 				);
 				$this->logger->notice('extending existing lock', ['fileLock' => $known]);
 				$this->locksRequest->update($known);
+				$this->lockCache[$lockScope->getNode()->getId()] = $known;
 				$this->injectMetadata($known);
 				return $known;
 			}
@@ -204,6 +205,7 @@ class LockService {
 		}
 
 		$this->locksRequest->delete($known);
+		$this->lockCache[$lock->getNode()->getId()] = false;
 		$this->propagateEtag($lock);
 		$this->injectMetadata($known);
 		return $known;
