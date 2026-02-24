@@ -60,10 +60,16 @@ class LockFeatureTest extends TestCase {
 				}
 				return time();
 			});
+
+		// switch to user2 to clear stale cache
+		$this->loginAndGetUserFolder(self::TEST_USER2);
+
 		$folder = $this->loginAndGetUserFolder(self::TEST_USER1);
 		$folder->delete('test-file');
 		$folder->delete('test-file2');
 		$folder->delete('test-file3');
+		$folder->delete('etag_test');
+
 		\OC_Hook::$thrownExceptions = [];
 		$this->overwriteService(ITimeFactory::class, $this->timeFactory);
 		$this->toTheFuture(0);
