@@ -9,12 +9,14 @@
     "Android client" : "Android хэрэглэгч",
     "Temporary files lock" : "Түр зуурын файл түгжээ",
     "Temporary lock your files" : "Файлуудаа түр зуур түгжих",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Хэрэглэгчиддээ хуваалцсан файлуудтай ажиллах явцад зөрчилдөөнөөс зайлсхийхийн тулд файлуудаа түр түгжих боломжийг олго.",
     "Manually locked by {user}" : "{user}-р гараар түгжигдсэн",
     "Locked by editing online in {app}" : "{app}-д онлайн засварлахад түгжигдсэн",
     "Automatically locked by {user}" : "{user}-р автоматаар түгжигдсэн",
     "Unlock file" : "Файл тайлах",
     "Lock file" : "Файл түгжих",
     "files_lock" : "files_lock",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Энэ файлыг клиент автоматаар түгжсэн байна. Түгжээг арилгасан нь файлыг хадгалахад зөрчилдөөн үүсгэж болзошгүй.",
     "Keep lock" : "Түгжээ хадгалах",
     "Force unlock" : "Хүчээр тайлах"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
