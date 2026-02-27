@@ -10,6 +10,9 @@ declare(strict_types=1);
 namespace OCA\FilesLock\Service;
 
 use Exception;
+use OC\Files\Storage\DAV;
+use OC\Files\Storage\Wrapper\Wrapper;
+use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
@@ -19,6 +22,7 @@ use OCP\App\IAppManager;
 use OCP\Constants;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\InvalidPathException;
+use OCP\Files\IRootFolder;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
@@ -65,6 +69,7 @@ class LockService {
 		IUserSession $userSession,
 		IRequest $request,
 		LoggerInterface $logger,
+		private IRootFolder $rootFolder,
 	) {
 		$this->l10n = $l10n;
 		$this->userManager = $userManager;
@@ -90,8 +95,9 @@ class LockService {
 
 		try {
 			$this->lockCache[$nodeId] = $this->getLockFromFileId($nodeId);
-		} catch (LockNotFoundException $e) {
-			$this->lockCache[$nodeId] = false;
+		} catch (LockNotFoundException) {
+			$remoteLock = $this->getRemoteLockFromDav($nodeId);
+			$this->lockCache[$nodeId] = $remoteLock ?: false;
 		}
 
 		return $this->lockCache[$nodeId];
@@ -110,7 +116,6 @@ class LockService {
 				$locks[$nodeId] = $this->lockCache[$nodeId];
 			} else {
 				$locksToRequest[] = $nodeId;
-				$this->lockCache[$nodeId] = false;
 			}
 		}
 		if (count($locksToRequest) === 0) {
@@ -392,6 +397,61 @@ class LockService {
 		$this->logger->notice('removing locks', ['ids' => $ids]);
 
 		$this->locksRequest->removeIds($ids);
+	}
+
+	public function getRemoteLockFromDav(int $nodeId): ?FileLock {
+		try {
+			$user = $this->userSession->getUser();
+			if (!$user) {
+				return null;
+			}
+
+			$userFolder = $this->rootFolder->getUserFolder($user->getUID());
+			$node = $userFolder->getFirstNodeById($nodeId);
+			if (empty($node)) {
+				return null;
+			}
+
+			$storage = $node->getStorage();
+
+			while ($storage->instanceOfStorage(Wrapper::class)) {
+				$storage = $storage->getWrapperStorage();
+			}
+
+			if (!$storage->instanceOfStorage(DAV::class)) {
+				return null;
+			}
+
+			$path = $node->getInternalPath();
+			$storage->getMetaData($path);
+
+			if (!method_exists($storage, 'getPropfindPropertyValue')) {
+				return null;
+			}
+
+			$isLocked = $storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK);
+			if (!$isLocked) {
+				return null;
+			}
+
+			$fileLock = new FileLock();
+			$fileLock->import([
+				'fileId' => $nodeId,
+				'owner' => (string)($storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME) ?? ''),
+				'type' => (int)($storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK_OWNER_TYPE) ?? 0),
+				'creation' => (int)($storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK_TIME) ?? 0),
+				'ttl' => (int)($storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK_TIMEOUT) ?? 0),
+				'token' => (string)($storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK_TOKEN) ?? ''),
+			]);
+
+			$remoteHost = parse_url($storage->getRemote(), PHP_URL_HOST);
+			$fileLock->setDisplayName($fileLock->getDisplayName() . '@' . $remoteHost);
+
+			return $fileLock;
+		} catch (\Exception $e) {
+			$this->logger->error('Failed to get remote lock from DAV: ' . $e->getMessage(), ['exception' => $e]);
+			return null;
+		}
 	}
 
 	private function propagateEtag(LockContext $lockContext): void {
