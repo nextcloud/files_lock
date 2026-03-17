@@ -291,11 +291,9 @@ class LockService {
 	 */
 	public function getDeprecatedLocks(int $limit = 0): array {
 		$timeout = (int)$this->configService->getAppValue(ConfigService::LOCK_TIMEOUT);
-		if ($timeout === 0) {
-			$this->logger->notice(
-				'ConfigService::LOCK_TIMEOUT is not numerical, using default', ['current' => $timeout, 'exception' => new \Exception()]
-			);
-			$timeout = (int)$this->configService->defaults[ConfigService::LOCK_TIMEOUT];
+
+		if ($timeout === FileLock::ETA_INFINITE) {
+			return [];
 		}
 
 		try {
