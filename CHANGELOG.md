@@ -4,6 +4,13 @@
 -->
 # Changelog
 
+## 31.0.4
+
+### Fixed
+
+- [stable31] fix: do not expire locks when no timeout is configured by @benjaminfrueh [#1033](https://github.com/nextcloud/files_lock/pull/1033)
+- [stable31] fix(DAV): Fix getFileFromAbsoluteUri by @provokateurin [#1010](https://github.com/nextcloud/files_lock/pull/1010)
+
 ## 31.0.3
 
 ### Fixed
