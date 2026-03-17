@@ -4,6 +4,17 @@
 -->
 # Changelog
 
+## 32.0.2
+
+### Added
+
+- [stable32] feat: Add federated file locking by @benjaminfrueh [#988](https://github.com/nextcloud/files_lock/pull/988)
+
+### Fixed
+
+- [stable32] fix: Do not expire locks when no timeout is configured by @benjaminfrueh [#1027](https://github.com/nextcloud/files_lock/pull/1027)
+- [stable32] fix(DAV): Fix getFileFromAbsoluteUri by @provokateurin [#1008](https://github.com/nextcloud/files_lock/pull/1008)
+
 ## 32.0.1
 
 ### Fixed
