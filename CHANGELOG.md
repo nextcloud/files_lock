@@ -4,6 +4,14 @@
 -->
 # Changelog
 
+## 33.0.1
+
+### Fixed
+
+- fix: do not expire locks when no timeout is configured by @benjaminfrueh [#1028](https://github.com/nextcloud/files_lock/pull/1028)
+- fix(DAV): Fix getFileFromAbsoluteUri by @provokateurin [#1009](https://github.com/nextcloud/files_lock/pull/1009)
+- fix: lock cache invalidation by @benjaminfrueh [#1015](https://github.com/nextcloud/files_lock/pull/1015)
+
 ## 33.0.0
 
 ### Added
