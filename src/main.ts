@@ -4,7 +4,7 @@
  */
 
 import {
-	FileAction,
+	type IFileAction,
 	type Node,
 	type INode,
 	FileType,
@@ -80,7 +80,7 @@ const getLockStateIcon = (node: Node) => {
 	return LockSvg
 }
 
-const inlineAction = new FileAction({
+const inlineAction: IFileAction = {
 	id: 'lock_inline',
 	title: ({ nodes }: { nodes: INode[] }) => nodes.length === 1 ? getInfoLabel(nodes[0] as Node) : '',
 	inline: () => true,
@@ -104,9 +104,9 @@ const inlineAction = new FileAction({
 
 		return state.isLocked
 	},
-})
+}
 
-const menuInfo = new FileAction({
+const menuInfo: IFileAction = {
 	id: 'lock_info',
 	order: 25,
 	displayName: ({ nodes }: { nodes: INode[] }) => getInfoLabel(nodes[0] as Node),
@@ -126,8 +126,9 @@ const menuInfo = new FileAction({
 	async exec() {
 		return null
 	},
-})
-const menuAction = new FileAction({
+}
+
+const menuAction: IFileAction = {
 	id: 'lock',
 	order: 25,
 
@@ -185,8 +186,7 @@ const menuAction = new FileAction({
 
 		return await switchLock(node)
 	},
-
-})
+}
 
 registerFileAction(inlineAction)
 registerFileAction(menuInfo)
