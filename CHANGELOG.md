@@ -4,6 +4,12 @@
 -->
 # Changelog
 
+## 33.0.2
+
+### Fixed
+
+- fix: migrate FileAction to IFileAction for @nextcloud/files v4 by @benjaminfrueh [#1050](https://github.com/nextcloud/files_lock/pull/1050)
+
 ## 33.0.1
 
 ### Fixed
