@@ -103,13 +103,13 @@ class LockPlugin extends SabreLockPlugin {
 
 		$nodeId = $node->getId();
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK, function () use ($nodeId) {
-			$lock = $this->lockService->getLockForNodeId($nodeId);
+		$propFind->handle(Application::DAV_PROPERTY_LOCK, function () use ($nodeId, $node) {
+			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
 			return $lock instanceof FileLock;
 		});
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER, function () use ($nodeId) {
-			$lock = $this->lockService->getLockForNodeId($nodeId);
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER, function () use ($nodeId, $node) {
+			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
 
 			if ($lock === false) {
 				return null;
@@ -122,8 +122,8 @@ class LockPlugin extends SabreLockPlugin {
 			return $lock->getOwner();
 		});
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_TIME, function () use ($nodeId) {
-			$lock = $this->lockService->getLockForNodeId($nodeId);
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_TIME, function () use ($nodeId, $node) {
+			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
 
 			if ($lock === false) {
 				return null;
@@ -132,8 +132,8 @@ class LockPlugin extends SabreLockPlugin {
 			return $lock->getCreatedAt();
 		});
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_TIMEOUT, function () use ($nodeId) {
-			$lock = $this->lockService->getLockForNodeId($nodeId);
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_TIMEOUT, function () use ($nodeId, $node) {
+			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
 
 			if ($lock === false) {
 				return null;
@@ -142,8 +142,8 @@ class LockPlugin extends SabreLockPlugin {
 			return $lock->getTimeout();
 		});
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME, function () use ($nodeId) {
-			$lock = $this->lockService->getLockForNodeId($nodeId);
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME, function () use ($nodeId, $node) {
+			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
 
 			if ($lock === false) {
 				return null;
@@ -154,8 +154,8 @@ class LockPlugin extends SabreLockPlugin {
 			return $lock->getDisplayName();
 		});
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_TYPE, function () use ($nodeId) {
-			$lock = $this->lockService->getLockForNodeId($nodeId);
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_TYPE, function () use ($nodeId, $node) {
+			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
 
 			if ($lock === false) {
 				return null;
@@ -164,8 +164,8 @@ class LockPlugin extends SabreLockPlugin {
 			return $lock->getType();
 		});
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_EDITOR, function () use ($nodeId) {
-			$lock = $this->lockService->getLockForNodeId($nodeId);
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_EDITOR, function () use ($nodeId, $node) {
+			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
 			if ($lock === false || $lock->getType() !== ILock::TYPE_APP) {
 				return null;
 			}
@@ -173,8 +173,8 @@ class LockPlugin extends SabreLockPlugin {
 			return $lock->getOwner();
 		});
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_TOKEN, function () use ($nodeId) {
-			$lock = $this->lockService->getLockForNodeId($nodeId);
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_TOKEN, function () use ($nodeId, $node) {
+			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
 			if ($lock === false) {
 				return null;
 			}
