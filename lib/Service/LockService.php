@@ -122,6 +122,12 @@ class LockService {
 			return $locks;
 		}
 
+		// pre-fill the cache with negative hits for all requested ids
+		// so if no lock is found for the file we store the negative hit
+		foreach ($locksToRequest as $fileId) {
+			$this->lockCache[$fileId] = false;
+		}
+
 		$newLocks = [];
 		while ($fileIds = array_splice($locksToRequest, 0, 1000)) {
 			$newLocks[] = $this->locksRequest->getFromFileIds($fileIds);
