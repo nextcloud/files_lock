@@ -11,6 +11,7 @@ namespace OCA\FilesLock\AppInfo;
 
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\FilesLock\Capability;
+use OCA\FilesLock\ConfigLexicon;
 use OCA\FilesLock\Listeners\BeforeFileSystemSetupListener;
 use OCA\FilesLock\Listeners\LoadAdditionalScripts;
 use OCA\FilesLock\Listeners\PropfindPropertiesListener;
@@ -54,6 +55,7 @@ class Application extends App implements IBootstrap {
 			BeforeFileSystemSetupEvent::class,
 			BeforeFileSystemSetupListener::class
 		);
+		$context->registerConfigLexicon(ConfigLexicon::class);
 	}
 
 	#[\Override]
