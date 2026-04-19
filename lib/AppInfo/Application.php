@@ -12,6 +12,7 @@ namespace OCA\FilesLock\AppInfo;
 use OC\Files\Filesystem;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\FilesLock\Capability;
+use OCA\FilesLock\ConfigLexicon;
 use OCA\FilesLock\Listeners\LoadAdditionalScripts;
 use OCA\FilesLock\Listeners\PropfindPropertiesListener;
 use OCA\FilesLock\LockProvider;
@@ -56,6 +57,7 @@ class Application extends App implements IBootstrap {
 			BeforeRemotePropfindEvent::class,
 			PropfindPropertiesListener::class
 		);
+		$context->registerConfigLexicon(ConfigLexicon::class);
 	}
 
 	#[\Override]
