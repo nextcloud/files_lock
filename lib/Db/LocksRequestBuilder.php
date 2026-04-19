@@ -9,11 +9,12 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Db;
 
+use OCA\FilesLock\ConfigLexicon;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
-use OCA\FilesLock\Service\ConfigService;
 use OCA\FilesLock\Tools\Exceptions\RowNotFoundException;
 use OCA\FilesLock\Tools\Traits\TArrayTools;
+use OCP\AppFramework\Services\IAppConfig;
 
 /**
  * Class LocksRequestBuilder
@@ -22,14 +23,12 @@ use OCA\FilesLock\Tools\Traits\TArrayTools;
  */
 class LocksRequestBuilder extends CoreRequestBuilder {
 	use TArrayTools;
+	private int $timeout;
 
-
-	/** @var ConfigService */
-	private $configService;
-
-
-	public function __construct(ConfigService $configService) {
-		$this->configService = $configService;
+	public function __construct(
+		private readonly IAppConfig $appConfig,
+	) {
+		$this->timeout = $this->appConfig->getAppValueInt(ConfigLexicon::LOCK_TIMEOUT) * 60;
 	}
 
 	/**
@@ -125,7 +124,7 @@ class LocksRequestBuilder extends CoreRequestBuilder {
 	 * @return FileLock
 	 */
 	public function parseLockSelectSql(array $data): FileLock {
-		$lock = new FileLock($this->configService->getTimeoutSeconds());
+		$lock = new FileLock($this->timeout);
 		$lock->importFromDatabase($data);
 
 		return $lock;
