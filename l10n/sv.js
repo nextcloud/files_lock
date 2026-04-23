@@ -17,6 +17,7 @@ OC.L10N.register(
     "Automatically locked by {user}" : "Automatiskt låst av {user}",
     "Unlock file" : "Lås upp fil",
     "Lock file" : "Lås fil",
+    "files_lock" : "files_lock",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Den här filen har låsts automatiskt av en klient. Borttagning av låset kan leda till en konflikt när filen sparas.",
     "Keep lock" : "Behåll låset",
     "Force unlock" : "Tvinga upplåsning"
