@@ -18,6 +18,7 @@ use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\ILockManager;
 use OCP\Files\Lock\NoLockProviderException;
 use OCP\Files\NotFoundException;
+use OCP\Files\Storage\IStorage;
 use OCP\IUserSession;
 use OCP\Lock\LockedException;
 use OCP\Lock\ManuallyLockedException;
@@ -68,7 +69,7 @@ class LockWrapper extends Wrapper {
 		}
 
 		/** @var FileLock $lock */
-		if (!$this->isLocked($ownerId, $path, $viewerId, $lock)) {
+		if (!$this->isPathLocked($ownerId, $path, $viewerId, $lock)) {
 			return true;
 		}
 
@@ -92,25 +93,35 @@ class LockWrapper extends Wrapper {
 	 * @param string $ownerId
 	 * @param string $path
 	 * @param string $viewerId
-	 * @param FileLock $lock
+	 * @param FileLock|null $lock
 	 *
 	 * @return bool
 	 */
-	protected function isLocked(string $ownerId, string $path, string $viewerId, &$lock = null): bool {
+	protected function isPathLocked(string $ownerId, string $path, string $viewerId, ?FileLock &$lock = null): bool {
 		try {
 			$file = $this->fileService->getFileFromPath($ownerId, $path);
-		} catch (NotFoundException $e) {
+		} catch (NotFoundException) {
 			return false;
 		}
 
+		if ($file->getId() === null) {
+			return false;
+		}
+
+		return $this->isFileLocked($file->getId(), $viewerId, $lock);
+	}
+
+
+	/**
+	 * @param int $fileId
+	 * @param string $viewerId
+	 * @param FileLock|null $lock
+	 *
+	 * @return bool
+	 */
+	protected function isFileLocked(int $fileId, string $viewerId, ?FileLock &$lock = null): bool {
 		try {
-			// FIXME: too hacky - might be an issue if we start locking folders.
-			if ($file->getId() === null) {
-				return false;
-			}
-
-			$lock = $this->lockService->getLockFromFileId($file->getId());
-
+			$lock = $this->lockService->getLockFromFileId($fileId);
 			if ($lock->getType() === ILock::TYPE_USER && $lock->getOwner() !== $viewerId) {
 				return true;
 			}
@@ -151,8 +162,7 @@ class LockWrapper extends Wrapper {
 	}
 
 	public function copy($path1, $path2): bool {
-		$permissions
-			= $this->file_exists($path2) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+		$permissions = $this->file_exists($path2) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
 
 		return $this->checkPermissions($path2, $permissions)
 			&& $this->checkPermissions(
@@ -160,6 +170,19 @@ class LockWrapper extends Wrapper {
 			)
 			&& parent::copy($path1, $path2);
 	}
+
+
+	public function copyFromStorage(IStorage $sourceStorage, string $sourceInternalPath, string $targetInternalPath): bool {
+		$cache = $sourceStorage->getCache();
+		$fileId = $cache->getId($sourceInternalPath);
+
+		if ($fileId > 0 && $this->isFileLocked($fileId, $this->userSession->getUser()->getUID(), $lock)) {
+			throw new ManuallyLockedException($sourceInternalPath, null, $lock->getToken(), $lock->getOwner(), $lock->getETA());
+		}
+
+		return parent::copyFromStorage($sourceStorage, $sourceInternalPath, $targetInternalPath);
+	}
+
 
 	public function touch($path, $mtime = null): bool {
 		$permissions
