@@ -7,8 +7,8 @@
 
 use OC\Files\Lock\LockManager;
 use OCA\FilesLock\AppInfo\Application;
+use OCA\FilesLock\ConfigLexicon;
 use OCA\FilesLock\Model\FileLock;
-use OCA\FilesLock\Service\ConfigService;
 use OCA\FilesLock\Service\LockService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Files\File;
@@ -190,7 +190,7 @@ class LockFeatureTest extends TestCase {
 	}
 
 	public function testLockUserExpire() {
-		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, 30);
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, 30);
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('test-file-expire', 'AAA');
 		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
@@ -214,7 +214,7 @@ class LockFeatureTest extends TestCase {
 	}
 
 	public function testExpiredLocksAreDeprecated() {
-		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, 30);
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, 30);
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('test-expired-lock-is-deprecated', 'AAA');
 		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
@@ -225,7 +225,7 @@ class LockFeatureTest extends TestCase {
 
 	public function testRemoveLocks(): void {
 		$service = \OCP\Server::get(LockService::class);
-		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, 30);
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, 30);
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('test-expired-lock-is-deprecated', 'AAA');
 		$lock1 = $this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
 		$file2 = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('test-expired-lock-is-deprecated-2', 'AAA');
@@ -245,7 +245,7 @@ class LockFeatureTest extends TestCase {
 	}
 
 	public function testLockUserInfinite() {
-		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, 0);
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, 0);
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('test-file-infinite', 'AAA');
 		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
@@ -359,7 +359,7 @@ class LockFeatureTest extends TestCase {
 	 * Ensure that a lock can be extended and the same lock is kept
 	 */
 	public function testExtendLock() {
-		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, 15);
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, 15);
 
 		// Create a file and lock it
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('test-file', 'AAA');
@@ -391,7 +391,7 @@ class LockFeatureTest extends TestCase {
 	 * Regression test for https://github.com/nextcloud/files_lock/issues/130
 	 */
 	public function testExtendInfiniteLock() {
-		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, '0');
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, '0');
 
 		// Create a file and lock it
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('test-file', 'AAA');
@@ -414,7 +414,7 @@ class LockFeatureTest extends TestCase {
 	}
 
 	public function testUnlockStaleClientLock() {
-		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, '0');
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, '0');
 
 		// Create a file and lock it as the desktop client would
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('test-file-client', 'AAA');

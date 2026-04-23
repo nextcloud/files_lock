@@ -13,12 +13,14 @@ use Exception;
 use OC\Files\Storage\DAV;
 use OC\Files\Storage\Wrapper\Wrapper;
 use OCA\FilesLock\AppInfo\Application;
+use OCA\FilesLock\ConfigLexicon;
 use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Tools\Traits\TStringTools;
 use OCP\App\IAppManager;
+use OCP\AppFramework\Services\IAppConfig;
 use OCP\Constants;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\InvalidPathException;
@@ -44,7 +46,6 @@ class LockService {
 	private IL10N $l10n;
 	private LocksRequest $locksRequest;
 	private FileService $fileService;
-	private ConfigService $configService;
 	private IAppManager $appManager;
 	private IEventDispatcher $eventDispatcher;
 	private IUserSession $userSession;
@@ -64,7 +65,7 @@ class LockService {
 		IUserManager $userManager,
 		LocksRequest $locksRequest,
 		FileService $fileService,
-		ConfigService $configService,
+		private IAppConfig $appConfig,
 		IAppManager $appManager,
 		IEventDispatcher $eventDispatcher,
 		IUserSession $userSession,
@@ -76,7 +77,6 @@ class LockService {
 		$this->userManager = $userManager;
 		$this->locksRequest = $locksRequest;
 		$this->fileService = $fileService;
-		$this->configService = $configService;
 		$this->appManager = $appManager;
 		$this->eventDispatcher = $eventDispatcher;
 		$this->userSession = $userSession;
@@ -150,6 +150,7 @@ class LockService {
 
 	public function lock(LockContext $lockScope): FileLock {
 		$this->canLock($lockScope);
+		$timeout = $this->appConfig->getAppValueInt(ConfigLexicon::LOCK_TIMEOUT) * 60;
 
 		try {
 			$known = $this->getLockFromFileId($lockScope->getNode()->getId());
@@ -158,9 +159,7 @@ class LockService {
 			if (
 				$known->getType() === $lockScope->getType() && ($known->getOwner() === $lockScope->getOwner() || $known->getToken() === $lockScope->getOwner())
 			) {
-				$known->setTimeout(
-					$known->getETA() !== FileLock::ETA_INFINITE ? $known->getTimeout() - $known->getETA() + $this->configService->getTimeoutSeconds() : 0
-				);
+				$known->setTimeout($known->getETA() !== FileLock::ETA_INFINITE ? $known->getTimeout() - $known->getETA() + $timeout : 0);
 				$this->logger->notice('extending existing lock', ['fileLock' => $known]);
 				$this->locksRequest->update($known);
 				$this->lockCache[$lockScope->getNode()->getId()] = $known;
@@ -171,7 +170,7 @@ class LockService {
 			$this->injectMetadata($known);
 			throw new OwnerLockedException($known);
 		} catch (LockNotFoundException $e) {
-			$lock = FileLock::fromLockScope($lockScope, $this->configService->getTimeoutSeconds());
+			$lock = FileLock::fromLockScope($lockScope, $timeout);
 			$this->generateToken($lock);
 			$lock->setCreation(time());
 			$this->logger->notice('locking file', ['fileLock' => $lock]);
@@ -298,8 +297,7 @@ class LockService {
 	 * @return FileLock[]
 	 */
 	public function getDeprecatedLocks(int $limit = 0): array {
-		$timeout = (int)$this->configService->getAppValue(ConfigService::LOCK_TIMEOUT);
-
+		$timeout = $this->appConfig->getAppValueInt(ConfigLexicon::LOCK_TIMEOUT);
 		if ($timeout === FileLock::ETA_INFINITE) {
 			return [];
 		}
