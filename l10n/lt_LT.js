@@ -3,6 +3,8 @@ OC.L10N.register(
     {
     "File is currently locked by %s" : "Šiuo metu failą užrakino %s",
     "File is not locked" : "Failas nėra užrakintas",
+    "File can only be locked with update permissions." : "Failą galima užrakinti tik turint atnaujinimo teises.",
+    "File can only be unlocked by providing a valid owner lock token" : "Failą galima atrakinti tik pateikus galiojantį savininko užrakto prieigos žymą",
     "File can only be unlocked by the owner of the lock" : "Failą gali atrakinti tik užrakto savininkas",
     "Desktop client" : "Darbalaukio klientas",
     "iOS client" : "iOS klientas",
@@ -10,8 +12,13 @@ OC.L10N.register(
     "Temporary files lock" : "Laikinasis failų užraktas",
     "Temporary lock your files" : "Laikinai užrakinti savo failus",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Leidžia naudotojams laikinai blokuoti savo failus, kad išvengti veiklos konfliktų dirbant su bendrinamais failais.",
+    "Manually locked by {user}" : "{user} užrakino rankiniu būdu",
+    "Locked by editing online in {app}" : "Užrakinta redaguojant internete {app} ",
+    "Automatically locked by {user}" : "{user} automatiškai užrakino",
     "Unlock file" : "Atrakinti failą",
     "Lock file" : "Užrakinti failą",
+    "files_lock" : "failų_užraktas",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Šį failą klientas užrakino automatiškai. Pašalinus užraktą, gali kilti konfliktas išsaugant failą.",
     "Keep lock" : "Palikti užraktą",
     "Force unlock" : "Priverstinai atrakinti"
 },
