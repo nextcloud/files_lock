@@ -19,9 +19,9 @@ use OCA\FilesLock\Exceptions\NotFileException;
 use OCA\FilesLock\Exceptions\SuccessException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
-use OCA\FilesLock\Service\ConfigService;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
+use OCP\AppFramework\Services\IAppConfig;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
@@ -35,44 +35,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class Lock extends Base {
-	/** @var IUserManager */
-	private $userManager;
-
-	/** @var LocksRequest */
-	private $locksRequest;
-
-	/** @var FileService */
-	private $fileService;
-
-	/** @var LockService */
-	private $lockService;
-
-	/** @var ConfigService */
-	private $configService;
-
-
-	/**
-	 * CacheUpdate constructor.
-	 *
-	 * @param IUserManager $userManager
-	 * @param FileService $fileService
-	 * @param LockService $lockService
-	 * @param LocksRequest $locksRequest
-	 * @param ConfigService $configService
-	 */
 	public function __construct(
-		IUserManager $userManager, LocksRequest $locksRequest, FileService $fileService,
-		LockService $lockService, ConfigService $configService,
+		private readonly IUserManager $userManager,
+		private readonly LocksRequest $locksRequest,
+		private readonly FileService $fileService,
+		private readonly LockService $lockService,
+		private readonly IAppConfig $appConfig,
 	) {
 		parent::__construct();
-
-		$this->userManager = $userManager;
-		$this->locksRequest = $locksRequest;
-		$this->fileService = $fileService;
-		$this->lockService = $lockService;
-		$this->configService = $configService;
 	}
-
 
 	/**
 	 *
@@ -236,7 +207,7 @@ class Lock extends Base {
 		}
 
 		$this->locksRequest->uninstall();
-		$this->configService->unsetAppConfig();
+		$this->appConfig->deleteAppValues();
 		$output->writeln('<comment>FilesLock App fully uninstalled.</comment>');
 
 		throw new SuccessException();
