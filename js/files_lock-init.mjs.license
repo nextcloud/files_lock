@@ -1,0 +1,23 @@
+SPDX-License-Identifier: AGPL-3.0-or-later
+SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
+SPDX-FileCopyrightText: Nextcloud GmbH and Nextcloud contributors
+SPDX-FileCopyrightText: Perry Mitchell <perry@perrymitchell.net>
+SPDX-FileCopyrightText: files_lock developers
+
+This file is generated from multiple sources. Included packages:
+- @nextcloud/files
+	- version: 4.0.0
+	- license: AGPL-3.0-or-later
+- @nextcloud/initial-state
+	- version: 3.0.0
+	- license: GPL-3.0-or-later
+- @nextcloud/sharing
+	- version: 0.3.0
+	- license: GPL-3.0-or-later
+- files_lock
+	- version: 34.0.0-dev.0
+	- license: AGPL-3.0-or-later
+- webdav
+	- version: 5.9.0
+	- license: MIT
