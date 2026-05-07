@@ -6,9 +6,9 @@ SPDX-PackageSupplier = "Nextcloud <info@nextcloud.com>"
 SPDX-PackageDownloadLocation = "https://github.com/nextcloud/files_lock"
 
 [[annotations]]
-path = [".tx/config", "l10n/**.js", "l10n/**.json"]
+path = [".tx/config", "l10n/**.js", "l10n/**.json", "js**/mjs.map", "css/**.css"]
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2020 Nextcloud GmbH and Nextcloud contributors"
+SPDX-FileCopyrightText = "2020-2026 Nextcloud GmbH and Nextcloud contributors"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 
 [[annotations]]
