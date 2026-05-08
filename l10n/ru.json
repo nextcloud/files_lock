@@ -1,6 +1,7 @@
 { "translations": {
     "File is currently locked by %s" : "Файл заблокирован %s",
     "File is not locked" : "Файл не заблокирован",
+    "File can only be locked with update permissions." : "Файл можно заблокировать только с разрешениями на обновление.",
     "File can only be unlocked by providing a valid owner lock token" : "Файл может быть разблокирован только вводом действительного токена блокировки, подтверждающим владение файлом",
     "File can only be unlocked by the owner of the lock" : "Файл может быть разблокирован только тем, кто установил блокировку",
     "Desktop client" : "Клиент для ПК",
@@ -9,8 +10,12 @@
     "Temporary files lock" : "Временная блокировка файлов",
     "Temporary lock your files" : "Временная блокировка файлов",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Разрешить пользователям временно блокировать файлы во избежание конфликтов при совместной работе с файлами.",
+    "Manually locked by {user}" : "Заблокировано вручную {user}",
+    "Locked by editing online in {app}" : "Заблокировано путем редактирования онлайн в {app}",
+    "Automatically locked by {user}" : "Заблокировано автоматически {user}",
     "Unlock file" : "Разблокировать файл",
     "Lock file" : "Заблокировать файл",
+    "files_lock" : "files_lock",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Этот файл был автоматически заблокирован клиентом. Снятие блокировки может привести к конфликту при сохранении файла.",
     "Keep lock" : "Держать заблокированным",
     "Force unlock" : "Принудительная разблокировка"
