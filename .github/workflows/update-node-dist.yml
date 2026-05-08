@@ -81,5 +81,5 @@ jobs:
         if: steps.changes.outputs.CHANGED != ''
         run: |
           git add --force js/ css/
-          git commit --signoff -m 'chore(assets): recompile assets'
+          git commit --signoff -m 'build(assets): recompile assets'
           git push origin ${{ github.head_ref }}
