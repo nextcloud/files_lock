@@ -1,6 +1,6 @@
 OC.L10N.register(
     "files_lock",
     {
-    "Lock file" : "Sekkeṛ afaylu"
+    "Desktop client" : "Desktop client"
 },
 "nplurals=2; plural=(n != 1);");
