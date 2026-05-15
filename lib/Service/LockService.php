@@ -55,6 +55,7 @@ class LockService {
 	private array $locks = [];
 	private bool $lockRetrieved = false;
 	private array $lockCache = [];
+	private array $remoteLockCache = [];
 	private ?array $directEditors = null;
 	private bool $allowUserOverride = false;
 
@@ -90,18 +91,26 @@ class LockService {
 	 * @return FileLock|bool
 	 */
 	public function getLockForNodeId(int $nodeId, ?Node $node = null) {
-		if (array_key_exists($nodeId, $this->lockCache) && $this->lockCache[$nodeId] !== null) {
+		if (array_key_exists($nodeId, $this->lockCache) && $this->lockCache[$nodeId] !== false) {
 			return $this->lockCache[$nodeId];
 		}
 
-		try {
-			$this->lockCache[$nodeId] = $this->getLockFromFileId($nodeId);
-		} catch (LockNotFoundException) {
-			$remoteLock = $this->getRemoteLockFromDav($nodeId, $node);
-			$this->lockCache[$nodeId] = $remoteLock ?: false;
+		if (array_key_exists($nodeId, $this->remoteLockCache)) {
+			return $this->remoteLockCache[$nodeId];
 		}
 
-		return $this->lockCache[$nodeId];
+		if (!array_key_exists($nodeId, $this->lockCache)) {
+			try {
+				$this->lockCache[$nodeId] = $this->getLockFromFileId($nodeId);
+				return $this->lockCache[$nodeId];
+			} catch (LockNotFoundException) {
+				$this->lockCache[$nodeId] = false;
+			}
+		}
+
+		$remoteLock = $this->getRemoteLockFromDav($nodeId, $node);
+		$this->remoteLockCache[$nodeId] = $remoteLock ?: false;
+		return $this->remoteLockCache[$nodeId];
 	}
 
 	/**
@@ -113,8 +122,10 @@ class LockService {
 		$locks = [];
 		$locksToRequest = [];
 		foreach ($nodeIds as $nodeId) {
-			if (array_key_exists($nodeId, $this->lockCache) && $this->lockCache[$nodeId] !== null) {
+			if (array_key_exists($nodeId, $this->lockCache) && $this->lockCache[$nodeId] instanceof FileLock) {
 				$locks[$nodeId] = $this->lockCache[$nodeId];
+			} elseif (array_key_exists($nodeId, $this->remoteLockCache)) {
+				$locks[$nodeId] = $this->remoteLockCache[$nodeId];
 			} else {
 				$locksToRequest[] = $nodeId;
 			}
