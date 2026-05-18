@@ -11,6 +11,8 @@
 
 Allow your users to temporary lock their files to avoid conflicts while working on shared files.
 
+ℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore.
+
 ]]>
 	</description>
 	<version>33.0.2</version>
