@@ -16,7 +16,7 @@ This file is generated from multiple sources. Included packages:
 	- version: 0.3.0
 	- license: GPL-3.0-or-later
 - files_lock
-	- version: 34.0.0-dev.0
+	- version: 35.0.0-dev.0
 	- license: AGPL-3.0-or-later
 - webdav
 	- version: 5.9.0
