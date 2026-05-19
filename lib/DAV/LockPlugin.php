@@ -139,7 +139,7 @@ class LockPlugin extends SabreLockPlugin {
 				return null;
 			}
 
-			return $lock->getTimeout();
+			return $lock->getETA() === FileLock::ETA_INFINITE ? null : $lock->getTimeout();
 		});
 
 		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME, function () use ($nodeId, $node) {
@@ -278,7 +278,7 @@ class LockPlugin extends SabreLockPlugin {
 			Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME => $lock ? $lock->getDisplayName() : null,
 			Application::DAV_PROPERTY_LOCK_EDITOR => $lock ? $lock->getOwner() : null,
 			Application::DAV_PROPERTY_LOCK_TIME => $lock ? $lock->getCreatedAt() : null,
-			Application::DAV_PROPERTY_LOCK_TIMEOUT => $lock ? $lock->getTimeout() : null,
+			Application::DAV_PROPERTY_LOCK_TIMEOUT => $lock && $lock->getETA() !== FileLock::ETA_INFINITE ? $lock->getTimeout() : null,
 			Application::DAV_PROPERTY_LOCK_TOKEN => $lock ? $lock->getToken() : null,
 		];
 	}
