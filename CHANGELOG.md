@@ -4,6 +4,11 @@
 -->
 # Changelog
 
+## 32.0.3
+
+### Added
+- [stable32] feat: lock on copy storage by @ArtificialOwl [#1062](https://github.com/nextcloud/files_lock/pull/1062)
+
 ## 32.0.2
 
 ### Added
