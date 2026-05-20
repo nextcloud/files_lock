@@ -20,6 +20,7 @@ OC.L10N.register(
     "files_lock" : "failų_užraktas",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Šį failą klientas užrakino automatiškai. Pašalinus užraktą, gali kilti konfliktas išsaugant failą.",
     "Keep lock" : "Palikti užraktą",
-    "Force unlock" : "Priverstinai atrakinti"
+    "Force unlock" : "Priverstinai atrakinti",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "Leiskite vartotojams laikinai užrakinti savo failus, kad būtų išvengta konfliktų dirbant su bendrais failais.\n\nℹ️ Nuo „Nextcloud 34“ versijos ši programa yra įtraukta į „Nextcloud Hub“ paketą, todėl ji nebėra platinama per programėlių parduotuvę."
 },
 "nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);");
