@@ -4,6 +4,16 @@
 -->
 # Changelog
 
+## 33.0.3
+
+### Added
+- feat: lock on copy storage by @ArtificialOwl [#1063](https://github.com/nextcloud/files_lock/pull/1063)
+
+### Other
+- perf: don't needlessly call getFirstNodeById for every file during a propfind by @icewind1991 [#1058](https://github.com/nextcloud/files_lock/pull/1058)
+- perf: cache negative results in LockService::getLockForNodeIds by @icewind1991 and @benjaminfrueh [#1090](https://github.com/nextcloud/files_lock/pull/1090)
+- docs: inform about bundling as of NC 34 by @blizzz [#1080](https://github.com/nextcloud/files_lock/pull/1080)
+
 ## 33.0.2
 
 ### Fixed
