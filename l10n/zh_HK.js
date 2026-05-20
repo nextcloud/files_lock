@@ -19,6 +19,7 @@ OC.L10N.register(
     "Lock file" : "上鎖檔案",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "此檔案已被客戶端自動鎖定。移除鎖定可能會導致儲存檔案時發生衝突。",
     "Keep lock" : "維持鎖定",
-    "Force unlock" : "強制解鎖"
+    "Force unlock" : "強制解鎖",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "允許使用者暫時鎖定其檔案，以避免在處理共用檔案時發生衝突。\n\nℹ️ 自 Nextcloud 34 起，此應用程式已整合至 Nextcloud Hub，因此不再透過應用程式商店釋出。"
 },
 "nplurals=1; plural=0;");
