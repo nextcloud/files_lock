@@ -20,6 +20,7 @@ OC.L10N.register(
     "files_lock" : "files_lock",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Diese Datei wurde automatisch von einem Client gesperrt. Das Entfernen der Sperre kann zu einem Konflikt beim Speichern der Datei führen.",
     "Keep lock" : "Sperre behalten",
-    "Force unlock" : "Entsperren erzwingen"
+    "Force unlock" : "Entsperren erzwingen",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "Deinen Benutzern ermöglichen, ihre Dateien vorübergehend zu sperren, um Konflikte bei der Arbeit an geteilten Dateien zu vermeiden.\n\nℹ️ Ab Nextcloud 34 ist diese App fester Bestandteil von Nextcloud Hub und wird daher nicht mehr über den App Store veröffentlicht."
 },
 "nplurals=2; plural=(n != 1);");
