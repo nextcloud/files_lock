@@ -20,6 +20,7 @@ OC.L10N.register(
     "files_lock" : "files_lock",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Faililukustus on automaatselt lisatud klientrakenduse poolt. Kui selle eemalda, siis võib faili hilisemal salvestamisel tekkida versioonikonflikt.",
     "Keep lock" : "Jäta lukustus alles",
-    "Force unlock" : "Eemalda lukustus sundkorras"
+    "Force unlock" : "Eemalda lukustus sundkorras",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "Vältimaks failikonflikte, mis tekiksid ühe faili muutmisest mitme kasutaja poolt võimaldab see rakendus faile ajutiselt lukustada.\n\nℹ️ Alates Nextcloudi versioonist 34 on see rakendus liidetud Nextcloudi Hubiga ja seega pole rakenduste poest enam saadaval."
 },
 "nplurals=2; plural=(n != 1);");

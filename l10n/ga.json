@@ -18,6 +18,7 @@
     "files_lock" : "glas_comhad",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Tá an comhad seo glasáilte go huathoibríoch ag cliant. D'fhéadfadh coinbhleacht an comhad a shábháil má bhaintear an glas.",
     "Keep lock" : "Coinnigh glas",
-    "Force unlock" : "Díghlasáil bhfeidhm"
+    "Force unlock" : "Díghlasáil bhfeidhm",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "Lig do d'úsáideoirí a gcuid comhad a ghlasáil go sealadach chun coimhlintí a sheachaint agus iad ag obair ar chomhaid chomhroinnte.\n\nℹ️ Ó Nextcloud 34 ar aghaidh, tá an aip seo pacáilte le Nextcloud Hub agus dá bhrí sin níl sí eisithe tríd an aip-stóras a thuilleadh."
 },"pluralForm" :"nplurals=5; plural=(n==1 ? 0 : n==2 ? 1 : n<7 ? 2 : n<11 ? 3 : 4);"
 }

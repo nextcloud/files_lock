@@ -20,6 +20,7 @@ OC.L10N.register(
     "files_lock" : "files_lock",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Den här filen har låsts automatiskt av en klient. Borttagning av låset kan leda till en konflikt när filen sparas.",
     "Keep lock" : "Behåll låset",
-    "Force unlock" : "Tvinga upplåsning"
+    "Force unlock" : "Tvinga upplåsning",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "Tillåt dina användare att tillfälligt låsa sina filer för att undvika konflikter när de arbetar med delade filer.\n\nℹ️ Från och med Nextcloud 34 ingår den här appen i Nextcloud Hub och släpps därför inte längre via appbutiken."
 },
 "nplurals=2; plural=(n != 1);");
