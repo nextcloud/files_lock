@@ -18,6 +18,7 @@
     "files_lock" : "dosya_kilit",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Bu dosya bir istemci tarafından otomatik olarak kilitlenmiş. Kilidi kaldırmak dosyayı kaydederken bir çakışmaya yol açabilir.",
     "Keep lock" : "Kilitli kalsın",
-    "Force unlock" : "Kilit zorla açılsın"
+    "Force unlock" : "Kilit zorla açılsın",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "Paylaşılan dosyalar üzerinde çalışırken çakışmaları önlemek için kullanıcılarınızın dosyalarını geçici olarak kilitlemelerini sağlar.\n\nℹ️ Nextcloud 34 sürümüyle bu uygulama Nextcloud Hub ile birlikte geldiğinden, artık Mağaza üzerinde yayınlanmıyor."
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }
