@@ -20,6 +20,7 @@ OC.L10N.register(
     "files_lock" : "files_lock",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "このファイルはクライアントによって自動的にロックされています。ロックを解除すると、ファイルの保存が競合する可能性があります。",
     "Keep lock" : "ロックを保持する",
-    "Force unlock" : "強制ロック解除"
+    "Force unlock" : "強制ロック解除",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "ユーザーが共有ファイルを編集する際に競合を避けるため、ファイルを一時的にロックできるようにします。\n\nℹ️ Nextcloud 34 以降、このアプリは Nextcloud Hub に同梱されるようになったため、アプリストアでは提供されなくなりました。"
 },
 "nplurals=1; plural=0;");
