@@ -176,7 +176,8 @@ class LockWrapper extends Wrapper {
 		$cache = $sourceStorage->getCache();
 		$fileId = $cache->getId($sourceInternalPath);
 
-		if ($fileId > 0 && $this->isFileLocked($fileId, $this->userSession->getUser()->getUID(), $lock)) {
+		$user = $this->userSession->getUser();
+		if ($fileId > 0 && $this->isFileLocked($fileId, $user?->getUID() || '', $lock)) {
 			throw new ManuallyLockedException($sourceInternalPath, null, $lock->getToken(), $lock->getOwner(), $lock->getETA());
 		}
 
