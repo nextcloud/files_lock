@@ -4,6 +4,11 @@
 -->
 # Changelog
 
+## 33.0.4
+
+### Fixed
+- fix: gracefully handle null user in copyFromStorage() by @mejo- [#1099](https://github.com/nextcloud/files_lock/pull/1099)
+
 ## 33.0.3
 
 ### Added
