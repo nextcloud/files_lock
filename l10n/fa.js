@@ -1,7 +1,10 @@
 OC.L10N.register(
     "files_lock",
     {
-    "File can only be unlocked by providing a valid owner lock token" : "File can only be unlocked by providing a valid owner lock token",
+    "File is currently locked by %s" : "پرونده در حال حاضر توسط %s قفل شده است",
+    "File is not locked" : "پرونده قفل نشده است",
+    "File can only be locked with update permissions." : "پرونده تنها با دسترسی ویرایش قابل قفل شدن است.",
+    "File can only be unlocked by providing a valid owner lock token" : "قفل پرونده فقط با ارائه نشانه قفل معتبر صاحب، قابل باز شدن است",
     "File can only be unlocked by the owner of the lock" : "قفل پرونده فقط توسط صاحب قفل قابل باز شدن است",
     "Desktop client" : "دستگاه دسکتاپ",
     "iOS client" : "دستگاه های IOS",
@@ -9,7 +12,15 @@ OC.L10N.register(
     "Temporary files lock" : "موقتا پرونده‌ها قفل شده اند",
     "Temporary lock your files" : "موقتا پرونده‌هایتان را قفل کنید",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "به کاربران خود اجازه دهید پرونده‌ها خود را به طور موقت قفل کنند تا در حین کار بر روی پرونده‌ها به اشتراک گذاشته شده دچار تداخل نشوند.",
+    "Manually locked by {user}" : "به‌صورت دستی توسط {user} قفل شده است",
+    "Locked by editing online in {app}" : "قفل شده به دلیل ویرایش آنلاین در {app}",
+    "Automatically locked by {user}" : "به‌صورت خودکار توسط {user} قفل شده است",
     "Unlock file" : "باز کردن قفل پرونده",
-    "Lock file" : "قفل کردن پرونده"
+    "Lock file" : "قفل کردن پرونده",
+    "files_lock" : "files_lock",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "این پرونده به‌صورت خودکار توسط یک دستگاه قفل شده است. باز کردن قفل ممکن است هنگام ذخیره پرونده باعث تداخل شود.",
+    "Keep lock" : "نگه داشتن قفل",
+    "Force unlock" : "باز کردن اجباری قفل",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "به کاربران خود اجازه دهید پرونده‌ها خود را به طور موقت قفل کنند تا در حین کار بر روی پرونده‌ها به اشتراک گذاشته شده دچار تداخل نشوند.\n\nℹ️ از نسخه Nextcloud 34، این برنامه همراه با Nextcloud Hub ارائه می‌شود و دیگر از طریق فروشگاه برنامه‌ها (appstore) منتشر نمی‌شود."
 },
 "nplurals=2; plural=(n > 1);");
