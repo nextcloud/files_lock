@@ -4,6 +4,7 @@ OC.L10N.register(
     "Desktop client" : "Veceru pa ordenadores",
     "iOS client" : "Veceru pa iOS",
     "Android client" : "Veceru p'Android",
-    "Unlock file" : "Desbloquiar el ficheru"
+    "Unlock file" : "Desbloquiar el ficheru",
+    "Lock file" : "Lock file"
 },
 "nplurals=2; plural=(n != 1);");

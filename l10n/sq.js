@@ -3,6 +3,8 @@ OC.L10N.register(
     {
     "Desktop client" : "Klient Desktop",
     "iOS client" : "Klient IOS",
-    "Android client" : "Klient Android"
+    "Android client" : "Klient Android",
+    "Unlock file" : "Unlock file",
+    "Lock file" : "Lock file"
 },
 "nplurals=2; plural=(n != 1);");

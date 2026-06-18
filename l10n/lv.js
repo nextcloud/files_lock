@@ -3,6 +3,8 @@ OC.L10N.register(
     {
     "Desktop client" : "Darbvirsmas klients",
     "iOS client" : "iOS klients",
-    "Android client" : "Android klients"
+    "Android client" : "Android klients",
+    "Unlock file" : "Unlock file",
+    "Lock file" : "Lock file"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");
