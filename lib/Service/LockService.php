@@ -244,12 +244,25 @@ class LockService {
 		$isSameOwner = $request->getOwner() === $current->getOwner();
 		$isSameType = $request->getType() === $current->getType();
 
+		// we need to ignore some filesystem that return current user as file owner
+		$ignoreFileOwnership = [
+			'OCA\GroupFolders\Mount\MountProvider',
+			'OCA\Files_External\Config\ConfigAdapter'
+		];
+
+		$isFileOwner = $request->getNode()->getOwner()->getUID() === $this->userSession->getUser()?->getUID()
+			&& !in_array($request->getNode()->getMountPoint()->getMountProvider(), $ignoreFileOwnership);
+
 		// Check the token for token based locks
 		if ($current->getType() === ILock::TYPE_TOKEN) {
-			if ($isSameToken || ($this->allowUserOverride && $isSameUser)) {
+			// token holder can unlock
+			if ($isSameToken) {
 				return;
 			}
-
+			// file owner or lock owner can unlock
+			if ($this->allowUserOverride && ($isSameUser || $isFileOwner)) {
+				return;
+			}
 			throw new UnauthorizedUnlockException(
 				$this->l10n->t('File can only be unlocked by providing a valid owner lock token')
 			);
@@ -260,15 +273,7 @@ class LockService {
 			return;
 		}
 
-		// we need to ignore some filesystem that return current user as file owner
-		$ignoreFileOwnership = [
-			'OCA\GroupFolders\Mount\MountProvider',
-			'OCA\Files_External\Config\ConfigAdapter'
-		];
-		if ($request->getType() === ILock::TYPE_USER
-			&& $request->getNode()->getOwner()->getUID() === $this->userSession->getUser()?->getUID()
-			&& !in_array($request->getNode()->getMountPoint()->getMountProvider(), $ignoreFileOwnership)
-		) {
+		if ($request->getType() === ILock::TYPE_USER && $isFileOwner) {
 			return;
 		}
 
