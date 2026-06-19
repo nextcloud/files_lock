@@ -24,6 +24,7 @@ use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\Files\Events\BeforeRemotePropfindEvent;
 use OCP\Files\Lock\ILockManager;
+use OCP\Files\Storage\IStorage;
 use OCP\IUserSession;
 use OCP\Server;
 use OCP\Util;
@@ -70,15 +71,20 @@ class Application extends App implements IBootstrap {
 
 	/** @internal */
 	public function addStorageWrapper(): void {
+		$lockManager = Server::get(ILockManager::class);
+		$userSession = Server::get(IUserSession::class);
+		$fileService = Server::get(FileService::class);
+		$lockService = Server::get(LockService::class);
+
 		Filesystem::addStorageWrapper(
-			'files_lock', function ($mountPoint, $storage) {
+			'files_lock', function (string $mountPoint, IStorage $storage) use ($lockManager, $userSession, $fileService, $lockService): LockWrapper {
 				return new LockWrapper(
 					[
 						'storage' => $storage,
-						'lock_manager' => Server::get(ILockManager::class),
-						'user_session' => Server::get(IUserSession::class),
-						'file_service' => Server::get(FileService::class),
-						'lock_service' => Server::get(LockService::class)
+						'lock_manager' => $lockManager,
+						'user_session' => $userSession,
+						'file_service' => $fileService,
+						'lock_service' => $lockService,
 					]
 				);
 			}, 10
