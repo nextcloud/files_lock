@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-
 /**
  * SPDX-FileCopyrightText: 2019 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-
 
 namespace OCA\FilesLock\DAV;
 
@@ -38,6 +36,7 @@ class LockBackend implements BackendInterface {
 	 *
 	 * @return LockInfo[]
 	 */
+	#[\Override]
 	public function getLocks($uri, $returnChildLocks): array {
 		$locks = [];
 		try {
@@ -57,7 +56,6 @@ class LockBackend implements BackendInterface {
 		}
 	}
 
-
 	/**
 	 * Locks a uri
 	 *
@@ -66,6 +64,7 @@ class LockBackend implements BackendInterface {
 	 *
 	 * @return bool
 	 */
+	#[\Override]
 	public function lock($uri, LockInfo $lockInfo): bool {
 		try {
 			$file = $this->getFileFromUri($uri);
@@ -94,7 +93,6 @@ class LockBackend implements BackendInterface {
 		}
 	}
 
-
 	/**
 	 * Removes a lock from a uri
 	 *
@@ -103,6 +101,7 @@ class LockBackend implements BackendInterface {
 	 *
 	 * @return bool
 	 */
+	#[\Override]
 	public function unlock($uri, LockInfo $lockInfo): bool {
 		try {
 			$file = $this->getFileFromUri($uri);

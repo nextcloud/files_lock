@@ -35,7 +35,6 @@ class LockWrapper extends Wrapper {
 	/** @var IUserSession */
 	private $userSession;
 
-
 	/**
 	 * LockWrapper constructor.
 	 *
@@ -49,7 +48,6 @@ class LockWrapper extends Wrapper {
 		$this->fileService = $arguments['file_service'];
 		$this->lockService = $arguments['lock_service'];
 	}
-
 
 	/**
 	 * @param $path
@@ -76,7 +74,6 @@ class LockWrapper extends Wrapper {
 		switch ($permissions) {
 			case Constants::PERMISSION_READ:
 				return true;
-
 			case Constants::PERMISSION_DELETE:
 			case Constants::PERMISSION_UPDATE:
 				throw new ManuallyLockedException(
@@ -87,7 +84,6 @@ class LockWrapper extends Wrapper {
 				return false;
 		}
 	}
-
 
 	/**
 	 * @param string $ownerId
@@ -110,7 +106,6 @@ class LockWrapper extends Wrapper {
 
 		return $this->isFileLocked($file->getId(), $viewerId, $lock);
 	}
-
 
 	/**
 	 * @param int $fileId
@@ -137,7 +132,6 @@ class LockWrapper extends Wrapper {
 
 		return false;
 	}
-
 
 	public function rename($path1, $path2): bool {
 		if (strpos($path1, $path2) === 0) {
@@ -171,7 +165,6 @@ class LockWrapper extends Wrapper {
 			&& parent::copy($path1, $path2);
 	}
 
-
 	public function copyFromStorage(IStorage $sourceStorage, string $sourceInternalPath, string $targetInternalPath): bool {
 		$cache = $sourceStorage->getCache();
 		$fileId = $cache->getId($sourceInternalPath);
@@ -183,7 +176,6 @@ class LockWrapper extends Wrapper {
 
 		return parent::copyFromStorage($sourceStorage, $sourceInternalPath, $targetInternalPath);
 	}
-
 
 	public function touch($path, $mtime = null): bool {
 		$permissions

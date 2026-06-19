@@ -29,12 +29,10 @@ class FileService {
 	/** @var IRootFolder */
 	private $rootFolder;
 
-
 	public function __construct(IUserSession $userSession, IRootFolder $rootFolder) {
 		$this->userSession = $userSession;
 		$this->rootFolder = $rootFolder;
 	}
-
 
 	/**
 	 * @param string $userId
@@ -56,7 +54,6 @@ class FileService {
 		return $file;
 	}
 
-
 	/**
 	 * @param string $path
 	 * @param string $userId
@@ -75,7 +72,6 @@ class FileService {
 
 		return $file;
 	}
-
 
 	/**
 	 * @param string $uri
@@ -97,7 +93,6 @@ class FileService {
 
 		return $file;
 	}
-
 
 	/**
 	 * @param string $uri

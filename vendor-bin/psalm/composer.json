@@ -1,0 +1,13 @@
+{
+	"require-dev": {
+		"nextcloud/ocp": "dev-master",
+		"vimeo/psalm": "^6.13.1",
+		"sabre/dav": "^4.6"
+	},
+	"config": {
+		"platform": {
+			"php": "8.3.16"
+		},
+		"sort-packages": true
+	}
+}

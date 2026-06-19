@@ -32,7 +32,6 @@ class ConfigService {
 	/** @var IRequest */
 	private $request;
 
-
 	/**
 	 * ConfigService constructor.
 	 *
@@ -48,14 +47,12 @@ class ConfigService {
 		$this->userId = $userId;
 	}
 
-
 	/**
 	 * @return int
 	 */
 	public function getTimeoutSeconds(): int {
 		return ((int)$this->getAppValue(ConfigService::LOCK_TIMEOUT)) * 60;
 	}
-
 
 	/**
 	 * Get a value by key
@@ -74,7 +71,6 @@ class ConfigService {
 		return $this->config->getAppValue($this->appName, $key, $defaultValue);
 	}
 
-
 	/**
 	 * Set a value by key
 	 *
@@ -87,7 +83,6 @@ class ConfigService {
 		$this->config->setAppValue($this->appName, $key, $value);
 	}
 
-
 	/**
 	 * remove a key
 	 *
@@ -98,7 +93,6 @@ class ConfigService {
 	public function deleteAppValue($key) {
 		return $this->config->deleteAppValue($this->appName, $key);
 	}
-
 
 	/**
 	 *

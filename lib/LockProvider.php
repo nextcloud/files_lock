@@ -4,6 +4,7 @@
  * SPDX-FileCopyrightText: 2022 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+
 namespace OCA\FilesLock;
 
 use OCA\FilesLock\Service\LockService;
@@ -19,6 +20,7 @@ class LockProvider implements ILockProvider {
 		$this->lockService = $lockService;
 	}
 
+	#[\Override]
 	public function getLocks(int $fileId): array {
 		$lock = $this->lockService->getLockForNodeId($fileId);
 		if (!$lock) {
@@ -32,6 +34,7 @@ class LockProvider implements ILockProvider {
 	/**
 	 * @inheritdoc
 	 */
+	#[\Override]
 	public function lock(LockContext $lockInfo): ILock {
 		return $this->lockService->lock($lockInfo);
 	}
@@ -39,6 +42,7 @@ class LockProvider implements ILockProvider {
 	/**
 	 * @inheritdoc
 	 */
+	#[\Override]
 	public function unlock(LockContext $lockInfo): void {
 		try {
 			$this->lockService->getLockFromFileId($lockInfo->getNode()->getId());

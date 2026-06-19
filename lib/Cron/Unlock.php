@@ -24,6 +24,7 @@ class Unlock extends TimedJob {
 		$this->setInterval(12 * 60);
 	}
 
+	#[\Override]
 	protected function run($argument): void {
 		$this->deleteExpiredLocks();
 	}

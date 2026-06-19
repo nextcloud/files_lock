@@ -74,7 +74,6 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $lock;
 	}
 
-
 	/**
 	 * @return int
 	 */
@@ -92,7 +91,6 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 
 		return $this;
 	}
-
 
 	/**
 	 * @return string
@@ -112,10 +110,10 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $this;
 	}
 
-
 	/**
 	 * @return string
 	 */
+	#[\Override]
 	public function getOwner(): string {
 		return $this->userId;
 	}
@@ -131,10 +129,10 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $this;
 	}
 
-
 	/**
 	 * @return int
 	 */
+	#[\Override]
 	public function getFileId(): int {
 		return $this->fileId;
 	}
@@ -150,10 +148,10 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $this;
 	}
 
-
 	/**
 	 * @return string
 	 */
+	#[\Override]
 	public function getToken(): string {
 		return $this->token;
 	}
@@ -169,10 +167,10 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $this;
 	}
 
-
 	/**
 	 * @return int
 	 */
+	#[\Override]
 	public function getTimeout(): int {
 		return $this->timeout;
 	}
@@ -203,6 +201,7 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 	/**
 	 * @return int
 	 */
+	#[\Override]
 	public function getCreatedAt(): int {
 		return $this->creation;
 	}
@@ -218,10 +217,12 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $this;
 	}
 
+	#[\Override]
 	public function getDepth(): int {
 		return ILock::LOCK_DEPTH_ZERO;
 	}
 
+	#[\Override]
 	public function getScope(): int {
 		return $this->scope;
 	}
@@ -232,6 +233,7 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $this;
 	}
 
+	#[\Override]
 	public function getType(): int {
 		return $this->lockType;
 	}
@@ -266,12 +268,12 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $lock;
 	}
 
-
 	/**
 	 * @param array $data
 	 *
 	 * @return IQueryRow
 	 */
+	#[\Override]
 	public function importFromDatabase(array $data):IQueryRow {
 		$this->setId($this->getInt('id', $data));
 		$this->setUserId($this->get('user_id', $data));
@@ -284,7 +286,6 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 
 		return $this;
 	}
-
 
 	/**
 	 * @param array $data
@@ -301,10 +302,10 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		$this->setDisplayName($this->get('owner', $data));
 	}
 
-
 	/**
 	 * @return array
 	 */
+	#[\Override]
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->getId(),

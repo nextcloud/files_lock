@@ -4,6 +4,7 @@
  * SPDX-FileCopyrightText: 2022 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+
 namespace OCA\FilesLock\DAV;
 
 use OCA\DAV\Connector\Sabre\CachingTree;
@@ -43,6 +44,7 @@ class LockPlugin extends SabreLockPlugin {
 		$this->userSession = $userSession;
 	}
 
+	#[\Override]
 	public function initialize(Server $server) {
 		$fakePlugin = $server->getPlugins()[FakeLockerPlugin::class] ?? null;
 		if ($fakePlugin) {
@@ -183,6 +185,7 @@ class LockPlugin extends SabreLockPlugin {
 		});
 	}
 
+	#[\Override]
 	public function httpLock(RequestInterface $request, ResponseInterface $response) {
 		if ($request->getHeader('X-User-Lock')) {
 			$lockType = (int)($request->getHeader('X-User-Lock-Type') ?? ILock::TYPE_USER);
@@ -217,6 +220,7 @@ class LockPlugin extends SabreLockPlugin {
 		return parent::httpLock($request, $response);
 	}
 
+	#[\Override]
 	public function httpUnlock(RequestInterface $request, ResponseInterface $response) {
 		if ($request->getHeader('X-User-Lock')) {
 			$lockType = (int)($request->getHeader('X-User-Lock-Type') ?? ILock::TYPE_USER);

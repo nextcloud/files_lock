@@ -45,6 +45,7 @@ class Application extends App implements IBootstrap {
 		parent::__construct(self::APP_ID, $params);
 	}
 
+	#[\Override]
 	public function register(IRegistrationContext $context): void {
 		$context->registerCapability(Capability::class);
 		$context->registerEventListener(
@@ -57,6 +58,7 @@ class Application extends App implements IBootstrap {
 		);
 	}
 
+	#[\Override]
 	public function boot(IBootContext $context): void {
 		$this->registerHooks();
 
