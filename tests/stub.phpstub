@@ -6,3 +6,13 @@ namespace OCA\Files\Event {
 	use OCP\EventDispatcher\Event;
  	class LoadAdditionalScriptsEvent extends Event {}
 }
+
+namespace OC\Hooks {
+	class Emitter {
+		public function emit(string $class, string $value, array $option) {
+		}
+		/** Closure $closure */
+		public function listen(string $class, string $value, $closure) {
+		}
+	}
+}

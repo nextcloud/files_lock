@@ -25,14 +25,12 @@ class Version0001Date20191105000001 extends SimpleMigrationStep {
 	/** @var IDBConnection */
 	private $connection;
 
-
 	/**
 	 * @param IDBConnection $connection
 	 */
 	public function __construct(IDBConnection $connection) {
 		$this->connection = $connection;
 	}
-
 
 	/**
 	 * @param IOutput $output
@@ -41,6 +39,7 @@ class Version0001Date20191105000001 extends SimpleMigrationStep {
 	 *
 	 * @return ISchemaWrapper
 	 */
+	#[\Override]
 	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options): ISchemaWrapper {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
@@ -98,7 +97,6 @@ class Version0001Date20191105000001 extends SimpleMigrationStep {
 		return $schema;
 	}
 
-
 	/**
 	 * @param IOutput $output
 	 * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
@@ -106,6 +104,7 @@ class Version0001Date20191105000001 extends SimpleMigrationStep {
 	 *
 	 * @throws Exception
 	 */
+	#[\Override]
 	public function postSchemaChange(IOutput $output, Closure $schemaClosure, array $options) {
 	}
 }

@@ -26,10 +26,8 @@ class CoreRequestBuilder {
 		self::TABLE_LOCKS,
 	];
 
-
 	/** @var string */
 	protected $defaultSelectAlias;
-
 
 	/**
 	 * @return CoreQueryBuilder
@@ -37,7 +35,6 @@ class CoreRequestBuilder {
 	public function getQueryBuilder(): CoreQueryBuilder {
 		return new CoreQueryBuilder();
 	}
-
 
 	/**
 	 *
@@ -48,7 +45,6 @@ class CoreRequestBuilder {
 		;
 		$this->removeFromMigrations();
 	}
-
 
 	/**
 	 *
@@ -65,7 +61,6 @@ class CoreRequestBuilder {
 
 		$schema->performDropTableCalls();
 	}
-
 
 	/**
 	 *

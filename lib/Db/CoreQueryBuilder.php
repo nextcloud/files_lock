@@ -24,7 +24,6 @@ class CoreQueryBuilder extends ExtendedQueryBuilder {
 		$this->limitInt('file_id', $fileId);
 	}
 
-
 	/**
 	 * @param array $ids
 	 */

@@ -166,7 +166,6 @@ class LockFeatureTest extends TestCase {
 		self::assertNotEquals($oldEtag, $file->getEtag());
 	}
 
-
 	public function testUnlockEtagShare() {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('etag_test', 'etag_test');
@@ -432,7 +431,6 @@ class LockFeatureTest extends TestCase {
 			$locks = $this->lockManager->getLocks($file->getId());
 		}
 		$this->assertCount(1, $locks);
-
 
 		// The owner can stil force unlock it as done through the OCS controller
 		\OCP\Server::get(\OCA\FilesLock\Service\LockService::class)->enableUserOverride();

@@ -5,6 +5,7 @@ declare(strict_types=1);
  * SPDX-FileCopyrightText: 2022 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+
 namespace OCA\FilesLock\Migration;
 
 use Closure;
@@ -17,6 +18,7 @@ use OCP\Migration\SimpleMigrationStep;
  * Auto-generated migration step: Please modify to your needs!
  */
 class Version1000Date20220201111525 extends SimpleMigrationStep {
+	#[\Override]
 	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options): ?ISchemaWrapper {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();

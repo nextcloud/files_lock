@@ -4,6 +4,7 @@
 
 /build/
 /vendor/
+/vendor-bin/*/vendor
 /node_modules/
 /playwright-report/
 

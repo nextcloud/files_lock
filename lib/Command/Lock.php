@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-
 /**
  * SPDX-FileCopyrightText: 2018 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-
 
 namespace OCA\FilesLock\Command;
 
@@ -50,7 +48,6 @@ class Lock extends Base {
 	/** @var ConfigService */
 	private $configService;
 
-
 	/**
 	 * CacheUpdate constructor.
 	 *
@@ -73,7 +70,6 @@ class Lock extends Base {
 		$this->configService = $configService;
 	}
 
-
 	/**
 	 *
 	 */
@@ -89,7 +85,6 @@ class Lock extends Base {
 			->addArgument('user_id', InputArgument::OPTIONAL, 'owner of the lock', '')
 			->setDescription('lock a file to a user');
 	}
-
 
 	/**
 	 * @param InputInterface $input
@@ -127,7 +122,6 @@ class Lock extends Base {
 		return 0;
 	}
 
-
 	/**
 	 * @param InputInterface $input
 	 * @param OutputInterface $output
@@ -160,7 +154,6 @@ class Lock extends Base {
 		throw new SuccessException();
 	}
 
-
 	/**
 	 * @param InputInterface $input
 	 * @param OutputInterface $output
@@ -186,7 +179,6 @@ class Lock extends Base {
 		));
 	}
 
-
 	/**
 	 * @param InputInterface $input
 	 * @param OutputInterface $output
@@ -208,7 +200,6 @@ class Lock extends Base {
 
 		throw new SuccessException();
 	}
-
 
 	/**
 	 * @param InputInterface $input

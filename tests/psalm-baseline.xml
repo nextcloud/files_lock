@@ -55,9 +55,6 @@
       <code><![CDATA[$qb]]></code>
       <code><![CDATA[$qb]]></code>
       <code><![CDATA[$qb]]></code>
-      <code><![CDATA[$qb]]></code>
-      <code><![CDATA[$qb]]></code>
-      <code><![CDATA[$qb]]></code>
     </MissingDependency>
   </file>
   <file src="lib/Db/LocksRequestBuilder.php">
@@ -68,21 +65,6 @@
       <code><![CDATA[CoreQueryBuilder]]></code>
       <code><![CDATA[CoreQueryBuilder]]></code>
       <code><![CDATA[CoreQueryBuilder]]></code>
-    </MissingDependency>
-  </file>
-  <file src="lib/LockProvider.php">
-    <RedundantCondition>
-      <code><![CDATA[$lock]]></code>
-    </RedundantCondition>
-  </file>
-  <file src="lib/Service/FileService.php">
-    <MissingDependency>
-      <code><![CDATA[$this->rootFolder]]></code>
-      <code><![CDATA[$this->rootFolder]]></code>
-      <code><![CDATA[$this->rootFolder]]></code>
-      <code><![CDATA[$this->rootFolder]]></code>
-      <code><![CDATA[IRootFolder]]></code>
-      <code><![CDATA[IRootFolder]]></code>
     </MissingDependency>
   </file>
   <file src="lib/Tools/Traits/TArrayTools.php">
