@@ -4,7 +4,7 @@ OC.L10N.register(
     "File is currently locked by %s" : "Šiuo metu failą užrakino %s",
     "File is not locked" : "Failas nėra užrakintas",
     "File can only be locked with update permissions." : "Failą galima užrakinti tik turint atnaujinimo teises.",
-    "File can only be unlocked by providing a valid owner lock token" : "Failą galima atrakinti tik pateikus galiojantį savininko užrakto prieigos žymą",
+    "File can only be unlocked by providing a valid owner lock token" : "Failą galima atrakinti tik pateikus galiojantį savininko užrakto žymenį",
     "File can only be unlocked by the owner of the lock" : "Failą gali atrakinti tik užrakto savininkas",
     "Desktop client" : "Darbalaukio klientas",
     "iOS client" : "iOS klientas",
