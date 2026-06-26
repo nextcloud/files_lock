@@ -19,5 +19,5 @@ This file is generated from multiple sources. Included packages:
 	- version: 35.0.0-dev.0
 	- license: AGPL-3.0-or-later
 - webdav
-	- version: 5.9.0
+	- version: 5.10.0
 	- license: MIT
