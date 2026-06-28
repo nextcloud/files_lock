@@ -3,7 +3,8 @@
 	"license": "AGPL",
 	"require-dev": {
 		"phpunit/phpunit": "^9.5",
-		"nextcloud/coding-standard": "^1.2"
+		"nextcloud/coding-standard": "^1.2",
+		"nextcloud/ocp": "dev-master"
 	},
 	"config": {
 		"allow-plugins": {
