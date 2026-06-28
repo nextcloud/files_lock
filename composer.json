@@ -1,6 +1,6 @@
 {
 	"name": "nextcloud/files_lock",
-	"license": "AGPL",
+	"license": "AGPL-3.0-or-later",
 	"require-dev": {
 		"phpunit/phpunit": "^9.5",
 		"nextcloud/coding-standard": "^1.2"
