@@ -11,6 +11,7 @@ OC.L10N.register(
     "Temporary files lock" : "Bloquear ficheiros temporariamente",
     "Temporary lock your files" : "Bloquear temporariamente os seus ficheiros ",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Permitir que os utilizadores bloqueiem temporariamente os seus ficheiros para evitar conflitos enquanto trabalham em ficheiros partilhados.",
+    "Automatically locked by {user}" : "Trancado automaticamente por {user}",
     "Unlock file" : "Desbloquear ficheiro",
     "Lock file" : "Bloquear ficheiro "
 },
