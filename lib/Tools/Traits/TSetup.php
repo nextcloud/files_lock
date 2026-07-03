@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-
 /**
  * SPDX-FileCopyrightText: 2020 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-
 
 namespace OCA\FilesLock\Tools\Traits;
 
@@ -20,10 +18,8 @@ use OCP\IConfig;
 trait TSetup {
 	use TArrayTools;
 
-
 	/** @var array */
 	private $_setup = [];
-
 
 	/**
 	 * @param string $key
@@ -56,7 +52,6 @@ trait TSetup {
 
 		return $this->getArray($key, $this->_setup, $default);
 	}
-
 
 	/**
 	 * @param string $key

@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-
 /**
  * SPDX-FileCopyrightText: 2019 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-
 
 namespace OCA\FilesLock\DAV;
 
@@ -57,7 +55,6 @@ class LockBackend implements BackendInterface {
 		}
 	}
 
-
 	/**
 	 * Locks a uri
 	 *
@@ -93,7 +90,6 @@ class LockBackend implements BackendInterface {
 			return false;
 		}
 	}
-
 
 	/**
 	 * Removes a lock from a uri

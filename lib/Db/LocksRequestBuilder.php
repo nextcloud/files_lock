@@ -23,10 +23,8 @@ use OCA\FilesLock\Tools\Traits\TArrayTools;
 class LocksRequestBuilder extends CoreRequestBuilder {
 	use TArrayTools;
 
-
 	/** @var ConfigService */
 	private $configService;
-
 
 	public function __construct(ConfigService $configService) {
 		$this->configService = $configService;
@@ -44,7 +42,6 @@ class LocksRequestBuilder extends CoreRequestBuilder {
 		return $qb;
 	}
 
-
 	/**
 	 * Base of the Sql Update request
 	 *
@@ -56,7 +53,6 @@ class LocksRequestBuilder extends CoreRequestBuilder {
 
 		return $qb;
 	}
-
 
 	/**
 	 * Base of the Sql Select request for Shares
@@ -74,7 +70,6 @@ class LocksRequestBuilder extends CoreRequestBuilder {
 		return $qb;
 	}
 
-
 	/**
 	 * Base of the Sql Delete request
 	 *
@@ -86,7 +81,6 @@ class LocksRequestBuilder extends CoreRequestBuilder {
 
 		return $qb;
 	}
-
 
 	/**
 	 * @param CoreQueryBuilder $qb
@@ -105,7 +99,6 @@ class LocksRequestBuilder extends CoreRequestBuilder {
 		return $result;
 	}
 
-
 	/**
 	 * @param CoreQueryBuilder $qb
 	 *
@@ -117,7 +110,6 @@ class LocksRequestBuilder extends CoreRequestBuilder {
 
 		return $result;
 	}
-
 
 	/**
 	 * @param array $data

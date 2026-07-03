@@ -57,7 +57,6 @@ class LocksRequest extends LocksRequestBuilder {
 		$qb->executeStatement();
 	}
 
-
 	/**
 	 * @param FileLock $lock
 	 */
@@ -67,7 +66,6 @@ class LocksRequest extends LocksRequestBuilder {
 
 		$qb->executeStatement();
 	}
-
 
 	/**
 	 * @param int[] $ids
@@ -82,7 +80,6 @@ class LocksRequest extends LocksRequestBuilder {
 
 		$qb->executeStatement();
 	}
-
 
 	/**
 	 * @param int $fileId
@@ -110,7 +107,6 @@ class LocksRequest extends LocksRequestBuilder {
 		return $this->getLocksFromRequest($qb);
 	}
 
-
 	/**
 	 * @return FileLock[]
 	 */
@@ -119,7 +115,6 @@ class LocksRequest extends LocksRequestBuilder {
 
 		return $this->getLocksFromRequest($qb);
 	}
-
 
 	/**
 	 * @param int $timeout in minutes
