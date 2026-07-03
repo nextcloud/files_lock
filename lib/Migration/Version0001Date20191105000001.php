@@ -25,14 +25,12 @@ class Version0001Date20191105000001 extends SimpleMigrationStep {
 	/** @var IDBConnection */
 	private $connection;
 
-
 	/**
 	 * @param IDBConnection $connection
 	 */
 	public function __construct(IDBConnection $connection) {
 		$this->connection = $connection;
 	}
-
 
 	/**
 	 * @param IOutput $output
@@ -97,7 +95,6 @@ class Version0001Date20191105000001 extends SimpleMigrationStep {
 
 		return $schema;
 	}
-
 
 	/**
 	 * @param IOutput $output

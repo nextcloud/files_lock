@@ -37,7 +37,6 @@ use Psr\Log\LoggerInterface;
 class LockService {
 	public const PREFIX = 'files_lock';
 
-
 	use TStringTools;
 
 	private IUserManager $userManager;
@@ -51,14 +50,12 @@ class LockService {
 	private IRequest $request;
 	private LoggerInterface $logger;
 
-
 	private array $locks = [];
 	private bool $lockRetrieved = false;
 	private array $lockCache = [];
 	private array $remoteLockCache = [];
 	private ?array $directEditors = null;
 	private bool $allowUserOverride = false;
-
 
 	public function __construct(
 		IL10N $l10n,
@@ -280,7 +277,6 @@ class LockService {
 		);
 	}
 
-
 	/**
 	 * @throws InvalidPathException
 	 * @throws LockNotFoundException
@@ -308,7 +304,6 @@ class LockService {
 		return $this->unlock($lock, $force);
 	}
 
-
 	/**
 	 * @param int $limit how many locks to retrieve (0 for all, default)
 	 *
@@ -330,7 +325,6 @@ class LockService {
 
 		return $locks;
 	}
-
 
 	/**
 	 * @param int $fileId
@@ -396,7 +390,6 @@ class LockService {
 
 		$lock->setToken(self::PREFIX . '/' . $this->uuid());
 	}
-
 
 	/**
 	 * @param FileLock[] $locks

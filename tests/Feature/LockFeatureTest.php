@@ -21,13 +21,12 @@ use OCP\IUserManager;
 use OCP\Lock\ManuallyLockedException;
 use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\MockObject\MockObject;
 use Test\TestCase;
 use Test\Util\User\Dummy;
 
-/**
- * @group DB
- */
+#[Group(name: 'DB')]
 class LockFeatureTest extends TestCase {
 	public const TEST_USER1 = 'test-user1';
 	public const TEST_USER2 = 'test-user2';
@@ -165,7 +164,6 @@ class LockFeatureTest extends TestCase {
 		self::assertNotEquals($oldRootEtag, $newRootEtag);
 		self::assertNotEquals($oldEtag, $file->getEtag());
 	}
-
 
 	public function testUnlockEtagShare() {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
@@ -432,7 +430,6 @@ class LockFeatureTest extends TestCase {
 			$locks = $this->lockManager->getLocks($file->getId());
 		}
 		$this->assertCount(1, $locks);
-
 
 		// The owner can stil force unlock it as done through the OCS controller
 		\OCP\Server::get(\OCA\FilesLock\Service\LockService::class)->enableUserOverride();

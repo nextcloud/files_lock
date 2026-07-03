@@ -60,7 +60,6 @@ class LockController extends OCSController {
 		$this->logger = $logger;
 	}
 
-
 	/**
 	 * @NoAdminRequired
 	 * @NoSubAdminRequired
@@ -116,7 +115,6 @@ class LockController extends OCSController {
 		}
 	}
 
-
 	public function setOCSVersion($version) {
 		$this->ocsVersion = $version;
 	}
@@ -146,8 +144,6 @@ class LockController extends OCSController {
 		}
 		return new \OC\AppFramework\OCS\V2Response($data, $format, $message);
 	}
-
-
 
 	/**
 	 * @param Exception $e

@@ -74,7 +74,6 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $lock;
 	}
 
-
 	/**
 	 * @return int
 	 */
@@ -92,7 +91,6 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 
 		return $this;
 	}
-
 
 	/**
 	 * @return string
@@ -112,7 +110,6 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $this;
 	}
 
-
 	/**
 	 * @return string
 	 */
@@ -130,7 +127,6 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 
 		return $this;
 	}
-
 
 	/**
 	 * @return int
@@ -150,7 +146,6 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $this;
 	}
 
-
 	/**
 	 * @return string
 	 */
@@ -168,7 +163,6 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 
 		return $this;
 	}
-
 
 	/**
 	 * @return int
@@ -266,7 +260,6 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $lock;
 	}
 
-
 	/**
 	 * @param array $data
 	 *
@@ -285,7 +278,6 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $this;
 	}
 
-
 	/**
 	 * @param array $data
 	 */
@@ -300,7 +292,6 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		$this->setTimeout($this->getInt('ttl', $data));
 		$this->setDisplayName($this->get('owner', $data));
 	}
-
 
 	/**
 	 * @return array
