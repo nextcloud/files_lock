@@ -21,13 +21,12 @@ use OCP\IUserManager;
 use OCP\Lock\ManuallyLockedException;
 use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\MockObject\MockObject;
 use Test\TestCase;
 use Test\Util\User\Dummy;
 
-/**
- * @group DB
- */
+#[Group(name: 'DB')]
 class LockFeatureTest extends TestCase {
 	public const TEST_USER1 = 'test-user1';
 	public const TEST_USER2 = 'test-user2';
