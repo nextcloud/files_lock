@@ -17,6 +17,7 @@ OC.L10N.register(
     "Unlock file" : "Desbloquear ficheiro",
     "Lock file" : "Bloquear ficheiro ",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Este arquivo foi trancado automaticamente por um cliente. A remoção do trancamento pode levar a um conflito ao salvar o arquivo.",
+    "Keep lock" : "Manter o trancamento",
     "Force unlock" : "Forçar o destrancamento",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "Permita que seus usuários tranquem temporariamente seus arquivos para evitar conflitos ao trabalhar em arquivos compartilhados.\n\nℹ️ A partir da versão 34 do Nextcloud, este aplicativo está integrado ao Nextcloud Hub e, portanto, não é mais disponibilizado na loja de aplicativos."
 },
