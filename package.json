@@ -32,7 +32,7 @@
     "@nextcloud/eslint-config": "^8.4.2",
     "@nextcloud/stylelint-config": "^3.2.2",
     "@nextcloud/vite-config": "^2.3.5",
-    "@playwright/test": "^1.61.0",
+    "@playwright/test": "^1.61.1",
     "@vue/tsconfig": "^0.9.1",
     "prettier": "^3.8.1",
     "stylelint-config-css-modules": "^4.6.0",
