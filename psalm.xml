@@ -15,6 +15,8 @@
 >
 	<stubs>
 		<file name="tests/stub.phpstub" preloadClasses="true"/>
+		<file name="tests/stubs/oc_files_storage_wrapper_wrapper.php"/>
+		<file name="tests/stubs/oc_files_storage_storage.php"/>
 	</stubs>
 	<projectFiles>
 		<directory name="lib" />
