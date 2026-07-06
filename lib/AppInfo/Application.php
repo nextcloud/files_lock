@@ -9,25 +9,19 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\AppInfo;
 
-use OC\Files\Filesystem;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\FilesLock\Capability;
+use OCA\FilesLock\Listeners\BeforeFileSystemSetupListener;
 use OCA\FilesLock\Listeners\LoadAdditionalScripts;
 use OCA\FilesLock\Listeners\PropfindPropertiesListener;
 use OCA\FilesLock\LockProvider;
-use OCA\FilesLock\Service\FileService;
-use OCA\FilesLock\Service\LockService;
-use OCA\FilesLock\Storage\LockWrapper;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCP\Files\Events\BeforeFileSystemSetupEvent;
 use OCP\Files\Events\BeforeRemotePropfindEvent;
 use OCP\Files\Lock\ILockManager;
-use OCP\Files\Storage\IStorage;
-use OCP\IUserSession;
-use OCP\Server;
-use OCP\Util;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'files_lock';
@@ -56,40 +50,16 @@ class Application extends App implements IBootstrap {
 			BeforeRemotePropfindEvent::class,
 			PropfindPropertiesListener::class
 		);
+		$context->registerEventListener(
+			BeforeFileSystemSetupEvent::class,
+			BeforeFileSystemSetupListener::class
+		);
 	}
 
 	#[\Override]
 	public function boot(IBootContext $context): void {
-		$this->registerHooks();
-
-		$context->injectFn(function (ILockManager $lockManager) use ($context) {
+		$context->injectFn(function (ILockManager $lockManager) use ($context): void {
 			$lockManager->registerLazyLockProvider(LockProvider::class);
 		});
-	}
-
-	public function registerHooks(): void {
-		Util::connectHook('OC_Filesystem', 'preSetup', $this, 'addStorageWrapper');
-	}
-
-	/** @internal */
-	public function addStorageWrapper(): void {
-		$lockManager = Server::get(ILockManager::class);
-		$userSession = Server::get(IUserSession::class);
-		$fileService = Server::get(FileService::class);
-		$lockService = Server::get(LockService::class);
-
-		Filesystem::addStorageWrapper(
-			'files_lock', function (string $mountPoint, IStorage $storage) use ($lockManager, $userSession, $fileService, $lockService): LockWrapper {
-				return new LockWrapper(
-					[
-						'storage' => $storage,
-						'lock_manager' => $lockManager,
-						'user_session' => $userSession,
-						'file_service' => $fileService,
-						'lock_service' => $lockService,
-					]
-				);
-			}, 10
-		);
 	}
 }
