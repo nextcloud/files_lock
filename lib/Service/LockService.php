@@ -26,6 +26,7 @@ use OCP\Files\IRootFolder;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
+use OCP\Files\Node;
 use OCP\Files\NotFoundException;
 use OCP\IL10N;
 use OCP\IRequest;
@@ -88,7 +89,7 @@ class LockService {
 	 *
 	 * @return FileLock|bool
 	 */
-	public function getLockForNodeId(int $nodeId) {
+	public function getLockForNodeId(int $nodeId, ?Node $node = null) {
 		if (array_key_exists($nodeId, $this->lockCache) && $this->lockCache[$nodeId] !== null) {
 			return $this->lockCache[$nodeId];
 		}
@@ -96,7 +97,7 @@ class LockService {
 		try {
 			$this->lockCache[$nodeId] = $this->getLockFromFileId($nodeId);
 		} catch (LockNotFoundException) {
-			$remoteLock = $this->getRemoteLockFromDav($nodeId);
+			$remoteLock = $this->getRemoteLockFromDav($nodeId, $node);
 			$this->lockCache[$nodeId] = $remoteLock ?: false;
 		}
 
@@ -399,15 +400,17 @@ class LockService {
 		$this->locksRequest->removeIds($ids);
 	}
 
-	public function getRemoteLockFromDav(int $nodeId): ?FileLock {
+	public function getRemoteLockFromDav(int $nodeId, ?Node $node = null): ?FileLock {
 		try {
 			$user = $this->userSession->getUser();
 			if (!$user) {
 				return null;
 			}
 
-			$userFolder = $this->rootFolder->getUserFolder($user->getUID());
-			$node = $userFolder->getFirstNodeById($nodeId);
+			if (!$node) {
+				$userFolder = $this->rootFolder->getUserFolder($user->getUID());
+				$node = $userFolder->getFirstNodeById($nodeId);
+			}
 			if (empty($node)) {
 				return null;
 			}
