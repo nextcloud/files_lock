@@ -8,7 +8,7 @@
 
 ### Fixed
 - perf: cache negative results in LockSerivice::getLockForNodeIds by @icewind
-- perf: Avoir calling Server::get for each share mounts by @CarlSchwan
+- perf: Avoid calling Server::get for each share mounts by @CarlSchwan
 
 ## 32.0.4
 
