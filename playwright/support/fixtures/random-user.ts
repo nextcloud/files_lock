@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { test as base } from '@playwright/test'
 import { createRandomUser, login } from '@nextcloud/e2e-test-server/playwright'
+import { test as base } from '@playwright/test'
 
 interface RandomUserFixture {
 	user: User
@@ -14,7 +14,7 @@ interface RandomUserFixture {
  * This test fixture ensures a new random user is created and used for the test (current page)
  */
 export const test = base.extend<RandomUserFixture>({
-	user: async ({ }, use) => {
+	user: async (_, use) => {
 		const user = await createRandomUser()
 		await use(user)
 	},
