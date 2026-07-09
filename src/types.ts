@@ -10,10 +10,10 @@ export enum LockType {
 }
 
 export type LockState = {
-	isLocked: boolean,
-	lockOwner: string,
-	lockOwnerDisplayName: string,
-	lockOwnerType: LockType,
-	lockOwnerEditor: string,
-	lockTime: number,
+	isLocked: boolean
+	lockOwner: string
+	lockOwnerDisplayName: string
+	lockOwnerType: LockType
+	lockOwnerEditor: string
+	lockTime: number
 }
