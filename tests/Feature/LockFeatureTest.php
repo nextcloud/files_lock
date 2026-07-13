@@ -386,6 +386,21 @@ class LockFeatureTest extends TestCase {
 	}
 
 	/**
+	 * Default config (LOCK_TIMEOUT = -1) must produce ETA_INFINITE, not a negative timestamp.
+	 * Regression: getTimeout() returned -60 which clients interpreted as a past expiry.
+	 */
+	public function testDefaultInfiniteTimeoutProducesEtaInfinite() {
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigService::LOCK_TIMEOUT, '-1');
+
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('test-file', 'AAA');
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+		$locks = $this->lockManager->getLocks($file->getId());
+
+		$this->assertCount(1, $locks);
+		$this->assertEquals(FileLock::ETA_INFINITE, $locks[0]->getEta());
+	}
+
+	/**
 	 * Regression test for https://github.com/nextcloud/files_lock/issues/130
 	 */
 	public function testExtendInfiniteLock() {
