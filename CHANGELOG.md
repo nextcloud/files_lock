@@ -4,6 +4,11 @@
 -->
 # Changelog
 
+## 33.0.6
+
+### Fixed
+- enh: allow file owner to unlock TYPE_TOKEN locks by @benjaminfrueh [#1170](https://github.com/nextcloud/files_lock/pull/1170)
+
 ## 33.0.5
 
 ### Fixed
