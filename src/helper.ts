@@ -49,6 +49,10 @@ export const canUnlock = (node: Node): boolean => {
 		return true
 	}
 
+	if (node.owner === getCurrentUser()?.uid) {
+		return true
+	}
+
 	return false
 }
 
