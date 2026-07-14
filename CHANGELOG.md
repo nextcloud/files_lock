@@ -4,6 +4,13 @@
 -->
 # Changelog
 
+## 30.0.4
+
+### Fixed
+
+- [stable30] enh: allow file owner to unlock TYPE_TOKEN locks by @benjaminfrueh [#1173](https://github.com/nextcloud/files_lock/pull/1173)
+- [stable30] fix(DAV): Fix getFileFromAbsoluteUri by @provokateurin [#1011](https://github.com/nextcloud/files_lock/pull/1011)
+
 ## 30.0.3
 
 ### Fixed
