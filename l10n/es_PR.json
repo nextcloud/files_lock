@@ -1,6 +1,8 @@
 { "translations": {
     "Desktop client" : "Cliente de escritorio",
     "iOS client" : "Cliente iOS",
-    "Android client" : "Cliente Android"
+    "Android client" : "Cliente Android",
+    "Unlock file" : "Unlock file",
+    "Lock file" : "Lock file"
 },"pluralForm" :"nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }

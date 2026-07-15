@@ -1,6 +1,8 @@
 { "translations": {
     "Desktop client" : "Cliente de Scriptorio",
     "iOS client" : "Cliente iOS",
-    "Android client" : "Cliente Android"
+    "Android client" : "Cliente Android",
+    "Unlock file" : "Unlock file",
+    "Lock file" : "Lock file"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

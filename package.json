@@ -1,6 +1,6 @@
 {
   "name": "files_lock",
-  "version": "33.0.4",
+  "version": "33.0.6",
   "license": "AGPL-3.0-or-later",
   "private": true,
   "type": "module",
@@ -24,7 +24,7 @@
     "@nextcloud/l10n": "^3.4.1",
     "@nextcloud/router": "^3.1.0",
     "@nextcloud/vue": "^9.3.3",
-    "vue": "^3.5.25"
+    "vue": "^3.5.39"
   },
   "devDependencies": {
     "@nextcloud/browserslist-config": "^3.1.2",
@@ -34,7 +34,7 @@
     "@nextcloud/vite-config": "^2.3.5",
     "@playwright/test": "^1.57.0",
     "@vue/tsconfig": "^0.8.1",
-    "prettier": "^3.8.1",
+    "prettier": "^3.8.5",
     "stylelint-config-css-modules": "^4.5.1",
     "typescript": "^5.9.3",
     "typescript-plugin-css-modules": "^5.2.0"
@@ -59,6 +59,6 @@
     "npm": "^11.3.0"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.55.1"
+    "@rollup/rollup-linux-x64-gnu": "^4.59.1"
   }
 }

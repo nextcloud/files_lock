@@ -4,6 +4,19 @@
 -->
 # Changelog
 
+## 33.0.6
+
+### Fixed
+- enh: allow file owner to unlock TYPE_TOKEN locks by @benjaminfrueh [#1170](https://github.com/nextcloud/files_lock/pull/1170)
+
+## 33.0.5
+
+### Fixed
+- perf: Avoid calling Server::get for each share mounts by @CarlSchwan [#1124](https://github.com/nextcloud/files_lock/pull/1124)
+
+### Other
+- chore(CI): Adjust testing matrix for Nextcloud 33 on stable33 by @nickvergessen [#966](https://github.com/nextcloud/files_lock/pull/966)
+
 ## 33.0.4
 
 ### Fixed

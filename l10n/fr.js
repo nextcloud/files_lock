@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "File is currently locked by %s" : "Le fichier est actuellement verrouillé par %s",
     "File is not locked" : "Le fichier n’est pas verrouillé",
+    "File can only be locked with update permissions." : "Le fichier ne peut être verrouillé qu'avec des droits de mise à jour.",
     "File can only be unlocked by providing a valid owner lock token" : "Le fichier ne peut être déverrouillé qu'en fournissant un jeton de verrouillage propriétaire valide",
     "File can only be unlocked by the owner of the lock" : "Le fichier ne peut être déverrouillé que par le propriétaire du verrouillage",
     "Desktop client" : "client de bureau",
@@ -19,6 +20,7 @@ OC.L10N.register(
     "files_lock" : "Verrouillage de fichier",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Ce fichier a été verrouillé automatiquement par un client. Supprimer le verrou peut conduire à un entrer en conflit lors de l'enregistrement du fichier.",
     "Keep lock" : "Garder le verrouillage",
-    "Force unlock" : "Forcer le déverrouillage"
+    "Force unlock" : "Forcer le déverrouillage",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "Permettez à vos utilisateurs de verrouiller temporairement leurs fichiers afin d'éviter les conflits lorsqu'ils travaillent sur des fichiers partagés.\n\nℹ️ Depuis la version 34 de Nextcloud, cette application est intégrée à Nextcloud Hub et n'est donc plus disponible sur le magasin d'applications."
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

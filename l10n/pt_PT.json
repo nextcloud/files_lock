@@ -1,6 +1,7 @@
 { "translations": {
     "File is currently locked by %s" : "O ficheiro está atualmente bloqueado por %s",
     "File is not locked" : "O ficheiro não está bloqueado",
+    "File can only be locked with update permissions." : "O arquivo só pode ser trancado com permissões de atualização.",
     "File can only be unlocked by providing a valid owner lock token" : "O ficheiros só pode ser desbloqueado fornecendo uma chave de bloqueio de proprietário válido",
     "File can only be unlocked by the owner of the lock" : "O ficheiros só pode ser desbloqueado pelo proprietário do bloqueio",
     "Desktop client" : "Cliente de PC",
@@ -9,7 +10,14 @@
     "Temporary files lock" : "Bloquear ficheiros temporariamente",
     "Temporary lock your files" : "Bloquear temporariamente os seus ficheiros ",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Permitir que os utilizadores bloqueiem temporariamente os seus ficheiros para evitar conflitos enquanto trabalham em ficheiros partilhados.",
+    "Manually locked by {user}" : "Trancado manualmente por {user}",
+    "Automatically locked by {user}" : "Trancado automaticamente por {user}",
     "Unlock file" : "Desbloquear ficheiro",
-    "Lock file" : "Bloquear ficheiro "
+    "Lock file" : "Bloquear ficheiro ",
+    "files_lock" : "Desbloquear arquivo manualmente",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Este arquivo foi trancado automaticamente por um cliente. A remoção do trancamento pode levar a um conflito ao salvar o arquivo.",
+    "Keep lock" : "Manter o trancamento",
+    "Force unlock" : "Forçar o destrancamento",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "Permita que seus usuários tranquem temporariamente seus arquivos para evitar conflitos ao trabalhar em arquivos compartilhados.\n\nℹ️ A partir da versão 34 do Nextcloud, este aplicativo está integrado ao Nextcloud Hub e, portanto, não é mais disponibilizado na loja de aplicativos."
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }
