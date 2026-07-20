@@ -10,11 +10,10 @@ declare(strict_types=1);
 namespace OCA\FilesLock\Model;
 
 use JsonSerializable;
-use OCA\FilesLock\Tools\Db\IQueryRow;
-use OCA\FilesLock\Tools\Traits\TArrayTools;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
+use OCP\Server;
 use Sabre\DAV\Locks\LockInfo;
 
 /**
@@ -22,48 +21,33 @@ use Sabre\DAV\Locks\LockInfo;
  *
  * @package OCA\FilesLock\Service
  */
-class FileLock implements ILock, IQueryRow, JsonSerializable {
-	use TArrayTools;
-
+class FileLock implements ILock, JsonSerializable {
 	public const ETA_INFINITE = -1;
 
-	/** @var int */
-	private $id = 0;
+	private int $id = 0;
 
-	/** @var string */
-	private $userId = '';
+	private string $userId = '';
 
-	/** @var string */
-	private $uri = '';
+	private string $uri = '';
 
-	/** @var string */
-	private $token = '';
+	private string $token = '';
 
-	/** @var int */
-	private $fileId = 0;
+	private int $fileId = 0;
 
-	/** @var int */
-	private $timeout = 1800;
+	private int $creation = 0;
 
-	/** @var int */
-	private $creation = 0;
-
-	/** @var int */
-	private $lockType = ILock::TYPE_USER;
+	private int $lockType = ILock::TYPE_USER;
 
 	private ?string $displayName = null;
-
-	private string $owner = '';
-	private $scope = ILock::LOCK_EXCLUSIVE;
+	private int $scope = ILock::LOCK_EXCLUSIVE;
 
 	/**
 	 * FileLock constructor.
-	 *
-	 * @param int $timeout
 	 */
-	public function __construct(int $timeout = 1800) {
-		$this->timeout = $timeout;
-		$this->creation = \OC::$server->get(ITimeFactory::class)->getTime();
+	public function __construct(
+		private int $timeout = 1800,
+	) {
+		$this->creation = Server::get(ITimeFactory::class)->getTime();
 	}
 
 	public static function fromLockScope(LockContext $lockScope, int $timeout): FileLock {
@@ -74,143 +58,84 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $lock;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getId(): int {
 		return $this->id;
 	}
 
-	/**
-	 * @param int $id
-	 *
-	 * @return FileLock
-	 */
 	public function setId(int $id): self {
 		$this->id = $id;
 
 		return $this;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getUri(): string {
 		return $this->uri;
 	}
 
-	/**
-	 * @param string $uri
-	 *
-	 * @return FileLock
-	 */
 	public function setUri(string $uri): self {
 		$this->uri = $uri;
 
 		return $this;
 	}
 
-	/**
-	 * @return string
-	 */
 	#[\Override]
 	public function getOwner(): string {
 		return $this->userId;
 	}
 
-	/**
-	 * @param string $userId
-	 *
-	 * @return FileLock
-	 */
 	public function setUserId(string $userId): self {
 		$this->userId = $userId;
 
 		return $this;
 	}
 
-	/**
-	 * @return int
-	 */
 	#[\Override]
 	public function getFileId(): int {
 		return $this->fileId;
 	}
 
-	/**
-	 * @param int $fileId
-	 *
-	 * @return FileLock
-	 */
 	public function setFileId(int $fileId): self {
 		$this->fileId = $fileId;
 
 		return $this;
 	}
 
-	/**
-	 * @return string
-	 */
 	#[\Override]
 	public function getToken(): string {
 		return $this->token;
 	}
 
-	/**
-	 * @param string $token
-	 *
-	 * @return FileLock
-	 */
 	public function setToken(string $token): self {
 		$this->token = $token;
 
 		return $this;
 	}
 
-	/**
-	 * @return int
-	 */
 	#[\Override]
 	public function getTimeout(): int {
 		return $this->timeout;
 	}
 
-	/**
-	 * @param int $timeout
-	 *
-	 * @return FileLock
-	 */
 	public function setTimeout(int $timeout): self {
 		$this->timeout = $timeout;
 
 		return $this;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getETA(): int {
 		if ($this->getTimeout() <= 0) {
 			return self::ETA_INFINITE;
 		}
 		$end = $this->getCreatedAt() + $this->getTimeout();
-		$eta = $end - \OC::$server->get(ITimeFactory::class)->getTime();
+		$eta = $end - Server::get(ITimeFactory::class)->getTime();
 		return ($eta < 1) ? 0 : $eta;
 	}
 
-	/**
-	 * @return int
-	 */
 	#[\Override]
 	public function getCreatedAt(): int {
 		return $this->creation;
 	}
 
-	/**
-	 * @param int $creation
-	 *
-	 * @return FileLock
-	 */
 	public function setCreation(int $creation): self {
 		$this->creation = $creation;
 
@@ -252,9 +177,6 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $this->displayName;
 	}
 
-	/**
-	 * @return LockInfo
-	 */
 	public function toLockInfo(): LockInfo {
 		$lock = new LockInfo();
 		$lock->owner = $this->getDisplayName();
@@ -268,43 +190,31 @@ class FileLock implements ILock, IQueryRow, JsonSerializable {
 		return $lock;
 	}
 
-	/**
-	 * @param array $data
-	 *
-	 * @return IQueryRow
-	 */
-	#[\Override]
-	public function importFromDatabase(array $data):IQueryRow {
-		$this->setId($this->getInt('id', $data));
-		$this->setUserId($this->get('user_id', $data));
-		$this->setFileId($this->getInt('file_id', $data));
-		$this->setToken($this->get('token', $data));
-		$this->setCreation($this->getInt('creation', $data));
-		$this->setLockType($this->getInt('type', $data));
-		$this->setTimeout($this->getInt('ttl', $data));
-		$this->setDisplayName($this->get('owner', $data));
+	public function importFromDatabase(array $data): self {
+		$this->setId((int)$data['id']);
+		$this->setUserId($data['user_id'] ?? '');
+		$this->setFileId((int)$data['file_id']);
+		$this->setToken($data['token'] ?? '');
+		$this->setCreation((int)$data['creation']);
+		$this->setLockType((int)$data['type']);
+		$this->setTimeout((int)$data['ttl']);
+		$this->setDisplayName($data['owner'] ?? '');
 
 		return $this;
 	}
 
-	/**
-	 * @param array $data
-	 */
-	public function import(array $data) {
-		$this->setId($this->getInt('id', $data));
-		$this->setUri($this->get('uri', $data));
-		$this->setUserId($this->get('userId', $data));
-		$this->setFileId($this->getInt('fileId', $data));
-		$this->setToken($this->get('token', $data));
-		$this->setCreation($this->getInt('creation', $data));
-		$this->setLockType($this->getInt('type', $data));
-		$this->setTimeout($this->getInt('ttl', $data));
-		$this->setDisplayName($this->get('owner', $data));
+	public function import(array $data): void {
+		$this->setId((int)$data['id']);
+		$this->setUri($data['uri'] ?? '');
+		$this->setUserId($data['user_id']);
+		$this->setFileId((int)$data['file_id']);
+		$this->setToken($data['token'] ?? '');
+		$this->setCreation((int)$data['creation']);
+		$this->setLockType((int)$data['type']);
+		$this->setTimeout((int)$data['ttl']);
+		$this->setDisplayName($data['owner'] ?? '');
 	}
 
-	/**
-	 * @return array
-	 */
 	#[\Override]
 	public function jsonSerialize(): array {
 		return [

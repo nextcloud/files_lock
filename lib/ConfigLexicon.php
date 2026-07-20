@@ -23,10 +23,12 @@ use OCP\Config\ValueType;
 class ConfigLexicon implements ILexicon {
 	public const LOCK_TIMEOUT = 'lock_timeout';
 
+	#[\Override]
 	public function getStrictness(): Strictness {
 		return Strictness::NOTICE;
 	}
 
+	#[\Override]
 	public function getAppConfigs(): array {
 		return [
 			new Entry(
@@ -38,6 +40,7 @@ class ConfigLexicon implements ILexicon {
 		];
 	}
 
+	#[\Override]
 	public function getUserConfigs(): array {
 		return [];
 	}

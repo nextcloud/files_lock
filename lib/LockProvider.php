@@ -14,10 +14,9 @@ use OCP\Files\Lock\LockContext;
 use OCP\PreConditionNotMetException;
 
 class LockProvider implements ILockProvider {
-	private LockService $lockService;
-
-	public function __construct(LockService $lockService) {
-		$this->lockService = $lockService;
+	public function __construct(
+		private readonly LockService $lockService,
+	) {
 	}
 
 	#[\Override]
@@ -46,15 +45,15 @@ class LockProvider implements ILockProvider {
 	public function unlock(LockContext $lockInfo): void {
 		try {
 			$this->lockService->getLockFromFileId($lockInfo->getNode()->getId());
-		} catch (Exceptions\LockNotFoundException $e) {
+		} catch (Exceptions\LockNotFoundException) {
 			throw new PreConditionNotMetException('No lock found');
 		}
 
 		try {
 			$this->lockService->unlock($lockInfo);
-		} catch (Exceptions\LockNotFoundException $e) {
+		} catch (Exceptions\LockNotFoundException) {
 			throw new PreConditionNotMetException('No lock found for scope');
-		} catch (Exceptions\UnauthorizedUnlockException $e) {
+		} catch (Exceptions\UnauthorizedUnlockException) {
 			throw new PreConditionNotMetException('Unauth unlock');
 		}
 	}

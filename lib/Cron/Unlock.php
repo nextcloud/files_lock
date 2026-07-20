@@ -14,12 +14,11 @@ use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
 
 class Unlock extends TimedJob {
-	private LockService $lockService;
-
-	public function __construct(ITimeFactory $timeFactory, LockService $lockService) {
+	public function __construct(
+		ITimeFactory $timeFactory,
+		private readonly LockService $lockService,
+	) {
 		parent::__construct($timeFactory);
-
-		$this->lockService = $lockService;
 
 		$this->setInterval(12 * 60);
 	}

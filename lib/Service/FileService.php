@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Service;
 
-use OC\User\NoUserException;
 use OCP\Files\IRootFolder;
 use OCP\Files\Node;
 use OCP\Files\NotFoundException;
@@ -23,22 +22,14 @@ use OCP\Session\Exceptions\SessionNotAvailableException;
  * @package OCA\FilesLock\Service
  */
 class FileService {
-	/** @var IUserSession */
-	private $userSession;
-
-	/** @var IRootFolder */
-	private $rootFolder;
-
-	public function __construct(IUserSession $userSession, IRootFolder $rootFolder) {
-		$this->userSession = $userSession;
-		$this->rootFolder = $rootFolder;
+	public function __construct(
+		private readonly IUserSession $userSession,
+		private readonly IRootFolder $rootFolder,
+	) {
 	}
 
 	/**
-	 * @param string $userId
-	 * @param int $fileId
 	 *
-	 * @return Node
 	 * @throws NotFoundException
 	 */
 	public function getFileFromId(string $userId, int $fileId): Node {
@@ -49,34 +40,25 @@ class FileService {
 			throw new NotFoundException();
 		}
 
-		$file = array_shift($files);
-
-		return $file;
+		return array_shift($files);
 	}
 
 	/**
-	 * @param string $path
-	 * @param string $userId
 	 *
-	 * @return Node
 	 * @throws NotFoundException
 	 */
 	public function getFileFromPath(string $userId, string $path): Node {
-		if (substr($path, 0, 6) !== 'files/') {
+		if (!str_starts_with($path, 'files/')) {
 			throw new NotFoundException();
 		}
 
 		$path = '/' . substr($path, 6);
-		$file = $this->rootFolder->getUserFolder($userId)
-			->get($path);
 
-		return $file;
+		return $this->rootFolder->getUserFolder($userId)
+			->get($path);
 	}
 
 	/**
-	 * @param string $uri
-	 *
-	 * @return Node
 	 * @throws NotFoundException
 	 */
 	public function getFileFromUri(string $uri): Node {
@@ -88,19 +70,15 @@ class FileService {
 		$userId = $user->getUID();
 
 		$path = '/' . $uri;
-		$file = $this->rootFolder->getUserFolder($userId)
-			->get($path);
 
-		return $file;
+		return $this->rootFolder->getUserFolder($userId)
+			->get($path);
 	}
 
 	/**
-	 * @param string $uri
 	 *
-	 * @return Node
 	 * @throws NotFoundException
 	 * @throws NotPermittedException
-	 * @throws NoUserException
 	 */
 	public function getFileFromAbsoluteUri(string $uri): Node {
 		$user = $this->userSession->getUser();
@@ -115,9 +93,8 @@ class FileService {
 			throw new NotFoundException();
 		}
 		$path = '/' . $path;
-		$file = $this->rootFolder->getUserFolder($userId)
-			->get($path);
 
-		return $file;
+		return $this->rootFolder->getUserFolder($userId)
+			->get($path);
 	}
 }
