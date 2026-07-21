@@ -7,12 +7,33 @@ namespace OCA\Files\Event {
  	class LoadAdditionalScriptsEvent extends Event {}
 }
 
-namespace OC\Hooks {
-	class Emitter {
-		public function emit(string $class, string $value, array $option) {
+namespace OC\AppFramework\OCS {
+	class V1Response extends \OCP\AppFramework\Http\Response {
+		public function __construct(
+			\OCP\AppFramework\Http\Response $dataResponse,
+			protected string $format = 'xml',
+			protected ?string $statusMessage = null,
+			protected ?int $itemsCount = null,
+			protected ?int $itemsPerPage = null,
+		) {
 		}
-		/** Closure $closure */
-		public function listen(string $class, string $value, $closure) {
+	}
+
+	class V2Response extends \OCP\AppFramework\Http\Response {
+		public function __construct(
+			\OCP\AppFramework\Http\Response $dataResponse,
+			protected string $format = 'xml',
+			protected ?string $statusMessage = null,
+			protected ?int $itemsCount = null,
+			protected ?int $itemsPerPage = null,
+		) {
 		}
 	}
 }
+
+
+define('UUID_TYPE_DEFAULT', 0);
+define('UUID_TYPE_RANDOM', 4);
+function uuid_create($uuid_type = \UUID_TYPE_DEFAULT): string {
+}
+

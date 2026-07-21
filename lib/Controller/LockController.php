@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace OCA\FilesLock\Controller;
 
 use Exception;
+use OC\AppFramework\OCS\V1Response;
+use OC\AppFramework\OCS\V2Response;
 use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
@@ -17,6 +19,7 @@ use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
 use OCP\Files\Lock\ILock;
@@ -35,39 +38,31 @@ use Psr\Log\LoggerInterface;
 class LockController extends OCSController {
 
 	private int $ocsVersion;
-	private LoggerInterface $logger;
 
 	public function __construct(
 		IRequest $request,
-		LoggerInterface $logger,
-		private IUserSession $userSession,
-		private FileService $fileService,
-		private LockService $lockService,
-		private IL10N $l10n,
+		private readonly LoggerInterface $logger,
+		private readonly IUserSession $userSession,
+		private readonly FileService $fileService,
+		private readonly LockService $lockService,
+		private readonly IL10N $l10n,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 
 		// We need to overload some implementation from the OCSController here
 		// to be able to push a custom message and data when returning other
 		// HTTP status codes than 200 OK
-		$this->registerResponder('json', function ($data) {
-			return $this->buildOCSResponse('json', $data);
-		});
+		$this->registerResponder('json', fn (DataResponse $data): V1Response|V2Response
+			=> $this->buildOCSResponse('json', $data));
 
-		$this->registerResponder('xml', function ($data) {
-			return $this->buildOCSResponse('xml', $data);
-		});
-		$this->logger = $logger;
+		$this->registerResponder('xml', fn (DataResponse $data): V1Response|V2Response
+			=> $this->buildOCSResponse('xml', $data));
 	}
 
 	/**
-	 * @NoAdminRequired
 	 * @NoSubAdminRequired
-	 *
-	 * @param string $fileId
-	 *
-	 * @return DataResponse
 	 */
+	#[NoAdminRequired]
 	public function locking(string $fileId, int $lockType = ILock::TYPE_USER): DataResponse {
 		try {
 			$user = $this->userSession->getUser();
@@ -86,13 +81,9 @@ class LockController extends OCSController {
 	}
 
 	/**
-	 * @NoAdminRequired
 	 * @NoSubAdminRequired
-	 *
-	 * @param string $fileId
-	 *
-	 * @return DataResponse
 	 */
+	#[NoAdminRequired]
 	public function unlocking(string $fileId, int $lockType = ILock::TYPE_USER): DataResponse {
 		try {
 			$user = $this->userSession->getUser();
@@ -100,11 +91,11 @@ class LockController extends OCSController {
 			$this->lockService->unlockFile((int)$fileId, $user->getUID());
 
 			return new DataResponse();
-		} catch (LockNotFoundException $e) {
+		} catch (LockNotFoundException) {
 			$response = new DataResponse();
 			$response->setStatus(Http::STATUS_PRECONDITION_FAILED);
 			return $response;
-		} catch (UnauthorizedUnlockException $e) {
+		} catch (UnauthorizedUnlockException) {
 			$lock = $this->lockService->getLockFromFileId((int)$fileId);
 			$response = new DataResponse();
 			$response->setStatus(Http::STATUS_LOCKED);
@@ -116,14 +107,13 @@ class LockController extends OCSController {
 	}
 
 	#[\Override]
-	public function setOCSVersion($version) {
+	public function setOCSVersion($version): void {
 		$this->ocsVersion = $version;
 	}
 
-	private function buildOCSResponse($format, DataResponse $data) {
+	private function buildOCSResponse(string $format, DataResponse $data): V1Response|V2Response {
 		$message = null;
 		if ($data->getStatus() === Http::STATUS_LOCKED) {
-			/** @var FileLock $lock */
 			$lock = new FileLock();
 			$lock->import($data->getData());
 			$this->lockService->injectMetadata($lock);
@@ -141,20 +131,11 @@ class LockController extends OCSController {
 		}
 
 		if ($this->ocsVersion === 1) {
-			return new \OC\AppFramework\OCS\V1Response($data, $format, $message);
+			return new V1Response($data, $format, $message);
 		}
-		return new \OC\AppFramework\OCS\V2Response($data, $format, $message);
+		return new V2Response($data, $format, $message);
 	}
 
-	/**
-	 * @param Exception $e
-	 * @param array $more
-	 * @param int $status
-	 *
-	 * @param bool $log
-	 *
-	 * @return DataResponse
-	 */
 	protected function fail(
 		Exception $e,
 		array $more = [],
@@ -165,7 +146,7 @@ class LockController extends OCSController {
 			$more,
 			[
 				'status' => -1,
-				'exception' => get_class($e),
+				'exception' => $e::class,
 				'message' => $e->getMessage()
 			]
 		);

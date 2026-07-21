@@ -40,16 +40,14 @@ class BeforeFileSystemSetupListener implements IEventListener {
 		}
 
 		$event->addStorageWrapper(
-			LockWrapper::class, function (string $mountPoint, IStorage $storage): LockWrapper {
-				return new LockWrapper(
-					[
-						'storage' => $storage,
-						'lock_manager' => $this->lockManager,
-						'user_session' => $this->userSession,
-						'file_service' => $this->fileService,
-						'lock_service' => $this->lockService,
-					]
-				);
-			}, 10);
+			LockWrapper::class, fn (string $mountPoint, IStorage $storage): LockWrapper => new LockWrapper(
+				[
+					'storage' => $storage,
+					'lock_manager' => $this->lockManager,
+					'user_session' => $this->userSession,
+					'file_service' => $this->fileService,
+					'lock_service' => $this->lockService,
+				]
+			), 10);
 	}
 }

@@ -53,7 +53,7 @@ class LockFeatureTest extends TestCase {
 		$this->timeFactory = $this->createMock(ITimeFactory::class);
 		$this->timeFactory->expects(self::any())
 			->method('getTime')
-			->willReturnCallback(function () {
+			->willReturnCallback(function (): int {
 				if ($this->time) {
 					return $this->time;
 				}
@@ -74,7 +74,7 @@ class LockFeatureTest extends TestCase {
 		$this->toTheFuture(0);
 	}
 
-	public function testLockUser() {
+	public function testLockUser(): void {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('test-file', 'AAA');
 		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
@@ -106,7 +106,7 @@ class LockFeatureTest extends TestCase {
 		self::assertEquals('EEE', $file->getContent());
 	}
 
-	public function testLockEtag() {
+	public function testLockEtag(): void {
 		$this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('etag_test', 'etag_test');
 
@@ -125,7 +125,7 @@ class LockFeatureTest extends TestCase {
 		self::assertNotEquals($oldEtag, $file->getEtag());
 	}
 
-	public function testUnlockEtag() {
+	public function testUnlockEtag(): void {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('etag_test', 'etag_test');
 		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
@@ -145,7 +145,7 @@ class LockFeatureTest extends TestCase {
 		self::assertNotEquals($oldEtag, $file->getEtag());
 	}
 
-	public function testLockEtagShare() {
+	public function testLockEtagShare(): void {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('etag_test', 'etag_test');
 		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
@@ -165,7 +165,7 @@ class LockFeatureTest extends TestCase {
 		self::assertNotEquals($oldEtag, $file->getEtag());
 	}
 
-	public function testUnlockEtagShare() {
+	public function testUnlockEtagShare(): void {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('etag_test', 'etag_test');
 		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
@@ -187,7 +187,7 @@ class LockFeatureTest extends TestCase {
 		self::assertNotEquals($oldEtag, $file->getEtag());
 	}
 
-	public function testLockUserExpire() {
+	public function testLockUserExpire(): void {
 		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, 30);
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('test-file-expire', 'AAA');
@@ -211,7 +211,7 @@ class LockFeatureTest extends TestCase {
 		self::assertEquals('CCC', $file->getContent());
 	}
 
-	public function testExpiredLocksAreDeprecated() {
+	public function testExpiredLocksAreDeprecated(): void {
 		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, 30);
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('test-expired-lock-is-deprecated', 'AAA');
@@ -229,7 +229,7 @@ class LockFeatureTest extends TestCase {
 		$file2 = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('test-expired-lock-is-deprecated-2', 'AAA');
 		$lock2 = $this->lockManager->lock(new LockContext($file2, ILock::TYPE_USER, self::TEST_USER1));
 		$this->toTheFuture(3600);
-		$mapToTokens = fn (ILock $lock) => $lock->getToken();
+		$mapToTokens = fn (ILock $lock): string => $lock->getToken();
 		$deprecated = array_map($mapToTokens, $service->getDeprecatedLocks());
 
 		self::assertContains($lock1->getToken(), $deprecated);
@@ -242,7 +242,7 @@ class LockFeatureTest extends TestCase {
 		self::assertNotContains($lock2->getToken(), $deprecated);
 	}
 
-	public function testLockUserInfinite() {
+	public function testLockUserInfinite(): void {
 		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, 0);
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('test-file-infinite', 'AAA');
@@ -274,7 +274,7 @@ class LockFeatureTest extends TestCase {
 		}
 	}
 
-	public function testLockApp() {
+	public function testLockApp(): void {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('test-file2', 'AAA');
 		$this->shareFileWithUser($file, self::TEST_USER1, self::TEST_USER2);
@@ -288,34 +288,34 @@ class LockFeatureTest extends TestCase {
 			self::assertEquals('AAA', $file->getContent());
 		}
 
-		$this->lockManager->runInScope($scope, function () use ($file) {
+		$this->lockManager->runInScope($scope, function () use ($file): void {
 			self::assertEquals('collaborative_app', $this->lockManager->getLockInScope()->getOwner());
 			$file->putContent('EEE');
 			self::assertEquals('EEE', $file->getContent());
 		});
 
 		$this->loginAndGetUserFolder(self::TEST_USER2);
-		$this->lockManager->runInScope($scope, function () use ($file) {
+		$this->lockManager->runInScope($scope, function () use ($file): void {
 			self::assertEquals('collaborative_app', $this->lockManager->getLockInScope()->getOwner());
 			$file->putContent('FFF');
 			self::assertEquals('FFF', $file->getContent());
 		});
 	}
 
-	public function testLockDifferentApps() {
+	public function testLockDifferentApps(): void {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('test-file3', 'AAA');
 		$scope = new LockContext($file, ILock::TYPE_APP, 'collaborative_app');
 		$this->lockManager->lock($scope);
 
-		$this->lockManager->runInScope($scope, function () use ($file) {
+		$this->lockManager->runInScope($scope, function () use ($file): void {
 			self::assertEquals('collaborative_app', $this->lockManager->getLockInScope()->getOwner());
 			$file->putContent('EEE');
 			self::assertEquals('EEE', $file->getContent());
 		});
 
 		$otherAppScope = new LockContext($file, ILock::TYPE_APP, 'other_app');
-		$this->lockManager->runInScope($otherAppScope, function () use ($file) {
+		$this->lockManager->runInScope($otherAppScope, function () use ($file): void {
 			self::assertEquals('other_app', $this->lockManager->getLockInScope()->getOwner());
 			try {
 				$file->putContent('BBB');
@@ -327,21 +327,21 @@ class LockFeatureTest extends TestCase {
 		});
 	}
 
-	public function testLockDifferentAppsPublic() {
+	public function testLockDifferentAppsPublic(): void {
 		self::logout();
 		$file = $this->rootFolder->getUserFolder(self::TEST_USER1)
 			->newFile('test-file_public', 'AAA');
 		$scope = new LockContext($file, ILock::TYPE_APP, 'collaborative_app');
 		$this->lockManager->lock($scope);
 
-		$this->lockManager->runInScope($scope, function () use ($file) {
+		$this->lockManager->runInScope($scope, function () use ($file): void {
 			self::assertEquals('collaborative_app', $this->lockManager->getLockInScope()->getOwner());
 			$file->putContent('EEE');
 			self::assertEquals('EEE', $file->getContent());
 		});
 
 		$otherAppScope = new LockContext($file, ILock::TYPE_APP, 'other_app');
-		$this->lockManager->runInScope($otherAppScope, function () use ($file) {
+		$this->lockManager->runInScope($otherAppScope, function () use ($file): void {
 			self::assertEquals('other_app', $this->lockManager->getLockInScope()->getOwner());
 			try {
 				$file->putContent('BBB');
@@ -356,7 +356,7 @@ class LockFeatureTest extends TestCase {
 	/**
 	 * Ensure that a lock can be extended and the same lock is kept
 	 */
-	public function testExtendLock() {
+	public function testExtendLock(): void {
 		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, 15);
 
 		// Create a file and lock it
@@ -388,7 +388,7 @@ class LockFeatureTest extends TestCase {
 	/**
 	 * Regression test for https://github.com/nextcloud/files_lock/issues/130
 	 */
-	public function testExtendInfiniteLock() {
+	public function testExtendInfiniteLock(): void {
 		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, '0');
 
 		// Create a file and lock it
@@ -411,7 +411,7 @@ class LockFeatureTest extends TestCase {
 		$this->assertEquals($id, $locks[0]->getId());
 	}
 
-	public function testUnlockStaleClientLock() {
+	public function testUnlockStaleClientLock(): void {
 		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, '0');
 
 		// Create a file and lock it as the desktop client would
@@ -426,7 +426,7 @@ class LockFeatureTest extends TestCase {
 		try {
 			$this->lockManager->unlock(new LockContext($file, ILock::TYPE_TOKEN, self::TEST_USER2));
 			$locks = [];
-		} catch (\OCP\PreConditionNotMetException $e) {
+		} catch (\OCP\PreConditionNotMetException) {
 			$locks = $this->lockManager->getLocks($file->getId());
 		}
 		$this->assertCount(1, $locks);
@@ -444,7 +444,7 @@ class LockFeatureTest extends TestCase {
 		return $this->rootFolder->getUserFolder($userId);
 	}
 
-	private function shareFileWithUser(\OCP\Files\File $file, $owner, $user) {
+	private function shareFileWithUser(\OCP\Files\File $file, string $owner, string $user): void {
 		$this->shareManager = \OCP\Server::get(IShareManager::class);
 		$share1 = $this->shareManager->newShare();
 		$share1->setNode($file)

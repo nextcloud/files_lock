@@ -12,7 +12,6 @@ namespace OCA\FilesLock\Migration;
 use Closure;
 use Exception;
 use OCP\DB\ISchemaWrapper;
-use OCP\IDBConnection;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
@@ -22,22 +21,9 @@ use OCP\Migration\SimpleMigrationStep;
  * @package OCA\FilesLock\Migration
  */
 class Version0001Date20191105000001 extends SimpleMigrationStep {
-	/** @var IDBConnection */
-	private $connection;
-
 	/**
-	 * @param IDBConnection $connection
-	 */
-	public function __construct(IDBConnection $connection) {
-		$this->connection = $connection;
-	}
-
-	/**
-	 * @param IOutput $output
 	 * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
-	 * @param array $options
 	 *
-	 * @return ISchemaWrapper
 	 */
 	#[\Override]
 	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options): ISchemaWrapper {
@@ -98,9 +84,7 @@ class Version0001Date20191105000001 extends SimpleMigrationStep {
 	}
 
 	/**
-	 * @param IOutput $output
 	 * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
-	 * @param array $options
 	 *
 	 * @throws Exception
 	 */

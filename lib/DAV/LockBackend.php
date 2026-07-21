@@ -23,17 +23,15 @@ use Sabre\DAV\Locks\LockInfo;
 
 class LockBackend implements BackendInterface {
 	public function __construct(
-		private FileService $fileService,
-		private LockService $lockService,
-		private bool $absolute,
-		private IUserSession $userSession,
+		private readonly FileService $fileService,
+		private readonly LockService $lockService,
+		private readonly bool $absolute,
+		private readonly IUserSession $userSession,
 	) {
 	}
 
 	/**
-	 * @param string $uri
 	 * @param bool $returnChildLocks
-	 *
 	 * @return LockInfo[]
 	 */
 	#[\Override]
@@ -51,7 +49,7 @@ class LockBackend implements BackendInterface {
 			$lock->setUri($uri);
 
 			return [$lock->toLockInfo()];
-		} catch (Exception $e) {
+		} catch (Exception) {
 			return $locks;
 		}
 	}
@@ -59,10 +57,7 @@ class LockBackend implements BackendInterface {
 	/**
 	 * Locks a uri
 	 *
-	 * @param string $uri
-	 * @param LockInfo $lockInfo
 	 *
-	 * @return bool
 	 */
 	#[\Override]
 	public function lock($uri, LockInfo $lockInfo): bool {
@@ -86,9 +81,9 @@ class LockBackend implements BackendInterface {
 			$lock->setScope($lockInfo->scope);
 			$this->lockService->update($lock);
 			return true;
-		} catch (NotFoundException $e) {
+		} catch (NotFoundException) {
 			return true;
-		} catch (OwnerLockedException $e) {
+		} catch (OwnerLockedException) {
 			return false;
 		}
 	}
@@ -96,16 +91,13 @@ class LockBackend implements BackendInterface {
 	/**
 	 * Removes a lock from a uri
 	 *
-	 * @param string $uri
-	 * @param LockInfo $lockInfo
 	 *
-	 * @return bool
 	 */
 	#[\Override]
 	public function unlock($uri, LockInfo $lockInfo): bool {
 		try {
 			$file = $this->getFileFromUri($uri);
-		} catch (NotFoundException $e) {
+		} catch (NotFoundException) {
 			return true;
 		}
 		$this->lockService->unlock(new LockContext(

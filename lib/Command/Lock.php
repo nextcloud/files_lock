@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace OCA\FilesLock\Command;
 
 use OC\Core\Command\Base;
-use OC\User\NoUserException;
 use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Exceptions\NotFileException;
@@ -25,6 +24,7 @@ use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\NotFoundException;
 use OCP\IUserManager;
+use OCP\User\Exceptions\UserNotFoundException;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -60,10 +60,7 @@ class Lock extends Base {
 	}
 
 	/**
-	 * @param InputInterface $input
-	 * @param OutputInterface $output
 	 *
-	 * @throws NoUserException
 	 * @throws NotFoundException
 	 * @throws UnauthorizedUnlockException
 	 * @throws NotFileException
@@ -82,7 +79,7 @@ class Lock extends Base {
 
 			$this->getStatus($input, $output, $fileId);
 			$this->unlockFile($input, $output, $fileId);
-		} catch (SuccessException $e) {
+		} catch (SuccessException) {
 			return 0;
 		}
 
@@ -90,19 +87,16 @@ class Lock extends Base {
 			throw new InvalidArgumentException('\'Not enough arguments (missing: "user_id")');
 		}
 
-		$this->lockFile($input, $output, $fileId, $userId);
+		$this->lockFile($output, $fileId, $userId);
 
 		return 0;
 	}
 
 	/**
-	 * @param InputInterface $input
-	 * @param OutputInterface $output
-	 * @param int $fileId
 	 *
 	 * @throws SuccessException
 	 */
-	private function getStatus(InputInterface $input, OutputInterface $output, int $fileId) {
+	private function getStatus(InputInterface $input, OutputInterface $output, int $fileId): void {
 		if (!$input->getOption('status')) {
 			return;
 		}
@@ -120,7 +114,7 @@ class Lock extends Base {
 					' - Expiry in seconds: ' . $lock->getETA()
 				);
 			}
-		} catch (LockNotFoundException $e) {
+		} catch (LockNotFoundException) {
 			$output->writeln('File #' . $fileId . ' is <info>not locked<info>');
 		}
 
@@ -128,20 +122,15 @@ class Lock extends Base {
 	}
 
 	/**
-	 * @param InputInterface $input
-	 * @param OutputInterface $output
-	 * @param int $fileId
-	 * @param string|null $userId
-	 *
 	 * @throws InvalidPathException
-	 * @throws NoUserException
 	 * @throws NotFileException
 	 * @throws NotFoundException
+	 * @throws UserNotFoundException
 	 */
-	private function lockFile(InputInterface $input, OutputInterface $output, int $fileId, ?string $userId) {
+	private function lockFile(OutputInterface $output, int $fileId, ?string $userId): void {
 		$user = $this->userManager->get($userId);
 		if ($user === null) {
-			throw new NoUserException("Unknown user '" . $userId . "'");
+			throw new UserNotFoundException("Unknown user '" . $userId . "'");
 		}
 
 		$file = $this->fileService->getFileFromId($user->getUID(), $fileId);
@@ -153,14 +142,11 @@ class Lock extends Base {
 	}
 
 	/**
-	 * @param InputInterface $input
-	 * @param OutputInterface $output
-	 * @param int $fileId
 	 *
 	 * @throws SuccessException
 	 * @throws UnauthorizedUnlockException
 	 */
-	private function unlockFile(InputInterface $input, OutputInterface $output, int $fileId) {
+	private function unlockFile(InputInterface $input, OutputInterface $output, int $fileId): void {
 		if (!$input->getOption('unlock')) {
 			return;
 		}
@@ -168,19 +154,17 @@ class Lock extends Base {
 		$output->writeln('<info>unlocking File #' . $fileId);
 		try {
 			$this->lockService->unlockFile($fileId, $input->getArgument('user_id'), true);
-		} catch (LockNotFoundException $e) {
+		} catch (LockNotFoundException) {
 		}
 
 		throw new SuccessException();
 	}
 
 	/**
-	 * @param InputInterface $input
-	 * @param OutputInterface $output
 	 *
 	 * @throws SuccessException
 	 */
-	private function uninstallApp(InputInterface $input, OutputInterface $output) {
+	private function uninstallApp(InputInterface $input, OutputInterface $output): void {
 		if (!$input->getOption('uninstall')) {
 			return;
 		}

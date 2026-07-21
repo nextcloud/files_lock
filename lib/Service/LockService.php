@@ -18,7 +18,6 @@ use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
-use OCA\FilesLock\Tools\Traits\TStringTools;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Services\IAppConfig;
 use OCP\Constants;
@@ -38,48 +37,23 @@ use Psr\Log\LoggerInterface;
 
 class LockService {
 	public const PREFIX = 'files_lock';
-
-	use TStringTools;
-
-	private IUserManager $userManager;
-	private IL10N $l10n;
-	private LocksRequest $locksRequest;
-	private FileService $fileService;
-	private IAppManager $appManager;
-	private IEventDispatcher $eventDispatcher;
-	private IUserSession $userSession;
-	private IRequest $request;
-	private LoggerInterface $logger;
-
-	private array $locks = [];
-	private bool $lockRetrieved = false;
 	private array $lockCache = [];
 	private array $remoteLockCache = [];
-	private ?array $directEditors = null;
 	private bool $allowUserOverride = false;
 
 	public function __construct(
-		IL10N $l10n,
-		IUserManager $userManager,
-		LocksRequest $locksRequest,
-		FileService $fileService,
-		private IAppConfig $appConfig,
-		IAppManager $appManager,
+		private readonly IL10N $l10n,
+		private readonly IUserManager $userManager,
+		private readonly LocksRequest $locksRequest,
+		private readonly FileService $fileService,
+		private readonly IAppConfig $appConfig,
+		private readonly IAppManager $appManager,
 		IEventDispatcher $eventDispatcher,
-		IUserSession $userSession,
-		IRequest $request,
-		LoggerInterface $logger,
-		private IRootFolder $rootFolder,
+		private readonly IUserSession $userSession,
+		private readonly IRequest $request,
+		private readonly LoggerInterface $logger,
+		private readonly IRootFolder $rootFolder,
 	) {
-		$this->l10n = $l10n;
-		$this->userManager = $userManager;
-		$this->locksRequest = $locksRequest;
-		$this->fileService = $fileService;
-		$this->appManager = $appManager;
-		$this->eventDispatcher = $eventDispatcher;
-		$this->userSession = $userSession;
-		$this->request = $request;
-		$this->logger = $logger;
 	}
 
 	public function getLockForNodeId(int $nodeId, ?Node $node = null): FileLock|false {
@@ -178,7 +152,7 @@ class LockService {
 
 			$this->injectMetadata($known);
 			throw new OwnerLockedException($known);
-		} catch (LockNotFoundException $e) {
+		} catch (LockNotFoundException) {
 			$lock = FileLock::fromLockScope($lockScope, $timeout);
 			$this->generateToken($lock);
 			$lock->setCreation(time());
@@ -190,7 +164,7 @@ class LockService {
 		}
 	}
 
-	public function update(FileLock $lock) {
+	public function update(FileLock $lock): void {
 		$this->locksRequest->update($lock);
 	}
 
@@ -326,9 +300,6 @@ class LockService {
 	}
 
 	/**
-	 * @param int $fileId
-	 *
-	 * @return FileLock
 	 * @throws LockNotFoundException
 	 */
 	public function getLockFromFileId(int $fileId): FileLock {
@@ -379,29 +350,24 @@ class LockService {
 		return null;
 	}
 
-	/**
-	 * @param FileLock $lock
-	 */
-	public function generateToken(FileLock $lock) {
+	public function generateToken(FileLock $lock): void {
 		if ($lock->getToken() !== '') {
 			return;
 		}
 
-		$lock->setToken(self::PREFIX . '/' . $this->uuid());
+		$lock->setToken(self::PREFIX . '/' . uuid_create(UUID_TYPE_RANDOM));
 	}
 
 	/**
 	 * @param FileLock[] $locks
 	 */
-	public function removeLocks(array $locks) {
+	public function removeLocks(array $locks): void {
 		if (empty($locks)) {
 			return;
 		}
 
 		$ids = array_map(
-			function (FileLock $lock) {
-				return $lock->getId();
-			}, $locks
+			fn (FileLock $lock): int => $lock->getId(), $locks
 		);
 
 		$this->logger->notice('removing locks', ['ids' => $ids]);

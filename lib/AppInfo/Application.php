@@ -60,7 +60,7 @@ class Application extends App implements IBootstrap {
 
 	#[\Override]
 	public function boot(IBootContext $context): void {
-		$context->injectFn(function (ILockManager $lockManager) use ($context): void {
+		$context->injectFn(function (ILockManager $lockManager): void {
 			$lockManager->registerLazyLockProvider(LockProvider::class);
 		});
 	}
