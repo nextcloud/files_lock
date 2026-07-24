@@ -31,6 +31,24 @@ class LockFeatureTest extends TestCase {
 	public const TEST_USER1 = 'test-user1';
 	public const TEST_USER2 = 'test-user2';
 
+	/**
+	 * Every file created by this test class.
+	 *
+	 * @var list<string>
+	 */
+	private const TEST_FILES = [
+		'test-file',
+		'test-file2',
+		'test-file3',
+		'test-file-expire',
+		'test-file-infinite',
+		'test-file_public',
+		'test-file-client',
+		'etag_test',
+		'test-expired-lock-is-deprecated',
+		'test-expired-lock-is-deprecated-2',
+	];
+
 	protected LockManager $lockManager;
 	protected IRootFolder $rootFolder;
 	protected ITimeFactory&MockObject $timeFactory;
@@ -64,10 +82,7 @@ class LockFeatureTest extends TestCase {
 		$this->loginAndGetUserFolder(self::TEST_USER2);
 
 		$folder = $this->loginAndGetUserFolder(self::TEST_USER1);
-		$folder->delete('test-file');
-		$folder->delete('test-file2');
-		$folder->delete('test-file3');
-		$folder->delete('etag_test');
+		$this->deleteTestFiles($folder);
 
 		\OC_Hook::$thrownExceptions = [];
 		$this->overwriteService(ITimeFactory::class, $this->timeFactory);
@@ -464,14 +479,16 @@ class LockFeatureTest extends TestCase {
 		$this->time += $seconds;
 	}
 
+	private function deleteTestFiles(\OCP\Files\Folder $folder): void {
+		foreach (self::TEST_FILES as $filename) {
+			$folder->delete($filename);
+		}
+	}
+
 	public function tearDown(): void {
-		parent::tearDown();
+		// Adjust if new fixtures ever create files for TEST_USER2 too
 		$folder = $this->rootFolder->getUserFolder(self::TEST_USER1);
-		$folder->delete('test-file');
-		$folder->delete('etag_test');
-		$folder->delete('test-file2');
-		$folder->delete('test-file3');
-		$folder->delete('test-file-infinite');
-		$folder->delete('test-file_public');
+		$this->deleteTestFiles($folder);
+		parent::tearDown();
 	}
 }
