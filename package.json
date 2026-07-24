@@ -36,7 +36,7 @@
     "@vue/tsconfig": "^0.9.1",
     "prettier": "^3.9.4",
     "stylelint-config-css-modules": "^4.6.0",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "typescript-plugin-css-modules": "^5.2.0"
   },
   "prettier": {
