@@ -277,7 +277,9 @@ class LockPlugin extends SabreLockPlugin {
 			Application::DAV_PROPERTY_LOCK_OWNER_TYPE => $lock ? $lock->getType() : null,
 			Application::DAV_PROPERTY_LOCK_OWNER => $lock ? $lock->getOwner() : null,
 			Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME => $lock ? $lock->getDisplayName() : null,
-			Application::DAV_PROPERTY_LOCK_EDITOR => $lock ? $lock->getOwner() : null,
+			Application::DAV_PROPERTY_LOCK_EDITOR => $lock?->getType() === ILock::TYPE_APP
+				? $lock->getOwner()
+				: null,
 			Application::DAV_PROPERTY_LOCK_TIME => $lock ? $lock->getCreatedAt() : null,
 			Application::DAV_PROPERTY_LOCK_TIMEOUT => $lock ? $lock->getTimeout() : null,
 			Application::DAV_PROPERTY_LOCK_TOKEN => $lock ? $lock->getToken() : null,
