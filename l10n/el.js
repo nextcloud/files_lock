@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "File is currently locked by %s" : "Το αρχείο είναι προς το παρόν κλειδωμένο από %s",
     "File is not locked" : "Το αρχείο δεν είναι κλειδωμένο",
+    "File can only be locked with update permissions." : "Το αρχείο μπορεί να κλειδωθεί μόνο με δικαιώματα ενημέρωσης.",
     "File can only be unlocked by providing a valid owner lock token" : "Το αρχείο μπορεί να ξεκλειδωθεί μόνο παρέχοντας ένα έγκυρο διακριτικό κλειδώματος κατόχου",
     "File can only be unlocked by the owner of the lock" : "Το αρχείο μπορεί να ξεκλειδωθεί μόνο από τον κάτοχο του κλειδώματος",
     "Desktop client" : "Πελάτης σταθερού υπολογιστή",
@@ -16,8 +17,10 @@ OC.L10N.register(
     "Automatically locked by {user}" : "Αυτόματα κλειδωμένο από {user}",
     "Unlock file" : "Ξεκλείδωμα αρχείου",
     "Lock file" : "Κλείδωμα αρχείου",
+    "files_lock" : "files_lock",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Αυτό το αρχείο έχει κλειδωθεί αυτόματα από έναν πελάτη. Η κατάργηση του κλειδώματος μπορεί να οδηγήσει σε διένεξη κατά την αποθήκευση του αρχείου.",
     "Keep lock" : "Διατήρηση κλειδώματος",
-    "Force unlock" : "Εξαναγκασμένο ξεκλείδωμα"
+    "Force unlock" : "Εξαναγκασμένο ξεκλείδωμα",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "Επιτρέπει στους χρήστες σας να κλειδώνουν προσωρινά τα αρχεία τους για την αποφυγή διενέξεων κατά την εργασία σε κοινόχρηστα αρχεία.\n\nℹ️ Από το Nextcloud 34 και έπειτα, αυτή η εφαρμογή περιλαμβάνεται στο Nextcloud Hub και συνεπώς δεν διατίθεται πλέον μέσω του appstore."
 },
 "nplurals=2; plural=(n != 1);");
