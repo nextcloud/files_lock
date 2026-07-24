@@ -3,36 +3,40 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
+import type { IFileAction, INode, Node } from '@nextcloud/files'
+
+import LockAccountSvg from '@mdi/svg/svg/account-lock-outline.svg?raw'
+import LockOpenSvg from '@mdi/svg/svg/lock-open-variant-outline.svg?raw'
+import LockSvg from '@mdi/svg/svg/lock-outline.svg?raw'
+import LockMonitorSvg from '@mdi/svg/svg/monitor-lock.svg?raw'
+import LockEditSvg from '@mdi/svg/svg/pencil-lock-outline.svg?raw'
+import { getCurrentUser } from '@nextcloud/auth'
+import { getDialogBuilder } from '@nextcloud/dialogs'
+import { emit } from '@nextcloud/event-bus'
 import {
-	type IFileAction,
-	type Node,
-	type INode,
 	FileType,
 	registerFileAction,
 } from '@nextcloud/files'
-import { getDialogBuilder } from '@nextcloud/dialogs'
 import { translate as t } from '@nextcloud/l10n'
-import { emit } from '@nextcloud/event-bus'
-import { lockFile, unlockFile } from './api'
-import { LockType } from './types'
+import { lockFile, unlockFile } from './api.ts'
 import {
-	canLock, canUnlock,
+	canLock,
+	canUnlock,
 	getInfoLabel,
 	getLockStateFromAttributes,
 	isUpdatable,
-} from './helper'
-import { getCurrentUser } from '@nextcloud/auth'
+} from './helper.ts'
+import { logger } from './services/logger.ts'
+import { LockType } from './types.ts'
 
 import '@nextcloud/dialogs/style.css'
 import './styles.css'
 
-import LockSvg from '@mdi/svg/svg/lock-outline.svg?raw'
-import LockOpenSvg from '@mdi/svg/svg/lock-open-variant-outline.svg?raw'
-import LockEditSvg from '@mdi/svg/svg/pencil-lock-outline.svg?raw'
-import LockMonitorSvg from '@mdi/svg/svg/monitor-lock.svg?raw'
-import LockAccountSvg from '@mdi/svg/svg/account-lock-outline.svg?raw'
-
-const switchLock = async (node: Node) => {
+/**
+ *
+ * @param node Node
+ */
+async function switchLock(node: Node) {
 	try {
 		const state = getLockStateFromAttributes(node)
 		if (!state.isLocked) {
@@ -53,12 +57,16 @@ const switchLock = async (node: Node) => {
 		emit('files:node:updated', node)
 		return true
 	} catch (e) {
-		console.error('Failed to switch lock', e)
+		logger.error('Failed to switch lock', e)
 		return false
 	}
 }
 
-const getLockStateIcon = (node: Node) => {
+/**
+ *
+ * @param node Node
+ */
+function getLockStateIcon(node: Node) {
 	const state = getLockStateFromAttributes(node)
 
 	if (!state.isLocked) {

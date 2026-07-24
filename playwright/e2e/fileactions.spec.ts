@@ -4,7 +4,7 @@
  */
 
 import { expect } from '@playwright/test'
-import { test } from '../support/fixtures/random-user'
+import { test } from '../support/fixtures/random-user.ts'
 
 test.beforeEach(async ({ page }) => {
 	await page.goto('apps/files')
