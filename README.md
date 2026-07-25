@@ -76,11 +76,13 @@ This command can be helpful when locks become stale. For example, when a user fo
 
 ### Lock timeout
 
-Locks have no expiry by default.
+Locks have no expiry by default (`lock_timeout = -1`).
 
 Administrators can change the time of the maximum lock time in minutes (30) using the command:
 
 `occ config:app:set --value '30' files_lock lock_timeout`
+
+Set `lock_timeout` to `-1` to disable expiration.
 
 ### Locking
 
@@ -124,7 +126,7 @@ WebDAV returns the following additional properties in response to a `PROPFIND` r
 - `{http://nextcloud.org/ns}lock-owner-displayname`: Display name of the lock owner
 - `{http://nextcloud.org/ns}lock-owner-editor`: App ID for an app-owned lock. Clients can use it to suggest joining the collaborative editing session in the web interface or through direct editing. In the response to an `X-User-Lock` `LOCK` request, this property currently contains the lock owner regardless of lock type.
 - `{http://nextcloud.org/ns}lock-time`: Timestamp at which the lock was created
-- `{http://nextcloud.org/ns}lock-timeout`: Lock timeout in seconds from creation. A value of `0` means that the lock does not expire.
+- `{http://nextcloud.org/ns}lock-timeout`: Configured lock timeout in seconds from creation. A value of <=`-1` indicates that the lock does not expire.
 - `{http://nextcloud.org/ns}lock-token`: Lock token. Clients using native WebDAV locking must retain it while holding the lock and provide it when unlocking.
 
 ```bash
