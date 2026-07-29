@@ -309,11 +309,13 @@ class LockFeatureTest extends TestCase {
 			self::assertEquals('EEE', $file->getContent());
 		});
 
-		$this->loginAndGetUserFolder(self::TEST_USER2);
-		$this->lockManager->runInScope($scope, function () use ($file): void {
+		/** @var File $sharedFile */
+		$sharedFile = $this->loginAndGetUserFolder(self::TEST_USER2)
+			->get('test-file2');
+		$this->lockManager->runInScope($scope, function () use ($sharedFile): void {
 			self::assertEquals('collaborative_app', $this->lockManager->getLockInScope()->getOwner());
-			$file->putContent('FFF');
-			self::assertEquals('FFF', $file->getContent());
+			$sharedFile->putContent('FFF');
+			self::assertEquals('FFF', $sharedFile->getContent());
 		});
 	}
 
