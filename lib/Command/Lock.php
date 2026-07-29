@@ -49,14 +49,55 @@ class Lock extends Base {
 	protected function configure() {
 		parent::configure();
 		$this->setName('files:lock')
-			->addOption('unlock', 'u', InputOption::VALUE_NONE, 'unlock a file')
+			->setDescription('Lock, unlock, or inspect a file lock')
 			->addOption(
-				'uninstall', '', InputOption::VALUE_NONE, 'fully uninstall the app from your Nextcloud'
+				'unlock',
+				'u',
+				InputOption::VALUE_NONE,
+				'forcibly unlock a file',
 			)
-			->addOption('status', 's', InputOption::VALUE_NONE, 'returns lock status of the file')
-			->addArgument('file_id', InputArgument::OPTIONAL, 'Id of the locked file', 0)
-			->addArgument('user_id', InputArgument::OPTIONAL, 'owner of the lock', '')
-			->setDescription('lock a file to a user');
+			->addOption(
+				'status',
+				's',
+				InputOption::VALUE_NONE,
+				'show the lock status of a file',
+			)
+			->addOption(
+				'uninstall',
+				'',
+				InputOption::VALUE_NONE,
+				'fully uninstall the app from your Nextcloud',
+			)
+			->addArgument(
+				'file_id',
+				InputArgument::OPTIONAL,
+				'ID of the file to lock, unlock, or inspect',
+				0,
+			)
+			->addArgument(
+				'user_id',
+				InputArgument::OPTIONAL,
+				'Lock owner when locking; user with file access when unlocking an app-owned lock',
+				'',
+			)
+			->setHelp(<<<'HELP'
+<info>Lock a file:</info>
+  <comment>occ files:lock &lt;file_id&gt; &lt;user_id&gt;</comment>
+
+<info>Show a file lock's status:</info>
+  <comment>occ files:lock --status &lt;file_id&gt;</comment>
+
+<info>Forcibly unlock a file:</info>
+  <comment>occ files:lock --unlock &lt;file_id&gt; [&lt;user_id&gt;]</comment>
+
+For app-owned locks, provide a user ID that has access to the file. This can be
+needed for files stored in Groupfolders:
+  <comment>occ files:lock --unlock &lt;file_id&gt; &lt;user_id&gt;</comment>
+
+<info>Uninstall the app and delete all locks:</info>
+  <comment>occ files:lock --uninstall</comment>
+HELP
+			);
 	}
 
 	/**
@@ -84,7 +125,7 @@ class Lock extends Base {
 		}
 
 		if ($userId === '') {
-			throw new InvalidArgumentException('\'Not enough arguments (missing: "user_id")');
+			throw new InvalidArgumentException('Not enough arguments (missing: "user_id")');
 		}
 
 		$this->lockFile($output, $fileId, $userId);
@@ -115,7 +156,7 @@ class Lock extends Base {
 				);
 			}
 		} catch (LockNotFoundException) {
-			$output->writeln('File #' . $fileId . ' is <info>not locked<info>');
+			$output->writeln('File #' . $fileId . ' is <info>not locked</info>');
 		}
 
 		throw new SuccessException();
@@ -151,10 +192,11 @@ class Lock extends Base {
 			return;
 		}
 
-		$output->writeln('<info>unlocking File #' . $fileId);
 		try {
 			$this->lockService->unlockFile($fileId, $input->getArgument('user_id'), true);
+			$output->writeln('<info>Unlocked file #' . $fileId . '</info>');
 		} catch (LockNotFoundException) {
+			$output->writeln('<comment>File #' . $fileId . ' was already unlocked</comment>');
 		}
 
 		throw new SuccessException();
