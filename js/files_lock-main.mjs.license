@@ -37,7 +37,7 @@ This file is generated from multiple sources. Included packages:
 	- version: 2.6.0
 	- license: GPL-3.0-or-later
 - @nextcloud/dialogs
-	- version: 7.4.0
+	- version: 7.4.1
 	- license: AGPL-3.0-or-later
 - @nextcloud/files
 	- version: 4.0.0
@@ -49,16 +49,16 @@ This file is generated from multiple sources. Included packages:
 	- version: 9.9.0
 	- license: AGPL-3.0-or-later
 - @vue/reactivity
-	- version: 3.5.39
+	- version: 3.5.40
 	- license: MIT
 - @vue/runtime-core
-	- version: 3.5.39
+	- version: 3.5.40
 	- license: MIT
 - @vue/runtime-dom
-	- version: 3.5.39
+	- version: 3.5.40
 	- license: MIT
 - @vue/shared
-	- version: 3.5.39
+	- version: 3.5.40
 	- license: MIT
 - @vueuse/core
 	- version: 14.3.0
