@@ -4,7 +4,7 @@
  */
 
 import { expect } from '@playwright/test'
-import { test } from '../support/fixtures/sharing-user'
+import { test } from '../support/fixtures/sharing-user.ts'
 
 test('Share a file read only that cannot be locked by the recipient', async ({ pageOwner, pageRecipient, owner, recipient, request }) => {
 	// Create a test file as owner

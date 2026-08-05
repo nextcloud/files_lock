@@ -1,18 +1,28 @@
 {
   "name": "files_lock",
   "version": "35.0.0-dev.0",
-  "license": "AGPL-3.0-or-later",
   "private": true,
+  "license": "AGPL-3.0-or-later",
   "type": "module",
   "scripts": {
     "build": "vite --mode production build",
     "dev": "vite --mode development build",
-    "watch": "vite --mode development build --watch",
-    "lint": "eslint --ext .js,.ts,.vue src",
-    "lint:fix": "eslint --ext .js,.ts,.vue src --fix",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "start:nextcloud": "node playwright/start-nextcloud-server.mjs",
     "stylelint": "stylelint 'src/**/*.vue'",
     "stylelint:fix": "stylelint src/**/*.vue --fix",
-    "start:nextcloud": "node playwright/start-nextcloud-server.mjs"
+    "watch": "vite --mode development build --watch"
+  },
+  "browserslist": [
+    "extends @nextcloud/browserslist-config"
+  ],
+  "prettier": {
+    "bracketSameLine": true,
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 4,
+    "useTabs": true
   },
   "dependencies": {
     "@mdi/svg": "^7.4.47",
@@ -29,7 +39,7 @@
   "devDependencies": {
     "@nextcloud/browserslist-config": "^3.1.2",
     "@nextcloud/e2e-test-server": "^0.5.0",
-    "@nextcloud/eslint-config": "^8.4.2",
+    "@nextcloud/eslint-config": "^9.0.0",
     "@nextcloud/stylelint-config": "^3.2.2",
     "@nextcloud/vite-config": "^2.3.5",
     "@playwright/test": "^1.61.1",
@@ -39,26 +49,11 @@
     "typescript": "^5.9.3",
     "typescript-plugin-css-modules": "^5.2.0"
   },
-  "prettier": {
-    "useTabs": true,
-    "semi": false,
-    "singleQuote": true,
-    "bracketSameLine": true,
-    "tabWidth": 4
-  },
-  "browserslist": [
-    "extends @nextcloud/browserslist-config"
-  ],
-  "eslintConfig": {
-    "extends": [
-      "@nextcloud/eslint-config/typescript"
-    ]
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.60.3"
   },
   "engines": {
     "node": "^24.0.0",
     "npm": "^11.3.0"
-  },
-  "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.60.3"
   }
 }

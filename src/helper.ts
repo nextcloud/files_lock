@@ -3,13 +3,20 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { Permission, type Node } from '@nextcloud/files'
-import { generateUrl } from '@nextcloud/router'
-import { type LockState, LockType } from './types'
-import { translate as t } from '@nextcloud/l10n'
-import { getCurrentUser } from '@nextcloud/auth'
+import type { Node } from '@nextcloud/files'
+import type { LockState } from './types.ts'
 
-export const getLockStateFromAttributes = (node: Node): LockState => {
+import { getCurrentUser } from '@nextcloud/auth'
+import { Permission } from '@nextcloud/files'
+import { translate as t } from '@nextcloud/l10n'
+import { generateUrl } from '@nextcloud/router'
+import { LockType } from './types.ts'
+
+/**
+ *
+ * @param node Node
+ */
+export function getLockStateFromAttributes(node: Node): LockState {
 	return {
 		isLocked: !!node.attributes.lock,
 		lockOwner: node.attributes['lock-owner'],
@@ -20,7 +27,11 @@ export const getLockStateFromAttributes = (node: Node): LockState => {
 	}
 }
 
-export const canLock = (node: Node): boolean => {
+/**
+ *
+ * @param node Node
+ */
+export function canLock(node: Node): boolean {
 	const state = getLockStateFromAttributes(node)
 
 	if (!state.isLocked && isUpdatable(node)) {
@@ -30,7 +41,11 @@ export const canLock = (node: Node): boolean => {
 	return false
 }
 
-export const canUnlock = (node: Node): boolean => {
+/**
+ *
+ * @param node Node
+ */
+export function canUnlock(node: Node): boolean {
 	const state = getLockStateFromAttributes(node)
 
 	if (!state.isLocked) {
@@ -56,7 +71,11 @@ export const canUnlock = (node: Node): boolean => {
 	return false
 }
 
-export const generateAvatarSvg = (userId: string) => {
+/**
+ *
+ * @param userId string
+ */
+export function generateAvatarSvg(userId: string) {
 	const avatarUrl = generateUrl('/avatar/{userId}/32', { userId })
 	return `<svg width="32" height="32" viewBox="0 0 32 32"
 		xmlns="http://www.w3.org/2000/svg" class="sharing-status__avatar">
@@ -64,14 +83,17 @@ export const generateAvatarSvg = (userId: string) => {
 	</svg>`
 }
 
-export const getInfoLabel = (node: Node): string => {
+/**
+ *
+ * @param node Node
+ */
+export function getInfoLabel(node: Node): string {
 	const state = getLockStateFromAttributes(node)
 
 	if (state.lockOwnerType === LockType.User) {
 		return state.isLocked
 			? t('files_lock', 'Manually locked by {user}', { user: state.lockOwnerDisplayName })
 			: ''
-
 	} else if (state.lockOwnerType === LockType.App) {
 		return state.isLocked
 			? t('files_lock', 'Locked by editing online in {app}', { app: state.lockOwnerDisplayName })
@@ -85,6 +107,10 @@ export const getInfoLabel = (node: Node): string => {
 	return ''
 }
 
-export const isUpdatable = (node: Node): boolean => {
+/**
+ *
+ * @param node Node
+ */
+export function isUpdatable(node: Node): boolean {
 	return (node.permissions & Permission.UPDATE) !== 0 && (node.attributes['share-permissions'] & Permission.UPDATE) !== 0
 }
