@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OCA\FilesLock\Db;
 
 use OCA\FilesLock\ConfigLexicon;
+use OCA\FilesLock\Cron\Unlock;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
 use OCP\AppFramework\Services\IAppConfig;
@@ -182,5 +183,25 @@ class LocksRequest {
 		$lock->importFromDatabase($data);
 
 		return $lock;
+	}
+
+	public function uninstall(): void {
+		$this->connection->dropTable(self::TABLE_LOCKS);
+		$this->removeFromJobs();
+		$this->removeFromMigrations();
+	}
+
+	public function removeFromMigrations(): void {
+		$qb = $this->connection->getQueryBuilder();
+		$qb->delete('migrations');
+		$qb->where($qb->expr()->eq('app', $qb->createNamedParameter('files_lock')));
+		$qb->executeStatement();
+	}
+
+	public function removeFromJobs(): void {
+		$qb = $this->connection->getQueryBuilder();
+		$qb->delete('jobs');
+		$qb->where($qb->expr()->eq('class', $qb->createNamedParameter(Unlock::class)));
+		$qb->executeStatement();
 	}
 }
