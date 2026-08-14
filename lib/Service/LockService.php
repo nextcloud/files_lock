@@ -257,7 +257,7 @@ class LockService {
 	 * @throws NotFoundException
 	 * @throws UnauthorizedUnlockException
 	 */
-	public function unlockFile(int $fileId, string $userId, bool $force = false, int $lockType = ILock::TYPE_USER): FileLock {
+	public function unlockFile(int $fileId, ?string $userId, bool $force = false, int $lockType = ILock::TYPE_USER): FileLock {
 		$lock = $this->getLockForNodeId($fileId);
 		if (!$lock) {
 			throw new LockNotFoundException();

@@ -9,16 +9,20 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Command;
 
-use OC\Core\Command\Base;
 use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Exceptions\NotFileException;
-use OCA\FilesLock\Exceptions\SuccessException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\AppFramework\Services\IAppConfig;
+use OCP\Console\Attribute\Argument;
+use OCP\Console\Attribute\AsCommand;
+use OCP\Console\Attribute\Option;
+use OCP\Console\ExitCode;
+use OCP\Console\IInput;
+use OCP\Console\IOutput;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
@@ -26,61 +30,11 @@ use OCP\Files\NotFoundException;
 use OCP\IUserManager;
 use OCP\User\Exceptions\UserNotFoundException;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
 
-class Lock extends Base {
-	public function __construct(
-		private readonly IUserManager $userManager,
-		private readonly LocksRequest $locksRequest,
-		private readonly FileService $fileService,
-		private readonly LockService $lockService,
-		private readonly IAppConfig $appConfig,
-	) {
-		parent::__construct();
-	}
-
-	/**
-	 *
-	 */
-	protected function configure() {
-		parent::configure();
-		$this->setName('files:lock')
-			->setDescription('Lock, unlock, or inspect a file lock')
-			->addOption(
-				'unlock',
-				'u',
-				InputOption::VALUE_NONE,
-				'forcibly unlock a file',
-			)
-			->addOption(
-				'status',
-				's',
-				InputOption::VALUE_NONE,
-				'show the lock status of a file',
-			)
-			->addOption(
-				'uninstall',
-				'',
-				InputOption::VALUE_NONE,
-				'fully uninstall the app from your Nextcloud',
-			)
-			->addArgument(
-				'file_id',
-				InputArgument::OPTIONAL,
-				'ID of the file to lock, unlock, or inspect',
-				0,
-			)
-			->addArgument(
-				'user_id',
-				InputArgument::OPTIONAL,
-				'Lock owner when locking; user with file access when unlocking an app-owned lock',
-				'',
-			)
-			->setHelp(<<<'HELP'
+#[AsCommand(
+	name: 'files:lock',
+	description: 'Lock, unlock, or inspect a file lock',
+	help: <<<'HELP'
 <info>Lock a file:</info>
   <comment>occ files:lock &lt;file_id&gt; &lt;user_id&gt;</comment>
 
@@ -97,51 +51,64 @@ needed for files stored in Groupfolders:
 <info>Uninstall the app and delete all locks:</info>
   <comment>occ files:lock --uninstall</comment>
 HELP
-			);
+)]
+class Lock {
+	public function __construct(
+		private readonly IUserManager $userManager,
+		private readonly LocksRequest $locksRequest,
+		private readonly FileService $fileService,
+		private readonly LockService $lockService,
+		private readonly IAppConfig $appConfig,
+	) {
 	}
 
 	/**
-	 *
 	 * @throws NotFoundException
 	 * @throws UnauthorizedUnlockException
 	 * @throws NotFileException
 	 * @throws InvalidPathException
 	 */
-	protected function execute(InputInterface $input, OutputInterface $output): int {
-		$fileId = (int)$input->getArgument('file_id');
-		$userId = $input->getArgument('user_id');
-
-		try {
-			$this->uninstallApp($input, $output);
-
-			if ($fileId === 0) {
-				throw new InvalidArgumentException('Not enough arguments (missing: "file_id")');
-			}
-
-			$this->getStatus($input, $output, $fileId);
-			$this->unlockFile($input, $output, $fileId);
-		} catch (SuccessException) {
-			return 0;
+	public function __invoke(
+		IOutput $output,
+		IInput $input,
+		#[Argument(description: 'ID of the file to lock, unlock, or inspect', name: 'file_id')]
+		?string $fileId = null,
+		#[Argument(description: 'Lock owner when locking; user with file access when unlocking an app-owned lock', name: 'user_id')]
+		?string $userId = null,
+		#[Option(description: 'Fully uninstall the app from your Nextcloud')]
+		bool $uninstall = false,
+		#[Option(description: 'Show the lock status of a file', shortcut: 's')]
+		bool $status = false,
+		#[Option(description: 'Forcibly unlock a file', shortcut: 'u')]
+		bool $unlock = false,
+	): ExitCode {
+		if ($uninstall) {
+			return $this->uninstallApp($input, $output);
 		}
 
-		if ($userId === '') {
+		$fileId = (int)$fileId;
+
+		if ($fileId <= 0) {
+			$output->writeln('<error>Not enough arguments (missing: "file_id")</error>');
+			return ExitCode::Invalid;
+		}
+
+		if ($status === true) {
+			return $this->getStatus($output, $fileId);
+		}
+
+		if ($unlock === true) {
+			return $this->unlockFile($output, $userId, $fileId);
+		}
+
+		if ($userId === null || $userId === '') {
 			throw new InvalidArgumentException('Not enough arguments (missing: "user_id")');
 		}
 
-		$this->lockFile($output, $fileId, $userId);
-
-		return 0;
+		return $this->lockFile($output, $fileId, $userId);
 	}
 
-	/**
-	 *
-	 * @throws SuccessException
-	 */
-	private function getStatus(InputInterface $input, OutputInterface $output, int $fileId): void {
-		if (!$input->getOption('status')) {
-			return;
-		}
-
+	private function getStatus(IOutput $output, int $fileId): ExitCode {
 		try {
 			$lock = $this->lockService->getLockFromFileId($fileId);
 			$output->writeln(
@@ -159,7 +126,7 @@ HELP
 			$output->writeln('File #' . $fileId . ' is <info>not locked</info>');
 		}
 
-		throw new SuccessException();
+		return ExitCode::Success;
 	}
 
 	/**
@@ -168,7 +135,7 @@ HELP
 	 * @throws NotFoundException
 	 * @throws UserNotFoundException
 	 */
-	private function lockFile(OutputInterface $output, int $fileId, ?string $userId): void {
+	private function lockFile(IOutput $output, int $fileId, string $userId): ExitCode {
 		$user = $this->userManager->get($userId);
 		if ($user === null) {
 			throw new UserNotFoundException("Unknown user '" . $userId . "'");
@@ -180,55 +147,38 @@ HELP
 		$this->lockService->lock(new LockContext(
 			$file, ILock::TYPE_USER, $userId
 		));
+		return ExitCode::Success;
 	}
 
 	/**
-	 *
-	 * @throws SuccessException
 	 * @throws UnauthorizedUnlockException
 	 */
-	private function unlockFile(InputInterface $input, OutputInterface $output, int $fileId): void {
-		if (!$input->getOption('unlock')) {
-			return;
-		}
-
+	private function unlockFile(IOutput $output, ?string $userId, int $fileId): ExitCode {
 		try {
-			$this->lockService->unlockFile($fileId, $input->getArgument('user_id'), true);
+			$this->lockService->unlockFile($fileId, $userId, true);
 			$output->writeln('<info>Unlocked file #' . $fileId . '</info>');
 		} catch (LockNotFoundException) {
 			$output->writeln('<comment>File #' . $fileId . ' was already unlocked</comment>');
 		}
 
-		throw new SuccessException();
+		return ExitCode::Success;
 	}
 
-	/**
-	 *
-	 * @throws SuccessException
-	 */
-	private function uninstallApp(InputInterface $input, OutputInterface $output): void {
-		if (!$input->getOption('uninstall')) {
-			return;
-		}
-
-		$helper = $this->getHelper('question');
+	private function uninstallApp(IInput $input, IOutput $output): ExitCode {
 		$output->writeln(
 			'<error>Beware, this operation will uninstall the FilesLock App and delete all locks.</error>'
 		);
-		$output->writeln('');
-		$question = new ConfirmationQuestion(
-			'<info>Do you confirm this operation?</info> (y/N) ', false, '/^(y|Y)/i'
-		);
 
-		if (!$helper->ask($input, $output, $question)) {
-			$output->writeln('operation cancelled');
-			throw new SuccessException();
+		$confirmed = $input->confirm('<info>Do you confirm this operation?</info> (y/N)', false);
+		if (!$confirmed) {
+			$output->writeln('Operation cancelled');
+			return ExitCode::Success;
 		}
 
 		$this->locksRequest->uninstall();
 		$this->appConfig->deleteAppValues();
 		$output->writeln('<comment>FilesLock App fully uninstalled.</comment>');
 
-		throw new SuccessException();
+		return ExitCode::Success;
 	}
 }
