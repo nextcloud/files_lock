@@ -4,7 +4,10 @@
 version: 2
 updates:
   - package-ecosystem: composer
-    directory: "/"
+    directories:
+    - /
+    - /vendor-bin/psalm
+    - /vendor-bin/rector
     schedule:
       interval: weekly
       day: saturday
