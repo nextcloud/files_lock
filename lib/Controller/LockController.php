@@ -20,6 +20,7 @@ use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\NoSubAdminRequired;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
 use OCP\Files\Lock\ILock;
@@ -60,14 +61,18 @@ class LockController extends OCSController {
 	}
 
 	/**
-	 * @NoSubAdminRequired
+	 * @param ILock::TYPE_* $lockType
 	 */
 	#[NoAdminRequired]
+	#[NoSubAdminRequired]
 	public function locking(string $fileId, int $lockType = ILock::TYPE_USER): DataResponse {
 		try {
 			$user = $this->userSession->getUser();
-			$file = $this->fileService->getFileFromId($user->getUID(), (int)$fileId);
+			if ($user === null) {
+				throw new \LogicException('User not logged in');
+			}
 
+			$file = $this->fileService->getFileFromId($user->getUID(), (int)$fileId);
 			$lock = $this->lockService->lock(new LockContext(
 				$file, $lockType, $user->getUID()
 			));
@@ -80,13 +85,15 @@ class LockController extends OCSController {
 		}
 	}
 
-	/**
-	 * @NoSubAdminRequired
-	 */
 	#[NoAdminRequired]
+	#[NoSubAdminRequired]
 	public function unlocking(string $fileId, int $lockType = ILock::TYPE_USER): DataResponse {
 		try {
 			$user = $this->userSession->getUser();
+			if ($user === null) {
+				throw new \LogicException('User not logged in');
+			}
+
 			$this->lockService->enableUserOverride();
 			$this->lockService->unlockFile((int)$fileId, $user->getUID());
 
@@ -136,6 +143,9 @@ class LockController extends OCSController {
 		return new V2Response($data, $format, $message);
 	}
 
+	/**
+	 * @param HTTP::STATUS_* $status
+	 */
 	protected function fail(
 		Exception $e,
 		array $more = [],
@@ -152,7 +162,7 @@ class LockController extends OCSController {
 		);
 
 		if ($log) {
-			$this->logger->warning('[warning] ' . $status . ' - ' . json_encode($data));
+			$this->logger->warning('[warning] ' . $status . ' - ' . json_encode($data, JSON_THROW_ON_ERROR));
 		}
 
 		return new DataResponse($data, $status);
