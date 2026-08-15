@@ -185,14 +185,20 @@ class LockPlugin extends SabreLockPlugin {
 	#[\Override]
 	public function httpLock(RequestInterface $request, ResponseInterface $response) {
 		if ($request->getHeader('X-User-Lock')) {
+			/** @var ILock::TYPE_* $lockType */
 			$lockType = (int)($request->getHeader('X-User-Lock-Type') ?? ILock::TYPE_USER);
 			$response->setHeader('Content-Type', 'application/xml; charset=utf-8');
 
 			$file = $this->fileService->getFileFromAbsoluteUri($this->server->getRequestUri());
 
+			$user = $this->userSession->getUser();
+			if ($user === null) {
+				throw new \LogicException('User not logged in');
+			}
+
 			try {
 				$lockInfo = $this->lockService->lock(new LockContext(
-					$file, $lockType, $this->userSession->getUser()->getUID()
+					$file, $lockType, $user->getUID()
 				));
 				$response->setStatus(200);
 				$response->setBody(
@@ -220,6 +226,7 @@ class LockPlugin extends SabreLockPlugin {
 	#[\Override]
 	public function httpUnlock(RequestInterface $request, ResponseInterface $response) {
 		if ($request->getHeader('X-User-Lock')) {
+			/** @var ILock::TYPE_* $lockType */
 			$lockType = (int)($request->getHeader('X-User-Lock-Type') ?? ILock::TYPE_USER);
 			$response->setHeader('Content-Type', 'application/xml; charset=utf-8');
 
