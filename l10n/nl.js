@@ -1,6 +1,10 @@
 OC.L10N.register(
     "files_lock",
     {
+    "File is currently locked by %s" : "Bestand is momenteel vergrendeld door %s",
+    "File is not locked" : "Bestand is niet vergrendeld",
+    "File can only be locked with update permissions." : "Bestand kan alleen worden vergrendeld als je over update-rechten beschikt.",
+    "File can only be unlocked by providing a valid owner lock token" : "Bestand kan alleen worden ontgrendeld met behulp van een geldig eigenaarsvergrendelingstoken",
     "File can only be unlocked by the owner of the lock" : "Bestand kan alleen ontgrendeld worden door de eigenaar van de vergrendeling",
     "Desktop client" : "Desktop client",
     "iOS client" : "iOS client",
@@ -8,7 +12,15 @@ OC.L10N.register(
     "Temporary files lock" : "Tijdelijke bestandsvergrendeling",
     "Temporary lock your files" : "Tijdelijk je bestanden vergrendelen",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Staat je gebruikers toe om tijdelijk hun bestanden te vergrendelen, om conflicten te vermijden terwijl ze aan gedeelde bestanden werken.",
+    "Manually locked by {user}" : "Handmatig vergrendeld door {user}",
+    "Locked by editing online in {app}" : "Vergrendeld door online te bewerken met {app}",
+    "Automatically locked by {user}" : "Automatisch vergrendeld door {user}",
     "Unlock file" : "Ontgrendel bestand",
-    "Lock file" : "Vergrendel bestand"
+    "Lock file" : "Vergrendel bestand",
+    "files_lock" : "bestands_vergrendeling",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Dit bestand is automatisch vergrendeld door een gebruiker. Als u de vergrendeling opheft, kan dit leiden tot een conflict bij het opslaan van het bestand.",
+    "Keep lock" : "Vergrendeling behouden",
+    "Force unlock" : "Geforceerd ontgrendelen",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "Geef uw gebruikers de mogelijkheid om hun bestanden tijdelijk te vergrendelen om conflicten te voorkomen bij het werken aan gedeelde bestanden.\n\nℹ️ Vanaf Nextcloud 34 wordt deze app meegeleverd met Nextcloud Hub en wordt daarom niet meer via de appstore uitgebracht."
 },
 "nplurals=2; plural=(n != 1);");
