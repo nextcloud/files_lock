@@ -49,16 +49,16 @@ This file is generated from multiple sources. Included packages:
 	- version: 9.9.0
 	- license: AGPL-3.0-or-later
 - @vue/reactivity
-	- version: 3.5.40
+	- version: 3.5.41
 	- license: MIT
 - @vue/runtime-core
-	- version: 3.5.40
+	- version: 3.5.41
 	- license: MIT
 - @vue/runtime-dom
-	- version: 3.5.40
+	- version: 3.5.41
 	- license: MIT
 - @vue/shared
-	- version: 3.5.40
+	- version: 3.5.41
 	- license: MIT
 - @vueuse/core
 	- version: 14.3.0
@@ -76,7 +76,7 @@ This file is generated from multiple sources. Included packages:
 	- version: 1.0.3
 	- license: MIT
 - files_lock
-	- version: 35.0.0-dev.0
+	- version: 36.0.0-dev.0
 	- license: AGPL-3.0-or-later
 - floating-vue
 	- version: 5.2.2
