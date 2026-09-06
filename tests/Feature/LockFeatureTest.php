@@ -40,7 +40,7 @@ class LockFeatureTest extends TestCase {
 	 *
 	 * @var list<string>
 	 */
-	private const TEST_FILES = [
+	private const array TEST_FILES = [
 		'test-file',
 		'test-file2',
 		'test-file3',
@@ -516,16 +516,17 @@ class LockFeatureTest extends TestCase {
 		$this->assertCount(1, $locks);
 
 		// Other users cannot unlock
+		$sharedFile = $this->loginAndGetUserFolder(self::TEST_USER2)->get('test-file-client');
 		try {
-			$this->lockManager->unlock(new LockContext($file, ILock::TYPE_TOKEN, self::TEST_USER2));
+			$this->lockManager->unlock(new LockContext($sharedFile, ILock::TYPE_TOKEN, self::TEST_USER2));
 			$locks = [];
 		} catch (\OCP\PreConditionNotMetException) {
 			$locks = $this->lockManager->getLocks($file->getId());
 		}
 		$this->assertCount(1, $locks);
 
-		// The owner can stil force unlock it as done through the OCS controller
-		\OCP\Server::get(\OCA\FilesLock\Service\LockService::class)->enableUserOverride();
+		// The owner can still unlock it, the override is part of the policy on every path
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->get('test-file-client');
 		$this->lockManager->unlock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
 
 		$locks = $this->lockManager->getLocks($file->getId());
