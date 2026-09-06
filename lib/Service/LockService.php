@@ -439,6 +439,21 @@ class LockService {
 	}
 
 	/**
+	 * Remove every lock of the given files, regardless of ownership.
+	 *
+	 * @param list<int> $fileIds
+	 */
+	public function removeLocksForFileIds(array $fileIds): void {
+		if (empty($fileIds)) {
+			return;
+		}
+		$this->locksRequest->removeByFileIds($fileIds);
+		foreach ($fileIds as $fileId) {
+			$this->lockCache[$fileId] = false;
+		}
+	}
+
+	/**
 	 * Locks whose expiry has passed.
 	 *
 	 * @param int $limit how many locks to retrieve (0 for all, default)
@@ -482,6 +497,39 @@ class LockService {
 
 		$this->lockCache[$fileId] = $lock;
 		return $lock;
+	}
+
+	/**
+	 * Locks on files below a folder that the current user may not write.
+	 *
+	 * @param LockContext|null $scope active ILockManager scope of the caller
+	 * @return list<array{lock: FileLock, path: string}>
+	 */
+	public function getBlockingLocksBelow(int $folderId, ?LockContext $scope): array {
+		$now = $this->now();
+		$blocking = [];
+		foreach ($this->locksRequest->getLocksBelow($folderId) as $entry) {
+			if ($entry['lock']->isExpired($now)) {
+				continue;
+			}
+			if (!$this->canWrite($entry['lock'], $scope)) {
+				$blocking[] = $entry;
+			}
+		}
+		return $blocking;
+	}
+
+	/**
+	 * Active locks on files below a folder (relative path included).
+	 *
+	 * @return list<array{lock: FileLock, path: string}>
+	 */
+	public function getLocksBelow(int $folderId): array {
+		$now = $this->now();
+		return array_values(array_filter(
+			$this->locksRequest->getLocksBelow($folderId),
+			fn (array $entry): bool => !$entry['lock']->isExpired($now)
+		));
 	}
 
 	public function injectMetadata(FileLock $lock): FileLock {
