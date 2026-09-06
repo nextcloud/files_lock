@@ -11,6 +11,7 @@ namespace OCA\FilesLock\Tests\Feature;
 
 use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\LockConflictException;
+use OCA\FilesLock\Exceptions\NotFileException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
 use OCP\Files\Lock\ILock;
@@ -84,6 +85,12 @@ class AcquisitionTest extends LockTestCase {
 		self::assertNotSame($old->getId(), $new->getId());
 		self::assertSame(self::USER2, $new->getOwner());
 		self::assertSame(1, $this->lockRowCount($file->getId()));
+	}
+
+	public function testFoldersCannotBeLocked(): void {
+		$folder = $this->loginAndGetUserFolder(self::USER1)->newFolder('a-folder');
+		$this->expectException(NotFileException::class);
+		$this->lockManager->lock(new LockContext($folder, ILock::TYPE_USER, self::USER1));
 	}
 
 	public function testLockingNeedsUpdatePermission(): void {

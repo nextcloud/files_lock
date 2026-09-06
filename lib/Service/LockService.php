@@ -17,6 +17,7 @@ use OCA\FilesLock\ConfigLexicon;
 use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\LockConflictException;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
+use OCA\FilesLock\Exceptions\NotFileException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
 use OCP\App\IAppManager;
@@ -24,6 +25,7 @@ use OCP\AppFramework\Services\IAppConfig;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Constants;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\Files\File;
 use OCP\Files\IHomeStorage;
 use OCP\Files\InvalidPathException;
 use OCP\Files\IRootFolder;
@@ -213,12 +215,14 @@ class LockService {
 	 * @param int|null $timeout lifetime in seconds, <= 0 for no expiry, null for the configured value
 	 * @param string|null $token token to record for a new lock (native WebDAV), generated when null
 	 * @param string|null $displayName display name to record, resolved from the owner when null
+	 * @param bool $filesOnly refuse folders; native WebDAV may lock a collection (RFC 4918)
 	 *
 	 * @throws OwnerLockedException
 	 * @throws UnauthorizedUnlockException
+	 * @throws NotFileException
 	 */
-	public function acquire(LockContext $lockScope, ?int $timeout = null, ?string $token = null, ?string $displayName = null): FileLock {
-		$this->canLock($lockScope);
+	public function acquire(LockContext $lockScope, ?int $timeout = null, ?string $token = null, ?string $displayName = null, bool $filesOnly = true): FileLock {
+		$this->canLock($lockScope, null, $filesOnly);
 		$fileId = $lockScope->getNode()->getId();
 		$timeout ??= $this->getConfiguredTimeout();
 		$now = $this->now();
@@ -333,7 +337,10 @@ class LockService {
 	 * @throws UnauthorizedUnlockException when the node cannot be locked by the caller
 	 * @throws NotFileException when the node is not a file
 	 */
-	public function canLock(LockContext $request, ?FileLock $current = null): void {
+	public function canLock(LockContext $request, ?FileLock $current = null, bool $filesOnly = true): void {
+		if ($filesOnly && !$request->getNode() instanceof File) {
+			throw new NotFileException($this->l10n->t('Only files can be locked.'));
+		}
 		if (($request->getNode()->getPermissions() & Constants::PERMISSION_UPDATE) === 0) {
 			throw new UnauthorizedUnlockException(
 				$this->l10n->t('File can only be locked with update permissions.')
@@ -673,6 +680,24 @@ class LockService {
 		} catch (\Exception $e) {
 			$this->logger->error('Failed to get remote lock from DAV: ' . $e->getMessage(), ['exception' => $e]);
 			return null;
+		}
+	}
+
+	/**
+	 * Warm the remote property cache of a DAV backed folder with one remote
+	 * listing so that per-file lookups do not trigger remote requests.
+	 */
+	public function prefetchRemoteLocks(Node $folder): void {
+		try {
+			$storage = $folder->getStorage();
+			while ($storage->instanceOfStorage(Wrapper::class)) {
+				$storage = $storage->getWrapperStorage();
+			}
+			if (!$storage->instanceOfStorage(DAV::class)) {
+				return;
+			}
+		} catch (\Exception $e) {
+			$this->logger->debug('Failed to prefetch remote locks: ' . $e->getMessage(), ['exception' => $e]);
 		}
 	}
 

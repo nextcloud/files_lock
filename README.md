@@ -130,7 +130,7 @@ WebDAV returns the following additional properties in response to a `PROPFIND` r
 - `{http://nextcloud.org/ns}lock-owner-displayname`: Display name of the lock owner
 - `{http://nextcloud.org/ns}lock-owner-editor`: App ID for an app-owned lock. Clients can use it to suggest joining the collaborative editing session in the web interface or through direct editing. In the response to an `X-User-Lock` `LOCK` request, this property currently contains the lock owner regardless of lock type.
 - `{http://nextcloud.org/ns}lock-time`: Timestamp at which the lock was created
-- `{http://nextcloud.org/ns}lock-timeout`: Configured lock timeout in seconds from creation. A value of `0` indicates that the lock does not expire.
+- `{http://nextcloud.org/ns}lock-timeout`: Lifetime of the lock in seconds counted from `lock-time`; it grows when the lock is refreshed. A value of `0` indicates that the lock does not expire.
 - `{http://nextcloud.org/ns}lock-token`: Lock token. Clients using native WebDAV locking must retain it while holding the lock and provide it when unlocking.
 
 ```bash
