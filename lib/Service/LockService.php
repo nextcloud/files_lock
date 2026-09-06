@@ -45,7 +45,8 @@ class LockService {
 	private array $lockCache = [];
 	/** @var array<int, FileLock|false> */
 	private array $remoteLockCache = [];
-	private bool $allowUserOverride = false;
+	/** @var list<string> */
+	private array $presentedTokens = [];
 
 	public function __construct(
 		private readonly IL10N $l10n,
@@ -59,6 +60,7 @@ class LockService {
 		private readonly IRequest $request,
 		private readonly LoggerInterface $logger,
 		private readonly IRootFolder $rootFolder,
+		private readonly LockPolicy $policy,
 	) {
 	}
 
@@ -70,9 +72,34 @@ class LockService {
 		return Server::get(ITimeFactory::class)->getTime();
 	}
 
+	public function getPolicy(): LockPolicy {
+		return $this->policy;
+	}
+
+	/**
+	 * Register a lock token presented by the current request (WebDAV If header).
+	 */
+	public function presentToken(string $token): void {
+		if ($token !== '' && !in_array($token, $this->presentedTokens, true)) {
+			$this->presentedTokens[] = $token;
+		}
+	}
+
+	/**
+	 * @return list<string>
+	 */
+	public function getPresentedTokens(): array {
+		return $this->presentedTokens;
+	}
+
+	public function resetPresentedTokens(): void {
+		$this->presentedTokens = [];
+	}
+
 	public function clearCache(): void {
 		$this->lockCache = [];
 		$this->remoteLockCache = [];
+		$this->presentedTokens = [];
 	}
 
 	/**
@@ -243,8 +270,7 @@ class LockService {
 	 */
 	private function refreshOrConflict(FileLock $known, LockContext $lockScope, int $timeout, int $now): FileLock {
 		$this->injectMetadata($known);
-		if (!($known->getType() === $lockScope->getType()
-			&& ($known->getOwner() === $lockScope->getOwner() || $known->getToken() === $lockScope->getOwner()))) {
+		if (!$this->policy->isHolder($known, $lockScope)) {
 			$this->lockCache[$known->getFileId()] = $known;
 			throw new OwnerLockedException($known);
 		}
@@ -254,102 +280,6 @@ class LockService {
 		$this->locksRequest->update($known);
 		$this->lockCache[$known->getFileId()] = $known;
 		return $known;
-	}
-
-	/**
-	 * @throws InvalidPathException
-	 * @throws LockNotFoundException
-	 * @throws NotFoundException
-	 * @throws UnauthorizedUnlockException
-	 */
-	public function unlock(LockContext $lock, bool $force = false): FileLock {
-		$this->logger->notice('unlocking file', ['fileLock' => $lock]);
-
-		$known = $this->getLockFromFileId($lock->getNode()->getId());
-		if (!$force) {
-			$this->canUnlock($lock, $known);
-		}
-
-		$this->locksRequest->delete($known);
-		$this->lockCache[$lock->getNode()->getId()] = false;
-		$this->propagateEtag($lock->getNode());
-		$this->injectMetadata($known);
-		return $known;
-	}
-
-	public function enableUserOverride(): void {
-		$this->allowUserOverride = true;
-	}
-
-	public function canUnlock(LockContext $request, FileLock $current): void {
-		$isSameUser = $current->getOwner() === $this->userSession->getUser()?->getUID();
-		$isSameToken = $request->getOwner() === $current->getToken();
-		$isSameOwner = $request->getOwner() === $current->getOwner();
-		$isSameType = $request->getType() === $current->getType();
-
-		// we need to ignore some filesystem that return current user as file owner
-		$ignoreFileOwnership = [
-			'OCA\GroupFolders\Mount\MountProvider',
-			'OCA\Files_External\Config\ConfigAdapter'
-		];
-
-		$isFileOwner = $request->getNode()->getOwner()->getUID() === $this->userSession->getUser()?->getUID()
-			&& !in_array($request->getNode()->getMountPoint()->getMountProvider(), $ignoreFileOwnership);
-
-		// Check the token for token based locks
-		if ($current->getType() === ILock::TYPE_TOKEN) {
-			// token holder can unlock
-			if ($isSameToken) {
-				return;
-			}
-			// file owner or lock owner can unlock
-			if ($this->allowUserOverride && ($isSameUser || $isFileOwner)) {
-				return;
-			}
-			throw new UnauthorizedUnlockException(
-				$this->l10n->t('File can only be unlocked by providing a valid owner lock token')
-			);
-		}
-
-		// Otherwise, we check if the owner (user id OR app id) for a match
-		if ($isSameOwner && $isSameType) {
-			return;
-		}
-
-		if ($request->getType() === ILock::TYPE_USER && $isFileOwner) {
-			return;
-		}
-
-		throw new UnauthorizedUnlockException(
-			$this->l10n->t('File can only be unlocked by the owner of the lock')
-		);
-	}
-
-	/**
-	 * @throws InvalidPathException
-	 * @throws LockNotFoundException
-	 * @throws NotFoundException
-	 * @throws UnauthorizedUnlockException
-	 */
-	public function unlockFile(int $fileId, ?string $userId, bool $force = false, int $lockType = ILock::TYPE_USER): FileLock {
-		$lock = $this->getLockForNodeId($fileId);
-		if (!$lock) {
-			throw new LockNotFoundException();
-		}
-
-		if ($force) {
-			$userId = in_array($lock->getType(), [ILock::TYPE_USER, ILock::TYPE_TOKEN]) ? $lock->getOwner() : $userId;
-			$lockType = $lock->getType();
-		}
-
-		$node = $this->fileService->getFileFromId($userId, $fileId);
-		$lock = new LockContext(
-			$node,
-			$lockType,
-			$userId,
-		);
-		$this->propagateEtag($lock->getNode());
-		return $this->unlock($lock, $force);
 	}
 
 	public function update(FileLock $lock): void {
@@ -364,6 +294,42 @@ class LockService {
 	}
 
 	/**
+	 * Release the lock on the node of $lock.
+	 *
+	 * @param string|null $token lock token presented with the request
+	 *
+	 * @throws InvalidPathException
+	 * @throws LockNotFoundException
+	 * @throws NotFoundException
+	 * @throws UnauthorizedUnlockException
+	 */
+	public function unlock(LockContext $lock, bool $force = false, ?string $token = null): FileLock {
+		$this->logger->notice('unlocking file', ['fileLock' => $lock]);
+
+		$known = $this->getLockFromFileId($lock->getNode()->getId());
+		if (!$this->policy->canUnlock($known, $lock, $token, $this->isFileOwner($lock->getNode()), $force, $this->canModify($lock->getNode()))) {
+			$this->injectMetadata($known);
+			throw new UnauthorizedUnlockException(
+				$known->getType() === ILock::TYPE_TOKEN
+					? $this->l10n->t('File can only be unlocked by providing a valid owner lock token')
+					: $this->l10n->t('File can only be unlocked by the owner of the lock')
+			);
+		}
+
+		$this->locksRequest->delete($known);
+		$this->lockCache[$lock->getNode()->getId()] = false;
+		$this->propagateEtag($lock->getNode());
+		$this->injectMetadata($known);
+		return $known;
+	}
+
+	/**
+	 * @deprecated the owner override is part of the policy; kept for callers of older versions
+	 */
+	public function enableUserOverride(): void {
+	}
+
+	/**
 	 * @throws UnauthorizedUnlockException when the node cannot be locked by the caller
 	 * @throws NotFileException when the node is not a file
 	 */
@@ -373,6 +339,103 @@ class LockService {
 				$this->l10n->t('File can only be locked with update permissions.')
 			);
 		}
+	}
+
+	/**
+	 * Whether the current user may write $lock's file.
+	 *
+	 * @param LockContext|null $scope active ILockManager scope of the caller
+	 */
+	public function canWrite(FileLock $lock, ?LockContext $scope): bool {
+		return $this->policy->canWrite($lock, $this->userSession->getUser()?->getUID(), $this->presentedTokens, $scope);
+	}
+
+	/**
+	 * Whether the current user may unlock $current through a request carrying $request.
+	 */
+	public function canUnlock(LockContext $request, FileLock $current, ?string $token = null): void {
+		if (!$this->policy->canUnlock($current, $request, $token, $this->isFileOwner($request->getNode()), false, $this->canModify($request->getNode()))) {
+			throw new UnauthorizedUnlockException(
+				$this->l10n->t('File can only be unlocked by the owner of the lock')
+			);
+		}
+	}
+
+	/**
+	 * The file owner override applies only to files stored in a user's own home
+	 * storage (directly or through a share of it). Group folders, external
+	 * storages and other mounts report the current user as owner of every file,
+	 * so they never grant the override.
+	 */
+	/**
+	 * Whether the current caller may write the node at all, independently of any lock.
+	 */
+	public function canModify(Node $node): bool {
+		try {
+			return ($node->getPermissions() & Constants::PERMISSION_UPDATE) !== 0;
+		} catch (Exception) {
+			return false;
+		}
+	}
+
+	public function isFileOwner(Node $node): bool {
+		$user = $this->userSession->getUser();
+		if ($user === null) {
+			return false;
+		}
+		try {
+			if (!$node->getStorage()->instanceOfStorage(IHomeStorage::class)) {
+				return false;
+			}
+			return $node->getOwner()?->getUID() === $user->getUID();
+		} catch (Exception) {
+			return false;
+		}
+	}
+
+	/**
+	 * Release the lock on a file. With $force the lock row is removed without
+	 * resolving the file through anyone's file system.
+	 *
+	 * @throws InvalidPathException
+	 * @throws LockNotFoundException
+	 * @throws NotFoundException
+	 * @throws UnauthorizedUnlockException
+	 */
+	public function unlockFile(int $fileId, string $userId, bool $force = false, int $lockType = ILock::TYPE_USER): FileLock {
+		if ($force) {
+			return $this->forceUnlock($fileId);
+		}
+
+		$node = $this->fileService->getFileFromId($userId, $fileId);
+		return $this->unlock(new LockContext($node, $lockType, $userId));
+	}
+
+	/**
+	 * Administrative removal of a lock by file id.
+	 *
+	 * @throws LockNotFoundException
+	 */
+	public function forceUnlock(int $fileId): FileLock {
+		$known = $this->getLockFromFileId($fileId);
+		$this->logger->notice('force unlocking file', ['fileLock' => $known]);
+		$this->locksRequest->delete($known);
+		$this->lockCache[$fileId] = false;
+
+		$node = null;
+		try {
+			if ($known->getType() !== ILock::TYPE_APP && $this->userManager->userExists($known->getOwner())) {
+				$node = $this->rootFolder->getUserFolder($known->getOwner())->getFirstNodeById($fileId);
+			}
+			$node ??= $this->rootFolder->getFirstNodeById($fileId);
+		} catch (Exception) {
+		}
+		if ($node !== null) {
+			$this->propagateEtag($node);
+		}
+
+		$this->injectMetadata($known);
+		return $known;
 	}
 
 	/**
