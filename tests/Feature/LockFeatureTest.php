@@ -26,7 +26,6 @@ use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\MockObject\MockObject;
-use Sabre\DAV\Locks\LockInfo;
 use Sabre\DAV\PropFind;
 use Test\TestCase;
 use Test\Util\User\Dummy;
@@ -352,19 +351,6 @@ class LockFeatureTest extends TestCase {
 		self::assertSame(30 * 60, $this->davLockTimeout($expiring));
 	}
 
-	/**
-	 * The standard {DAV:}timeout property has its own sentinel for a lock that
-	 * never expires (RFC4918 renders it as "Infinite", which Sabre only emits
-	 * for a timeout of exactly -1). Sending the raw negative internal lifetime
-	 * there produced the invalid "Second--60"; -60 and 0 are what
-	 * LockService::lock() actually stores for the two "never expires" configs.
-	 */
-	public function testInfiniteLockReportsStandardWebdavTimeoutAsInfinite(): void {
-		self::assertSame(LockInfo::TIMEOUT_INFINITE, (new FileLock(-60))->toLockInfo()->timeout);
-		self::assertSame(LockInfo::TIMEOUT_INFINITE, (new FileLock(0))->toLockInfo()->timeout);
-		self::assertSame(30 * 60, (new FileLock(30 * 60))->toLockInfo()->timeout);
-	}
-
 	public function testLockApp(): void {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('test-file2', 'AAA');
@@ -618,8 +604,13 @@ class LockFeatureTest extends TestCase {
 	}
 
 	private function deleteTestFiles(\OCP\Files\Folder $folder): void {
+		$lockService = \OCP\Server::get(LockService::class);
+		$lockService->removeLocks(\OCP\Server::get(\OCA\FilesLock\Db\LocksRequest::class)->getAll());
 		foreach (self::TEST_FILES as $filename) {
-			$folder->delete($filename);
+			try {
+				$folder->get($filename)->delete();
+			} catch (\OCP\Files\NotFoundException) {
+			}
 		}
 	}
 

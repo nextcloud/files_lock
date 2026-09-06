@@ -15,13 +15,16 @@ use OC\Files\Storage\Wrapper\Wrapper;
 use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\ConfigLexicon;
 use OCA\FilesLock\Db\LocksRequest;
+use OCA\FilesLock\Exceptions\LockConflictException;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Services\IAppConfig;
+use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Constants;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\Files\IHomeStorage;
 use OCP\Files\InvalidPathException;
 use OCP\Files\IRootFolder;
 use OCP\Files\Lock\ILock;
@@ -33,11 +36,14 @@ use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserManager;
 use OCP\IUserSession;
+use OCP\Server;
 use Psr\Log\LoggerInterface;
 
 class LockService {
 	public const PREFIX = 'files_lock';
+	/** @var array<int, FileLock|false> */
 	private array $lockCache = [];
+	/** @var array<int, FileLock|false> */
 	private array $remoteLockCache = [];
 	private bool $allowUserOverride = false;
 
@@ -56,27 +62,48 @@ class LockService {
 	) {
 	}
 
+	/**
+	 * Resolved lazily so that a clock replaced in the container after this
+	 * service was built (tests) is honoured everywhere.
+	 */
+	private function now(): int {
+		return Server::get(ITimeFactory::class)->getTime();
+	}
+
 	public function clearCache(): void {
 		$this->lockCache = [];
 		$this->remoteLockCache = [];
 	}
 
+	/**
+	 * Active local lock of a file, using the per-request cache. Never consults remote storages.
+	 */
+	public function getActiveLock(int $fileId): ?FileLock {
+		if (array_key_exists($fileId, $this->lockCache)) {
+			$cached = $this->lockCache[$fileId];
+			if ($cached instanceof FileLock && $cached->isExpired($this->now())) {
+				$this->locksRequest->removeExpired($fileId, $this->now());
+				$this->lockCache[$fileId] = false;
+				return null;
+			}
+			return $cached ?: null;
+		}
+
+		try {
+			return $this->getLockFromFileId($fileId);
+		} catch (LockNotFoundException) {
+			return null;
+		}
+	}
+
 	public function getLockForNodeId(int $nodeId, ?Node $node = null): FileLock|false {
-		if (array_key_exists($nodeId, $this->lockCache) && $this->lockCache[$nodeId] !== false) {
-			return $this->lockCache[$nodeId];
+		$lock = $this->getActiveLock($nodeId);
+		if ($lock !== null) {
+			return $lock;
 		}
 
 		if (array_key_exists($nodeId, $this->remoteLockCache)) {
 			return $this->remoteLockCache[$nodeId];
-		}
-
-		if (!array_key_exists($nodeId, $this->lockCache)) {
-			try {
-				$this->lockCache[$nodeId] = $this->getLockFromFileId($nodeId);
-				return $this->lockCache[$nodeId];
-			} catch (LockNotFoundException) {
-				$this->lockCache[$nodeId] = false;
-			}
 		}
 
 		$remoteLock = $this->getRemoteLockFromDav($nodeId, $node);
@@ -93,6 +120,7 @@ class LockService {
 		$locks = [];
 		$locksToRequest = [];
 		foreach ($nodeIds as $nodeId) {
+			$nodeId = (int)$nodeId;
 			if (array_key_exists($nodeId, $this->lockCache) && $this->lockCache[$nodeId] instanceof FileLock) {
 				$locks[$nodeId] = $this->lockCache[$nodeId];
 			} elseif (array_key_exists($nodeId, $this->remoteLockCache)) {
@@ -117,9 +145,10 @@ class LockService {
 		}
 		$newLocks = array_merge(...$newLocks);
 
+		$now = $this->now();
 		$expiredLocks = [];
 		foreach ($newLocks as $lock) {
-			if ($lock->getETA() === 0) {
+			if ($lock->isExpired($now)) {
 				$expiredLocks[] = $lock->getId();
 				$locks[$lock->getFileId()] = false;
 				$this->lockCache[$lock->getFileId()] = false;
@@ -130,52 +159,101 @@ class LockService {
 		}
 
 		if (count($expiredLocks) > 0) {
-			$this->locksRequest->removeIds($expiredLocks);
+			$this->locksRequest->removeExpiredIds($expiredLocks, $now);
 		}
 
 		return $locks;
 	}
 
+	/**
+	 * Configured lock lifetime in seconds, ETA_INFINITE when locks never expire.
+	 */
+	public function getConfiguredTimeout(): int {
+		$minutes = $this->appConfig->getAppValueInt(ConfigLexicon::LOCK_TIMEOUT);
+		return $minutes > 0 ? $minutes * 60 : FileLock::ETA_INFINITE;
+	}
+
 	public function lock(LockContext $lockScope): FileLock {
+		return $this->acquire($lockScope);
+	}
+
+	/**
+	 * Acquire or refresh the lock described by $lockScope.
+	 *
+	 * The database enforces at most one lock per file; a lost race is reported as
+	 * OwnerLockedException carrying the winning lock.
+	 *
+	 * @param int|null $timeout lifetime in seconds, <= 0 for no expiry, null for the configured value
+	 * @param string|null $token token to record for a new lock (native WebDAV), generated when null
+	 * @param string|null $displayName display name to record, resolved from the owner when null
+	 *
+	 * @throws OwnerLockedException
+	 * @throws UnauthorizedUnlockException
+	 */
+	public function acquire(LockContext $lockScope, ?int $timeout = null, ?string $token = null, ?string $displayName = null): FileLock {
 		$this->canLock($lockScope);
-		$timeout = $this->appConfig->getAppValueInt(ConfigLexicon::LOCK_TIMEOUT) * 60;
+		$fileId = $lockScope->getNode()->getId();
+		$timeout ??= $this->getConfiguredTimeout();
+		$now = $this->now();
+
+		$this->locksRequest->removeExpired($fileId, $now);
+		unset($this->lockCache[$fileId]);
 
 		try {
-			$known = $this->getLockFromFileId($lockScope->getNode()->getId());
-
-			// Extend lock expiry if matching
-			if (
-				$known->getType() === $lockScope->getType() && ($known->getOwner() === $lockScope->getOwner() || $known->getToken() === $lockScope->getOwner())
-			) {
-				$known->setTimeout($known->getETA() !== FileLock::ETA_INFINITE ? $known->getTimeout() - $known->getETA() + $timeout : 0);
-				$this->logger->notice('extending existing lock', ['fileLock' => $known]);
-				$this->locksRequest->update($known);
-				$this->lockCache[$lockScope->getNode()->getId()] = $known;
-				$this->injectMetadata($known);
-				return $known;
-			}
-
-			$this->injectMetadata($known);
-			throw new OwnerLockedException($known);
+			$known = $this->locksRequest->getFromFileId($fileId);
+			return $this->refreshOrConflict($known, $lockScope, $timeout, $now);
 		} catch (LockNotFoundException) {
-			$lock = FileLock::fromLockScope($lockScope, $timeout);
-			$this->generateToken($lock);
-			$this->logger->notice('locking file', ['fileLock' => $lock]);
-			$this->injectMetadata($lock);
-			$this->locksRequest->save($lock);
-			$this->propagateEtag($lockScope);
-			return $lock;
 		}
+
+		$lock = FileLock::fromLockScope($lockScope, 0);
+		$lock->setCreation($now);
+		$lock->setExpiresAt($timeout > 0 ? $now + $timeout : null);
+		$lock->setToken($token ?? self::PREFIX . '/' . uuid_create(UUID_TYPE_RANDOM));
+		if ($displayName !== null) {
+			$lock->setDisplayName($displayName);
+		} else {
+			$this->injectMetadata($lock);
+		}
+
+		try {
+			$this->locksRequest->save($lock);
+		} catch (LockConflictException) {
+			$known = null;
+			try {
+				$known = $this->locksRequest->getFromFileId($fileId);
+			} catch (LockNotFoundException) {
+				// no row for this file, so the unique index that fired was the one on
+				// the token; take a fresh token and try once more
+				$lock->setToken(self::PREFIX . '/' . uuid_create(UUID_TYPE_RANDOM));
+				$this->locksRequest->save($lock);
+			}
+			if ($known !== null) {
+				return $this->refreshOrConflict($known, $lockScope, $timeout, $now);
+			}
+		}
+
+		$this->logger->notice('locking file', ['fileLock' => $lock]);
+		$this->lockCache[$fileId] = $lock;
+		$this->propagateEtag($lockScope->getNode());
+		return $lock;
 	}
 
-	public function update(FileLock $lock): void {
-		$this->locksRequest->update($lock);
-	}
+	/**
+	 * @throws OwnerLockedException
+	 */
+	private function refreshOrConflict(FileLock $known, LockContext $lockScope, int $timeout, int $now): FileLock {
+		$this->injectMetadata($known);
+		if (!($known->getType() === $lockScope->getType()
+			&& ($known->getOwner() === $lockScope->getOwner() || $known->getToken() === $lockScope->getOwner()))) {
+			$this->lockCache[$known->getFileId()] = $known;
+			throw new OwnerLockedException($known);
+		}
 
-	public function getAppName(string $appId): ?string {
-		/** @var array{name: null}|null $appInfo */
-		$appInfo = $this->appManager->getAppInfo($appId);
-		return $appInfo['name'] ?? null;
+		$known->setExpiresAt($timeout > 0 ? $now + $timeout : null);
+		$this->logger->notice('extending existing lock', ['fileLock' => $known]);
+		$this->locksRequest->update($known);
+		$this->lockCache[$known->getFileId()] = $known;
+		return $known;
 	}
 
 	/**
@@ -194,21 +272,13 @@ class LockService {
 
 		$this->locksRequest->delete($known);
 		$this->lockCache[$lock->getNode()->getId()] = false;
-		$this->propagateEtag($lock);
+		$this->propagateEtag($lock->getNode());
 		$this->injectMetadata($known);
 		return $known;
 	}
 
 	public function enableUserOverride(): void {
 		$this->allowUserOverride = true;
-	}
-
-	public function canLock(LockContext $request, ?FileLock $current = null): void {
-		if (($request->getNode()->getPermissions() & Constants::PERMISSION_UPDATE) === 0) {
-			throw new UnauthorizedUnlockException(
-				$this->l10n->t('File can only be locked with update permissions.')
-			);
-		}
 	}
 
 	public function canUnlock(LockContext $request, FileLock $current): void {
@@ -278,41 +348,76 @@ class LockService {
 			$lockType,
 			$userId,
 		);
-		$this->propagateEtag($lock);
+		$this->propagateEtag($lock->getNode());
 		return $this->unlock($lock, $force);
 	}
 
+	public function update(FileLock $lock): void {
+		$this->locksRequest->update($lock);
+		$this->lockCache[$lock->getFileId()] = $lock;
+	}
+
+	public function getAppName(string $appId): ?string {
+		/** @var array{name: null}|null $appInfo */
+		$appInfo = $this->appManager->getAppInfo($appId);
+		return $appInfo['name'] ?? null;
+	}
+
 	/**
+	 * @throws UnauthorizedUnlockException when the node cannot be locked by the caller
+	 * @throws NotFileException when the node is not a file
+	 */
+	public function canLock(LockContext $request, ?FileLock $current = null): void {
+		if (($request->getNode()->getPermissions() & Constants::PERMISSION_UPDATE) === 0) {
+			throw new UnauthorizedUnlockException(
+				$this->l10n->t('File can only be locked with update permissions.')
+			);
+		}
+	}
+
+	/**
+	 * Locks whose expiry has passed.
+	 *
 	 * @param int $limit how many locks to retrieve (0 for all, default)
 	 *
 	 * @return FileLock[]
 	 */
-	public function getDeprecatedLocks(int $limit = 0): array {
-		$timeout = $this->appConfig->getAppValueInt(ConfigLexicon::LOCK_TIMEOUT);
-		if ($timeout === FileLock::ETA_INFINITE) {
-			return [];
-		}
-
+	public function getExpiredLocks(int $limit = 0): array {
 		try {
-			$locks = $this->locksRequest->getLocksOlderThan($timeout, $limit);
+			return $this->locksRequest->getExpired($this->now(), $limit);
 		} catch (Exception $e) {
-			$this->logger->warning('Failed to get locks older then timeout', ['exception' => $e]);
+			$this->logger->warning('Failed to get expired locks', ['exception' => $e]);
 			return [];
 		}
-
-		return $locks;
 	}
 
 	/**
+	 * @deprecated use getExpiredLocks()
+	 * @return FileLock[]
+	 */
+	public function getDeprecatedLocks(int $limit = 0): array {
+		return $this->getExpiredLocks($limit);
+	}
+
+	/**
+	 * Active lock of a file, removing it first when it has expired.
+	 *
 	 * @throws LockNotFoundException
 	 */
 	public function getLockFromFileId(int $fileId): FileLock {
-		$lock = $this->locksRequest->getFromFileId($fileId);
-		if ($lock->getETA() === 0) {
+		try {
+			$lock = $this->locksRequest->getFromFileId($fileId);
+		} catch (LockNotFoundException $e) {
+			$this->lockCache[$fileId] = false;
+			throw $e;
+		}
+		if ($lock->isExpired($this->now())) {
 			$this->locksRequest->delete($lock);
+			$this->lockCache[$fileId] = false;
 			throw new LockNotFoundException('lock is ignored and deleted as being too old.');
 		}
 
+		$this->lockCache[$fileId] = $lock;
 		return $lock;
 	}
 
@@ -325,11 +430,12 @@ class LockService {
 			$displayName = $this->getAppName($lock->getOwner()) ?? null;
 		}
 		if ($lock->getType() === ILock::TYPE_TOKEN) {
-			$clientHint = $this->getClientHint();
-			$displayName = $lock->getDisplayName() ?: (
-				$this->userManager->getDisplayName($lock->getOwner()) . ' '
-				. ($clientHint ? ('(' . $clientHint . ')') : '')
-			);
+			$displayName = $lock->getDisplayName();
+			if ($displayName === null || $displayName === '') {
+				$clientHint = $this->getClientHint();
+				$displayName = trim(($this->userManager->getDisplayName($lock->getOwner()) ?? $lock->getOwner())
+					. ($clientHint ? (' (' . $clientHint . ')') : ''));
+			}
 		}
 
 		if ($displayName) {
@@ -363,6 +469,26 @@ class LockService {
 	}
 
 	/**
+	 * Remove the given locks, skipping any that are no longer expired because
+	 * their owner refreshed them after the batch was read.
+	 *
+	 * @param FileLock[] $locks
+	 */
+	public function removeLocksIfExpired(array $locks): void {
+		if (empty($locks)) {
+			return;
+		}
+
+		$ids = array_map(fn (FileLock $lock): int => $lock->getId(), $locks);
+		$removed = $this->locksRequest->removeExpiredIds($ids, $this->now());
+		$this->logger->notice('removing expired locks', ['candidates' => count($ids), 'removed' => $removed]);
+
+		foreach ($locks as $lock) {
+			unset($this->lockCache[$lock->getFileId()]);
+		}
+	}
+
+	/**
 	 * @param FileLock[] $locks
 	 */
 	public function removeLocks(array $locks): void {
@@ -377,6 +503,9 @@ class LockService {
 		$this->logger->notice('removing locks', ['ids' => $ids]);
 
 		$this->locksRequest->removeIds($ids);
+		foreach ($locks as $lock) {
+			$this->lockCache[$lock->getFileId()] = false;
+		}
 	}
 
 	public function getRemoteLockFromDav(int $nodeId, ?Node $node = null): ?FileLock {
@@ -404,12 +533,12 @@ class LockService {
 				return null;
 			}
 
-			$path = $node->getInternalPath();
-			$storage->getMetaData($path);
-
 			if (!method_exists($storage, 'getPropfindPropertyValue')) {
 				return null;
 			}
+
+			$path = $node->getInternalPath();
+			$storage->getMetaData($path);
 
 			$isLocked = $storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK);
 			if (!$isLocked) {
@@ -436,11 +565,14 @@ class LockService {
 		}
 	}
 
-	private function propagateEtag(LockContext $lockContext): void {
-		$node = $lockContext->getNode();
-		$node->getStorage()->getCache()->update($node->getId(), [
-			'etag' => uniqid(),
-		]);
-		$node->getStorage()->getUpdater()->propagate($node->getInternalPath(), $node->getMTime());
+	private function propagateEtag(Node $node): void {
+		try {
+			$node->getStorage()->getCache()->update($node->getId(), [
+				'etag' => uniqid(),
+			]);
+			$node->getStorage()->getUpdater()->propagate($node->getInternalPath(), $node->getMTime());
+		} catch (Exception $e) {
+			$this->logger->debug('Failed to propagate etag after lock change: ' . $e->getMessage(), ['exception' => $e]);
+		}
 	}
 }
