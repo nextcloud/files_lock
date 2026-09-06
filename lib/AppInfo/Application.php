@@ -14,14 +14,17 @@ use OCA\FilesLock\Capability;
 use OCA\FilesLock\ConfigLexicon;
 use OCA\FilesLock\Listeners\BeforeFileSystemSetupListener;
 use OCA\FilesLock\Listeners\LoadAdditionalScripts;
+use OCA\FilesLock\Listeners\NodeDeletedListener;
 use OCA\FilesLock\Listeners\PropfindPropertiesListener;
 use OCA\FilesLock\LockProvider;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCP\Files\Cache\CacheEntryRemovedEvent;
 use OCP\Files\Events\BeforeFileSystemSetupEvent;
 use OCP\Files\Events\BeforeRemotePropfindEvent;
+use OCP\Files\Events\Node\NodeDeletedEvent;
 use OCP\Files\Lock\ILockManager;
 
 class Application extends App implements IBootstrap {
@@ -54,6 +57,14 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(
 			BeforeFileSystemSetupEvent::class,
 			BeforeFileSystemSetupListener::class
+		);
+		$context->registerEventListener(
+			NodeDeletedEvent::class,
+			NodeDeletedListener::class
+		);
+		$context->registerEventListener(
+			CacheEntryRemovedEvent::class,
+			NodeDeletedListener::class
 		);
 		$context->registerConfigLexicon(ConfigLexicon::class);
 	}

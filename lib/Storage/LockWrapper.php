@@ -8,32 +8,24 @@
 namespace OCA\FilesLock\Storage;
 
 use OC\Files\Storage\Wrapper\Wrapper;
-use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
-use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\Constants;
-use OCP\Files\InvalidPathException;
-use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\ILockManager;
-use OCP\Files\Lock\NoLockProviderException;
-use OCP\Files\NotFoundException;
 use OCP\Files\Storage\IStorage;
-use OCP\IUserSession;
 use OCP\Lock\LockedException;
 use OCP\Lock\ManuallyLockedException;
 
+/**
+ * Enforces file locks for every write that reaches a storage, whatever mount the
+ * storage is attached to. Files are identified through the wrapped storage's own
+ * cache, so the check does not depend on the shape of the storage path.
+ */
 class LockWrapper extends Wrapper {
 	private readonly ILockManager $lockManager;
 
-	/** @var FileService */
-	private $fileService;
-
 	/** @var LockService */
 	private $lockService;
-
-	/** @var IUserSession */
-	private $userSession;
 
 	/**
 	 * LockWrapper constructor.
@@ -44,8 +36,6 @@ class LockWrapper extends Wrapper {
 		parent::__construct($arguments);
 
 		$this->lockManager = $arguments['lock_manager'];
-		$this->userSession = $arguments['user_session'];
-		$this->fileService = $arguments['file_service'];
 		$this->lockService = $arguments['lock_service'];
 	}
 
@@ -56,65 +46,49 @@ class LockWrapper extends Wrapper {
 	 * @throws LockedException
 	 */
 	protected function checkPermissions($path, $permissions): bool {
-		$viewerId = '';
-		$user = $this->userSession->getUser();
-		if ($user !== null) {
-			$viewerId = $user->getUID();
-			$ownerId = $viewerId;
-		} else {
-			$ownerId = $this->getOwner($path);
-		}
-
-		/** @var FileLock $lock */
-		if (!$this->isPathLocked($ownerId, $path, $viewerId, $lock)) {
+		if ($permissions === Constants::PERMISSION_READ) {
 			return true;
 		}
 
-		switch ($permissions) {
-			case Constants::PERMISSION_READ:
-				return true;
-			case Constants::PERMISSION_DELETE:
-			case Constants::PERMISSION_UPDATE:
-				throw new ManuallyLockedException(
-					$path, null, $lock->getToken(), $lock->getOwner(), $lock->getETA()
-				);
-
-			default:
-				return false;
+		$fileId = $this->getCache()->getId($path);
+		if ($fileId === -1) {
+			return true;
 		}
+
+		$lock = $this->lockService->getActiveLock($fileId);
+		if ($lock === null || $this->lockService->canWrite($lock, $this->lockManager->getLockInScope())) {
+			return true;
+		}
+
+		throw new ManuallyLockedException(
+			$path, null, $lock->getToken(), $lock->getOwner(), $lock->getETA()
+		);
 	}
 
-	protected function isPathLocked(string $ownerId, string $path, string $viewerId, ?FileLock &$lock = null): bool {
-		try {
-			$file = $this->fileService->getFileFromPath($ownerId, $path);
-		} catch (NotFoundException) {
-			return false;
+	/**
+	 * Refuse an operation on a directory that would delete or relocate a locked
+	 * descendant the current user may not write.
+	 *
+	 * @throws LockedException
+	 */
+	protected function checkDescendants(IStorage $storage, string $path): void {
+		if (!$storage->is_dir($path)) {
+			return;
+		}
+		$folderId = $storage->getCache()->getId($path);
+		if ($folderId === -1) {
+			return;
 		}
 
-		if ($file->getId() === null) {
-			return false;
+		$blocking = $this->lockService->getBlockingLocksBelow($folderId, $this->lockManager->getLockInScope());
+		if ($blocking === []) {
+			return;
 		}
-
-		return $this->isFileLocked($file->getId(), $viewerId, $lock);
-	}
-
-	protected function isFileLocked(int $fileId, string $viewerId, ?FileLock &$lock = null): bool {
-		try {
-			$lock = $this->lockService->getLockFromFileId($fileId);
-			if ($lock->getType() === ILock::TYPE_USER && $lock->getOwner() !== $viewerId) {
-				return true;
-			}
-
-			if ($lock->getType() === ILock::TYPE_APP) {
-				$lockScope = $this->lockManager->getLockInScope();
-				if (!$lockScope || $lockScope->getType() !== $lock->getType() || $lockScope->getOwner() !== $lock->getOwner()) {
-					return true;
-				}
-			}
-		} catch (NoLockProviderException|LockNotFoundException|InvalidPathException|NotFoundException) {
-		}
-
-		return false;
+		/** @var FileLock $lock */
+		$lock = $blocking[0]['lock'];
+		throw new ManuallyLockedException(
+			rtrim($path, '/') . '/' . $blocking[0]['path'], null, $lock->getToken(), $lock->getOwner(), $lock->getETA()
+		);
 	}
 
 	#[\Override]
@@ -123,19 +97,16 @@ class LockWrapper extends Wrapper {
 			$part = substr($source, strlen($target));
 			//This is a rename of the transfer file to the original file
 			if (str_starts_with($part, '.ocTransferId')) {
-				return $this->checkPermissions($target, Constants::PERMISSION_CREATE)
+				return $this->checkPermissions($target, Constants::PERMISSION_UPDATE)
 					&& parent::rename($source, $target);
 			}
 		}
 		$permissions
 			= $this->file_exists($target) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
-		$sourceParent = dirname($source);
-		if ($sourceParent === '.') {
-			$sourceParent = '';
-		}
 
-		return $this->checkPermissions($sourceParent, Constants::PERMISSION_DELETE)
-			&& $this->checkPermissions($source, Constants::PERMISSION_UPDATE & Constants::PERMISSION_READ)
+		$this->checkDescendants($this, $source);
+
+		return $this->checkPermissions($source, Constants::PERMISSION_UPDATE)
 			&& $this->checkPermissions($target, $permissions)
 			&& parent::rename($source, $target);
 	}
@@ -153,15 +124,31 @@ class LockWrapper extends Wrapper {
 
 	#[\Override]
 	public function copyFromStorage(IStorage $sourceStorage, string $sourceInternalPath, string $targetInternalPath): bool {
-		$cache = $sourceStorage->getCache();
-		$fileId = $cache->getId($sourceInternalPath);
-
-		$user = $this->userSession->getUser();
-		if ($fileId > 0 && $this->isFileLocked($fileId, $user?->getUID() ?? '', $lock)) {
-			throw new ManuallyLockedException($sourceInternalPath, null, $lock->getToken(), $lock->getOwner(), $lock->getETA());
+		$fileId = $sourceStorage->getCache()->getId($sourceInternalPath);
+		if ($fileId > 0) {
+			$lock = $this->lockService->getActiveLock($fileId);
+			if ($lock !== null && !$this->lockService->canWrite($lock, $this->lockManager->getLockInScope())) {
+				throw new ManuallyLockedException($sourceInternalPath, null, $lock->getToken(), $lock->getOwner(), $lock->getETA());
+			}
 		}
 
 		return parent::copyFromStorage($sourceStorage, $sourceInternalPath, $targetInternalPath);
+	}
+
+	#[\Override]
+	public function moveFromStorage(IStorage $sourceStorage, string $sourceInternalPath, string $targetInternalPath): bool {
+		$this->checkDescendants($sourceStorage, $sourceInternalPath);
+		$fileId = $sourceStorage->getCache()->getId($sourceInternalPath);
+		if ($fileId > 0) {
+			$lock = $this->lockService->getActiveLock($fileId);
+			if ($lock !== null && !$this->lockService->canWrite($lock, $this->lockManager->getLockInScope())) {
+				throw new ManuallyLockedException($sourceInternalPath, null, $lock->getToken(), $lock->getOwner(), $lock->getETA());
+			}
+		}
+		$permissions = $this->file_exists($targetInternalPath) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
+
+		return $this->checkPermissions($targetInternalPath, $permissions)
+			&& parent::moveFromStorage($sourceStorage, $sourceInternalPath, $targetInternalPath);
 	}
 
 	#[\Override]
@@ -179,14 +166,31 @@ class LockWrapper extends Wrapper {
 
 	#[\Override]
 	public function rmdir(string $path): bool {
-		return $this->checkPermissions($path, Constants::PERMISSION_DELETE)
-			&& parent::rmdir($path);
+		$this->checkDescendants($this, $path);
+		$this->checkPermissions($path, Constants::PERMISSION_DELETE);
+
+		$folderId = $this->getCache()->getId($path);
+		$lockedIds = $folderId > 0
+			? array_map(fn (array $entry): int => $entry['lock']->getFileId(), $this->lockService->getLocksBelow($folderId))
+			: [];
+
+		$result = parent::rmdir($path);
+		if ($result && $lockedIds !== []) {
+			$this->lockService->removeLocksForFileIds($lockedIds);
+		}
+		return $result;
 	}
 
 	#[\Override]
 	public function unlink(string $path): bool {
-		return $this->checkPermissions($path, Constants::PERMISSION_DELETE)
-			&& parent::unlink($path);
+		$this->checkPermissions($path, Constants::PERMISSION_DELETE);
+		$fileId = $this->getCache()->getId($path);
+
+		$result = parent::unlink($path);
+		if ($result && $fileId > 0) {
+			$this->lockService->removeLocksForFileIds([$fileId]);
+		}
+		return $result;
 	}
 
 	#[\Override]

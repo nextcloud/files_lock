@@ -209,6 +209,49 @@ class LocksRequest {
 	}
 
 	/**
+	 * Locks on files stored below a folder, resolved through the file cache so it
+	 * works for every storage type. Each entry is the lock plus the path of the
+	 * locked file relative to the folder.
+	 *
+	 * @return list<array{lock: FileLock, path: string}>
+	 */
+	public function getLocksBelow(int $folderId): array {
+		$qb = $this->connection->getQueryBuilder();
+		$qb->select('storage', 'path')
+			->from('filecache')
+			->where($qb->expr()->eq('fileid', $qb->createNamedParameter($folderId, IQueryBuilder::PARAM_INT)));
+		$result = $qb->executeQuery();
+		$folder = $result->fetch();
+		$result->closeCursor();
+		if ($folder === false) {
+			return [];
+		}
+
+		$prefix = ($folder['path'] === null || $folder['path'] === '') ? '' : $folder['path'] . '/';
+
+		$qb = $this->connection->getQueryBuilder();
+		$qb->select('l.id', 'l.user_id', 'l.file_id', 'l.token', 'l.creation', 'l.type', 'l.ttl', 'l.owner', 'l.scope', 'l.expires_at', 'f.path')
+			->from(self::TABLE_LOCKS, 'l')
+			->innerJoin('l', 'filecache', 'f', $qb->expr()->eq('l.file_id', 'f.fileid'))
+			->where($qb->expr()->eq('f.storage', $qb->createNamedParameter((int)$folder['storage'], IQueryBuilder::PARAM_INT)));
+		if ($prefix !== '') {
+			$qb->andWhere($qb->expr()->like('f.path', $qb->createNamedParameter($this->connection->escapeLikeParameter($prefix) . '%')));
+		}
+
+		$locks = [];
+		$result = $qb->executeQuery();
+		while ($row = $result->fetch()) {
+			$locks[] = [
+				'lock' => $this->parseLockSelectSql($row),
+				'path' => substr((string)$row['path'], strlen($prefix)),
+			];
+		}
+		$result->closeCursor();
+
+		return $locks;
+	}
+
+	/**
 	 * @throws LockNotFoundException
 	 */
 	protected function getLockFromRequest(IResult $result): FileLock {

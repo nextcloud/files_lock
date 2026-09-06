@@ -10,7 +10,6 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Listeners;
 
-use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCA\FilesLock\Storage\LockWrapper;
 use OCP\EventDispatcher\Event;
@@ -28,7 +27,6 @@ class BeforeFileSystemSetupListener implements IEventListener {
 	public function __construct(
 		private readonly ILockManager $lockManager,
 		private readonly IUserSession $userSession,
-		private readonly FileService $fileService,
 		private readonly LockService $lockService,
 	) {
 	}
@@ -39,15 +37,17 @@ class BeforeFileSystemSetupListener implements IEventListener {
 			return;
 		}
 
+		// priority 0 makes this the outermost wrapper (lower numbers are applied
+		// last), ahead of the trash bin (1) and encryption (2): a locked file must
+		// be refused before anything moves it to the trash or rewrites it
 		$event->addStorageWrapper(
 			LockWrapper::class, fn (string $mountPoint, IStorage $storage): LockWrapper => new LockWrapper(
 				[
 					'storage' => $storage,
 					'lock_manager' => $this->lockManager,
 					'user_session' => $this->userSession,
-					'file_service' => $this->fileService,
 					'lock_service' => $this->lockService,
 				]
-			), 10);
+			), 0);
 	}
 }
