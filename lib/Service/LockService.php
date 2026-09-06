@@ -56,6 +56,11 @@ class LockService {
 	) {
 	}
 
+	public function clearCache(): void {
+		$this->lockCache = [];
+		$this->remoteLockCache = [];
+	}
+
 	public function getLockForNodeId(int $nodeId, ?Node $node = null): FileLock|false {
 		if (array_key_exists($nodeId, $this->lockCache) && $this->lockCache[$nodeId] !== false) {
 			return $this->lockCache[$nodeId];
@@ -415,7 +420,7 @@ class LockService {
 			$fileLock = new FileLock();
 			$fileLock->import([
 				'fileId' => $nodeId,
-				'owner' => (string)($storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME) ?? ''),
+				'userId' => (string)($storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME) ?? ''),
 				'type' => (int)($storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK_OWNER_TYPE) ?? 0),
 				'creation' => (int)($storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK_TIME) ?? 0),
 				'ttl' => (int)($storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK_TIMEOUT) ?? 0),
