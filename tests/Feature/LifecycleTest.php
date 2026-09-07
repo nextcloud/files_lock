@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\Tests\Feature;
 
+use OC\Files\Filesystem;
+use OC\Files\Storage\Temporary;
 use OCA\Files_Trashbin\Helper;
 use OCA\Files_Trashbin\Trashbin;
 use OCA\FilesLock\Db\LocksRequest;
@@ -17,6 +19,7 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\Events\Node\NodeDeletedEvent;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
+use OCP\Lock\LockedException;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -97,6 +100,49 @@ class LifecycleTest extends LockTestCase {
 		self::assertSame($id, $restored->getId());
 		self::assertSame([], $this->lockManager->getLocks($id));
 		self::assertSame(0, $this->lockRowCount($id));
+	}
+
+	/**
+	 * Moving a file between storages copies it under a new id and deletes the
+	 * source, so the lock must not survive as a row pointing at a file that is
+	 * gone, and it must not follow onto a file nobody locked.
+	 */
+	public function testMovingALockedFileToAnotherStorageStrandsNoLock(): void {
+		$folder = $this->loginAndGetUserFolder(self::USER1);
+		$storage = new Temporary([]);
+		Filesystem::mount($storage, [], '/' . self::USER1 . '/files/ext/');
+		$file = $folder->newFile('crossing.txt', 'AAA');
+		$id = $file->getId();
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::USER1));
+
+		$file->move($folder->get('ext')->getPath() . '/crossing.txt');
+
+		$moved = $this->rootFolder->getUserFolder(self::USER1)->get('ext/crossing.txt');
+		self::assertSame(0, $this->lockRowCount($id));
+		self::assertSame(0, $this->lockRowCount($moved->getId()));
+	}
+
+	public function testAnotherUserCannotMoveALockedFileOffItsStorage(): void {
+		$folder = $this->loginAndGetUserFolder(self::USER1);
+		$dir = $folder->newFolder('shared-tree');
+		$file = $dir->newFile('held.txt', 'AAA');
+		$this->shareWith($dir, self::USER1, self::USER2, 31);
+		$id = $file->getId();
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::USER1));
+
+		\OC_Util::setupFS(self::USER2);
+		\OC_User::setUserId(self::USER2);
+		$this->lockService()->clearCache();
+		$storage = new Temporary([]);
+		Filesystem::mount($storage, [], '/' . self::USER2 . '/files/ext/');
+		$theirs = $this->rootFolder->getUserFolder(self::USER2)->get('shared-tree/held.txt');
+
+		try {
+			$theirs->move($this->rootFolder->getUserFolder(self::USER2)->get('ext')->getPath() . '/held.txt');
+			self::fail('a locked file should not leave its storage under another user');
+		} catch (LockedException) {
+		}
+		self::assertSame(1, $this->lockRowCount($id));
 	}
 
 	public function testPurgingTheCacheEntryRemovesTheLock(): void {
