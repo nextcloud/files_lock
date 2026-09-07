@@ -456,6 +456,44 @@ class LockFeatureTest extends TestCase {
 		$this->assertCount(0, $locks);
 	}
 
+	/**
+	 * The display name of a federated lock comes from the remote as free text.
+	 * It is not a local user id and must not be treated as one.
+	 */
+	public function testRemoteLockKeepsTheRemoteDisplayName(): void {
+		$this->loginAsUser(self::TEST_USER1);
+
+		$storage = $this->createMock(\OCA\Files_Sharing\External\Storage::class);
+		$storage->method('instanceOfStorage')->willReturnCallback(
+			static fn (string $class): bool => $class === \OC\Files\Storage\DAV::class
+		);
+		$storage->method('getPropfindPropertyValue')->willReturnCallback(
+			static fn (string $path, string $property): mixed => match ($property) {
+				Application::DAV_PROPERTY_LOCK => '1',
+				Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME => 'Alice Remote',
+				Application::DAV_PROPERTY_LOCK_OWNER_TYPE => (string)ILock::TYPE_USER,
+				default => null,
+			}
+		);
+		$storage->method('getRemote')->willReturn('https://cloud.example.org/remote.php/dav');
+
+		$node = $this->createMock(\OCP\Files\Node::class);
+		$node->method('getStorage')->willReturn($storage);
+		$node->method('getInternalPath')->willReturn('files/remote-locked.txt');
+
+		$service = \OCP\Server::get(LockService::class);
+		$lock = $service->getRemoteLockFromDav(424242, $node);
+
+		$this->assertNotNull($lock);
+		$this->assertSame('Alice Remote@cloud.example.org', $lock->getDisplayName());
+		$this->assertSame('', $lock->getOwner(), 'a remote display name is not a local user id');
+		$this->assertSame(
+			'Alice Remote@cloud.example.org',
+			$service->injectMetadata($lock)->getDisplayName(),
+			'the propfind path runs every lock through injectMetadata'
+		);
+	}
+
 	private function loginAndGetUserFolder(string $userId) {
 		$this->loginAsUser($userId);
 		return $this->rootFolder->getUserFolder($userId);
