@@ -420,7 +420,7 @@ class LockService {
 			$fileLock = new FileLock();
 			$fileLock->import([
 				'fileId' => $nodeId,
-				'userId' => (string)($storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME) ?? ''),
+				'displayName' => (string)($storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME) ?? ''),
 				'type' => (int)($storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK_OWNER_TYPE) ?? 0),
 				'creation' => (int)($storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK_TIME) ?? 0),
 				'ttl' => (int)($storage->getPropfindPropertyValue($path, Application::DAV_PROPERTY_LOCK_TIMEOUT) ?? 0),
