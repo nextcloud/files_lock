@@ -103,11 +103,14 @@ class LockController extends OCSController {
 			$response->setStatus(Http::STATUS_PRECONDITION_FAILED);
 			return $response;
 		} catch (UnauthorizedUnlockException) {
-			$lock = $this->lockService->getLockFromFileId((int)$fileId);
-			$response = new DataResponse();
-			$response->setStatus(Http::STATUS_LOCKED);
-			$response->setData($lock->jsonSerialize());
-			return $response;
+			try {
+				$lock = $this->lockService->getLockFromFileId((int)$fileId);
+			} catch (LockNotFoundException) {
+				$response = new DataResponse();
+				$response->setStatus(Http::STATUS_PRECONDITION_FAILED);
+				return $response;
+			}
+			return new DataResponse($lock, Http::STATUS_LOCKED);
 		} catch (Exception $e) {
 			return $this->fail($e);
 		}
@@ -120,21 +123,17 @@ class LockController extends OCSController {
 
 	private function buildOCSResponse(string $format, DataResponse $data): V1Response|V2Response {
 		$message = null;
-		if ($data->getStatus() === Http::STATUS_LOCKED) {
-			$lock = new FileLock();
-			$lock->import($data->getData());
-			$this->lockService->injectMetadata($lock);
-			$message = $this->l10n->t('File is currently locked by %s', [$lock->getDisplayName()]);
+		$containedData = $data->getData();
+		if ($data->getStatus() === Http::STATUS_LOCKED && $containedData instanceof FileLock) {
+			$this->lockService->injectMetadata($containedData);
+			$message = $this->l10n->t('File is currently locked by %s', [$containedData->getDisplayName() ?? $containedData->getOwner()]);
 		}
 		if ($data->getStatus() === Http::STATUS_PRECONDITION_FAILED) {
-			/** @var FileLock $lock */
-			$lock = $data->getData();
 			$message = $this->l10n->t('File is not locked');
 		}
 
-		$containedData = $data->getData();
 		if ($containedData instanceof FileLock) {
-			$data->setData($data->getData()->jsonSerialize());
+			$data->setData($containedData->jsonSerialize());
 		}
 
 		if ($this->ocsVersion === 1) {

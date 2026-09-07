@@ -17,4 +17,6 @@ if (!defined('PHPUNIT_RUN')) {
 require_once __DIR__ . '/../../../lib/base.php';
 require_once __DIR__ . '/../../../tests/autoload.php';
 
+\OC::$composerAutoloader->addPsr4('OCA\\FilesLock\\Tests\\', __DIR__ . '/', true);
+
 Server::get(IAppManager::class)->loadApp('files_lock');

@@ -203,16 +203,19 @@ class FileLock implements ILock, JsonSerializable {
 		return $this;
 	}
 
+	/**
+	 * Import the shape produced by jsonSerialize() (also accepts database column names).
+	 */
 	public function import(array $data): void {
-		$this->setId((int)$data['id']);
-		$this->setUri($data['uri'] ?? '');
-		$this->setUserId($data['user_id']);
-		$this->setFileId((int)$data['file_id']);
-		$this->setToken($data['token'] ?? '');
-		$this->setCreation((int)$data['creation']);
-		$this->setLockType((int)$data['type']);
-		$this->setTimeout((int)$data['ttl']);
-		$this->setDisplayName($data['owner'] ?? '');
+		$this->setId((int)($data['id'] ?? 0));
+		$this->setUri((string)($data['uri'] ?? ''));
+		$this->setUserId((string)($data['userId'] ?? $data['user_id'] ?? ''));
+		$this->setFileId((int)($data['fileId'] ?? $data['file_id'] ?? 0));
+		$this->setToken((string)($data['token'] ?? ''));
+		$this->setCreation((int)($data['creation'] ?? 0));
+		$this->setLockType((int)($data['type'] ?? ILock::TYPE_USER));
+		$this->setTimeout((int)($data['ttl'] ?? 0));
+		$this->setDisplayName((string)($data['displayName'] ?? $data['owner'] ?? ''));
 	}
 
 	#[\Override]
