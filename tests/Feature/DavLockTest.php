@@ -369,6 +369,91 @@ class DavLockTest extends LockTestCase {
 		self::assertSame(423, $this->request(self::USER2, 'PROPPATCH', '/visible.txt', '<d:propertyupdate xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns"><d:set><d:prop><oc:favorite>1</oc:favorite></d:prop></d:set></d:propertyupdate>')->getStatus());
 	}
 
+	public function testALockedFileStaysLockedAfterItsHolderMovesIt(): void {
+		$dir = $this->loginAndGetUserFolder(self::USER1)->newFolder('churn');
+		$file = $dir->newFile('travel.txt', 'AAA');
+		$this->shareWith($dir, self::USER1, self::USER2, 31);
+		$id = $file->getId();
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::USER1));
+
+		self::assertContains($this->request(self::USER1, 'MOVE', '/churn/travel.txt', null, ['Destination' => '/churn/travelled.txt'])->getStatus(), [201, 204]);
+		self::assertSame(1, $this->lockRowCount($id));
+
+		$props = $this->lockProps(self::USER2, '/churn/travelled.txt');
+		self::assertSame('1', $props['lock']);
+		self::assertSame(self::USER1, $props['lock-owner']);
+		self::assertSame(423, $this->request(self::USER2, 'PUT', '/churn/travelled.txt', 'BBB')->getStatus());
+	}
+
+	/**
+	 * The web client never holds the lock token of a lock its own desktop client
+	 * took, so it is refused like any other client until that client releases it.
+	 */
+	public function testOnlyTheClientHoldingATokenLockMovesTheFile(): void {
+		$dir = $this->loginAndGetUserFolder(self::USER1)->newFolder('churn');
+		$file = $dir->newFile('doc.odt', 'AAA');
+		$this->shareWith($dir, self::USER1, self::USER2, 31);
+		$id = $file->getId();
+		$token = $this->tokenOf($this->nativeLock(self::USER1, '/churn/doc.odt'));
+		$if = ['If' => '(<opaquelocktoken:' . $token . '>)'];
+
+		self::assertSame(423, $this->request(self::USER1, 'MOVE', '/churn/doc.odt', null, ['Destination' => '/churn/renamed.odt'])->getStatus());
+
+		self::assertContains($this->request(self::USER1, 'MOVE', '/churn/doc.odt', null, ['Destination' => '/churn/renamed.odt'] + $if)->getStatus(), [201, 204]);
+		self::assertSame(1, $this->lockRowCount($id));
+		self::assertSame($token, $this->lockProps(self::USER2, '/churn/renamed.odt')['lock-token']);
+
+		self::assertSame(204, $this->request(self::USER1, 'UNLOCK', '/churn/renamed.odt', null, ['Lock-Token' => '<opaquelocktoken:' . $token . '>'])->getStatus());
+		self::assertContains($this->request(self::USER2, 'MOVE', '/churn/renamed.odt', null, ['Destination' => '/churn/theirs.odt'])->getStatus(), [201, 204]);
+	}
+
+	/**
+	 * A client that never sends UNLOCK (crashed editor, killed sync client) must
+	 * not hold the file for the rest of the team beyond the configured timeout.
+	 */
+	public function testAnAbandonedClientLockStopsBlockingWhenItExpires(): void {
+		$this->setLockTimeoutMinutes(30);
+		$this->toTheFuture(0);
+		$dir = $this->loginAndGetUserFolder(self::USER1)->newFolder('churn');
+		$dir->newFile('abandoned.txt', 'AAA');
+		$this->shareWith($dir, self::USER1, self::USER2, 31);
+		$this->nativeLock(self::USER1, '/churn/abandoned.txt');
+
+		self::assertSame(423, $this->request(self::USER2, 'MOVE', '/churn/abandoned.txt', null, ['Destination' => '/churn/mine.txt'])->getStatus());
+
+		$this->toTheFuture(1801);
+		self::assertSame('', $this->lockProps(self::USER2, '/churn/abandoned.txt')['lock']);
+		self::assertContains($this->request(self::USER2, 'MOVE', '/churn/abandoned.txt', null, ['Destination' => '/churn/mine.txt'])->getStatus(), [201, 204]);
+	}
+
+	/**
+	 * Locks other clients take and release between two listings, which is where a
+	 * stale hit in the bulk PROPFIND cache would surface as a phantom lock.
+	 */
+	public function testDirectoryListingsFollowLocksTakenByOtherClients(): void {
+		$dir = $this->loginAndGetUserFolder(self::USER1)->newFolder('churn');
+		$one = $dir->newFile('one.txt', 'AAA');
+		$dir->newFile('two.txt', 'BBB');
+		$this->shareWith($dir, self::USER1, self::USER2, 31);
+
+		self::assertSame(0, $this->countLockOwners(self::USER2, '/churn/'));
+
+		$lock = $this->lockManager->lock(new LockContext($one, ILock::TYPE_USER, self::USER1));
+		self::assertSame(1, $this->countLockOwners(self::USER2, '/churn/'));
+		self::assertSame(423, $this->request(self::USER2, 'PUT', '/churn/one.txt', 'CCC')->getStatus());
+		self::assertContains($this->request(self::USER2, 'PUT', '/churn/two.txt', 'CCC')->getStatus(), [200, 204]);
+
+		self::assertSame(204, $this->request(self::USER1, 'UNLOCK', '/churn/one.txt', null, ['Lock-Token' => '<opaquelocktoken:' . $lock->getToken() . '>'])->getStatus());
+		self::assertSame(0, $this->countLockOwners(self::USER2, '/churn/'));
+		self::assertContains($this->request(self::USER2, 'PUT', '/churn/one.txt', 'DDD')->getStatus(), [200, 204]);
+	}
+
+	private function countLockOwners(string $user, string $path): int {
+		$response = $this->request($user, 'PROPFIND', $path, '<d:propfind xmlns:d="DAV:" xmlns:nc="http://nextcloud.org/ns"><d:prop><nc:lock/><nc:lock-owner/></d:prop></d:propfind>', ['Depth' => '1']);
+		self::assertSame(207, $response->getStatus());
+		return preg_match_all('#<nc:lock-owner>[^<]+</nc:lock-owner>#', $this->body($response));
+	}
+
 	#[\Override]
 	protected function sharedFile(string $name, int $permissions = 19, ?int $permissionsUser3 = null): File {
 		return parent::sharedFile($name, $permissions, $permissionsUser3);
