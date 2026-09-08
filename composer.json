@@ -10,11 +10,11 @@
 	},
 	"config": {
 		"platform": {
-			"php": "8.1"
+			"php": "8.2"
 		}
 	},
 	"require": {
-		"php": "^8.1"
+		"php": "^8.2"
 	},
 	"scripts": {
 		"lint": "find . -name \\*.php -not -path './vendor/*' -print0 | xargs -0 -n1 php -l",
