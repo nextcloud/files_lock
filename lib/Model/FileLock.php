@@ -181,7 +181,7 @@ class FileLock implements ILock, JsonSerializable {
 		$lock = new LockInfo();
 		$lock->owner = $this->getDisplayName();
 		$lock->token = $this->getToken();
-		$lock->timeout = $this->getTimeout();
+		$lock->timeout = $this->getTimeout() <= 0 ? LockInfo::TIMEOUT_INFINITE : $this->getTimeout();
 		$lock->created = $this->getCreatedAt();
 		$lock->scope = LockInfo::EXCLUSIVE;
 		$lock->depth = 1;
