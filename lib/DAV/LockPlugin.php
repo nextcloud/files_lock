@@ -138,7 +138,7 @@ class LockPlugin extends SabreLockPlugin {
 				return null;
 			}
 
-			return $lock->getTimeout();
+			return $this->davTimeout($lock);
 		});
 
 		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME, function () use ($nodeId, $node): ?string {
@@ -288,8 +288,17 @@ class LockPlugin extends SabreLockPlugin {
 				? $lock->getOwner()
 				: null,
 			Application::DAV_PROPERTY_LOCK_TIME => $lock ? $lock->getCreatedAt() : null,
-			Application::DAV_PROPERTY_LOCK_TIMEOUT => $lock ? $lock->getTimeout() : null,
+			Application::DAV_PROPERTY_LOCK_TIMEOUT => $lock ? $this->davTimeout($lock) : null,
 			Application::DAV_PROPERTY_LOCK_TOKEN => $lock ? $lock->getToken() : null,
 		];
+	}
+
+	/**
+	 * Lifetime as clients read it: 0 means the lock never expires. A lock that
+	 * never expires has a negative lifetime internally, and sending that raw put
+	 * the expiry date in the past.
+	 */
+	private function davTimeout(FileLock $lock): int {
+		return max(0, $lock->getTimeout());
 	}
 }
