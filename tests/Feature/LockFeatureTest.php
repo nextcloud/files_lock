@@ -6,8 +6,11 @@
  */
 
 use OC\Files\Lock\LockManager;
+use OC\Files\View;
+use OCA\DAV\Connector\Sabre\File as DavFile;
 use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\ConfigLexicon;
+use OCA\FilesLock\DAV\LockPlugin;
 use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\LockService;
 use OCP\AppFramework\Utility\ITimeFactory;
@@ -23,6 +26,8 @@ use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\MockObject\MockObject;
+use Sabre\DAV\Locks\LockInfo;
+use Sabre\DAV\PropFind;
 use Test\TestCase;
 use Test\Util\User\Dummy;
 
@@ -42,6 +47,8 @@ class LockFeatureTest extends TestCase {
 		'test-file3',
 		'test-file-expire',
 		'test-file-infinite',
+		'test-file-dav-infinite',
+		'test-file-dav-expiring',
 		'test-file_public',
 		'test-file-client',
 		'etag_test',
@@ -66,6 +73,7 @@ class LockFeatureTest extends TestCase {
 	public function setUp(): void {
 		parent::setUp();
 		$this->time = null;
+		\OCP\Server::get(IConfig::class)->deleteAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT);
 		$this->lockManager = \OCP\Server::get(ILockManager::class);
 		$this->rootFolder = \OCP\Server::get(IRootFolder::class);
 		$this->timeFactory = $this->createMock(ITimeFactory::class);
@@ -289,6 +297,37 @@ class LockFeatureTest extends TestCase {
 		}
 	}
 
+	/**
+	 * Clients read the remaining lifetime from the WebDAV property and treat 0 as
+	 * "no expiry". Under the default configuration the internal lifetime is
+	 * negative, and sending that raw put the expiry date in the past.
+	 */
+	public function testInfiniteLockReportsNoExpiryOverWebdav(): void {
+		$folder = $this->loginAndGetUserFolder(self::TEST_USER1);
+
+		$infinite = $folder->newFile('test-file-dav-infinite', 'AAA');
+		$this->lockManager->lock(new LockContext($infinite, ILock::TYPE_USER, self::TEST_USER1));
+		self::assertSame(0, $this->davLockTimeout($infinite));
+
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, '30');
+		$expiring = $folder->newFile('test-file-dav-expiring', 'AAA');
+		$this->lockManager->lock(new LockContext($expiring, ILock::TYPE_USER, self::TEST_USER1));
+		self::assertSame(30 * 60, $this->davLockTimeout($expiring));
+	}
+
+	/**
+	 * The standard {DAV:}timeout property has its own sentinel for a lock that
+	 * never expires (RFC4918 renders it as "Infinite", which Sabre only emits
+	 * for a timeout of exactly -1). Sending the raw negative internal lifetime
+	 * there produced the invalid "Second--60"; -60 and 0 are what
+	 * LockService::lock() actually stores for the two "never expires" configs.
+	 */
+	public function testInfiniteLockReportsStandardWebdavTimeoutAsInfinite(): void {
+		self::assertSame(LockInfo::TIMEOUT_INFINITE, (new FileLock(-60))->toLockInfo()->timeout);
+		self::assertSame(LockInfo::TIMEOUT_INFINITE, (new FileLock(0))->toLockInfo()->timeout);
+		self::assertSame(30 * 60, (new FileLock(30 * 60))->toLockInfo()->timeout);
+	}
+
 	public function testLockApp(): void {
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
 			->newFile('test-file2', 'AAA');
@@ -492,6 +531,14 @@ class LockFeatureTest extends TestCase {
 			$service->injectMetadata($lock)->getDisplayName(),
 			'the propfind path runs every lock through injectMetadata'
 		);
+	}
+
+	private function davLockTimeout(File $file): ?int {
+		$view = new View('/' . self::TEST_USER1 . '/files');
+		$propFind = new PropFind($file->getName(), [Application::DAV_PROPERTY_LOCK_TIMEOUT]);
+		\OCP\Server::get(LockPlugin::class)->customProperties($propFind, new DavFile($view, $file));
+
+		return $propFind->get(Application::DAV_PROPERTY_LOCK_TIMEOUT);
 	}
 
 	private function loginAndGetUserFolder(string $userId) {
