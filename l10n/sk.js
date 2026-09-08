@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "File is currently locked by %s" : "Súbor je momentálne zamknutý od %s",
     "File is not locked" : "Súbor nie je zamknutý",
+    "File can only be locked with update permissions." : "Súbor možno zamknúť iba s oprávneniami na aktualizáciu.",
     "File can only be unlocked by providing a valid owner lock token" : "Súbor môže byť odomknutý iba poskytnutím správneho tokenu vlastníkom zámku",
     "File can only be unlocked by the owner of the lock" : "Súbor môže byť odomknutý iba vlastníkom zámku",
     "Desktop client" : "Desktopový klient",
@@ -16,8 +17,10 @@ OC.L10N.register(
     "Automatically locked by {user}" : "Automaticky zamknuté od {user}",
     "Unlock file" : "Odomknúť súbor",
     "Lock file" : "Zamknúť súbor",
+    "files_lock" : "files_lock",
     "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Tento súbor bol automaticky uzamknutý klientom. Odstránenie zámku môže viesť ku konfliktu pri ukladaní súboru.",
     "Keep lock" : "Ponechať uzamknuté",
-    "Force unlock" : "Vynútiť odomknutie"
+    "Force unlock" : "Vynútiť odomknutie",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "Umožnite svojim používateľom dočasne zamykať súbory, aby sa pri práci so zdieľanými súbormi vyhli konfliktom.\n\nℹ️ Od Nextcloudu 34 je táto aplikácia súčasťou Nextcloud Hub, a preto sa už nevydáva prostredníctvom obchodu s aplikáciami."
 },
 "nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);");
