@@ -47,6 +47,7 @@ class LockFeatureTest extends TestCase {
 		'test-file3',
 		'test-file-expire',
 		'test-file-infinite',
+		'test-file-creation-clock',
 		'test-file-dav-infinite',
 		'test-file-dav-expiring',
 		'test-file_public',
@@ -265,6 +266,17 @@ class LockFeatureTest extends TestCase {
 		$service->removeLocks([$lock]);
 
 		self::assertCount(0, $this->lockManager->getLocks($file->getId()));
+	}
+
+	/**
+	 * Reading the wall clock here instead would race the clock tests mock in.
+	 */
+	public function testLockCreationUsesTheInjectedClock(): void {
+		$this->time = strtotime('2000-01-01T00:00:00+00:00');
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('test-file-creation-clock', 'AAA');
+		$lock = $this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+
+		self::assertSame($this->time, $lock->getCreatedAt());
 	}
 
 	// Use expired locks to model the cron cleanup workflow:
