@@ -160,7 +160,6 @@ class LockService {
 		} catch (LockNotFoundException) {
 			$lock = FileLock::fromLockScope($lockScope, $timeout);
 			$this->generateToken($lock);
-			$lock->setCreation(time());
 			$this->logger->notice('locking file', ['fileLock' => $lock]);
 			$this->injectMetadata($lock);
 			$this->locksRequest->save($lock);
