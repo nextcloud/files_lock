@@ -47,6 +47,7 @@ class LockFeatureTest extends TestCase {
 		'test-file3',
 		'test-file-expire',
 		'test-file-infinite',
+		'test-file-creation-clock',
 		'test-file-dav-infinite',
 		'test-file-dav-expiring',
 		'test-file_public',
