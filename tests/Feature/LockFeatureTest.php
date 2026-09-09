@@ -49,11 +49,16 @@ class LockFeatureTest extends TestCase {
 		'test-file-creation-clock',
 		'test-file-dav-infinite',
 		'test-file-dav-expiring',
+		'test-file-extend',
+		'test-file-extend-infinite',
+		'test-file-remove-lock',
+		'test-file-token',
 		'test-file_public',
 		'test-file-client',
 		'etag_test',
-		'test-expired-lock-is-deprecated',
-		'test-expired-lock-is-deprecated-2',
+		'test-expired-lock',
+		'test-expired-lock-remove-1',
+		'test-expired-lock-remove-2',
 	];
 
 	protected LockManager $lockManager;
