@@ -35,12 +35,12 @@ class AcquisitionTest extends LockTestCase {
 		$file = $this->loginAndGetUserFolder(self::USER1)->newFile('dup.txt', 'AAA');
 		$request = \OCP\Server::get(LocksRequest::class);
 
-		$first = FileLock::fromLockScope(new LockContext($file, ILock::TYPE_USER, self::USER1), 0);
+		$first = FileLock::fromLockScope(new LockContext($file, ILock::TYPE_USER, self::USER1));
 		$first->setToken('files_lock/dup-1');
 		$request->save($first);
 		self::assertGreaterThan(0, $first->getId());
 
-		$second = FileLock::fromLockScope(new LockContext($file, ILock::TYPE_USER, self::USER2), 0);
+		$second = FileLock::fromLockScope(new LockContext($file, ILock::TYPE_USER, self::USER2));
 		$second->setToken('files_lock/dup-2');
 		try {
 			$request->save($second);
@@ -48,6 +48,24 @@ class AcquisitionTest extends LockTestCase {
 		} catch (LockConflictException) {
 		}
 		self::assertSame(1, $this->lockRowCount($file->getId()));
+	}
+
+	/**
+	 * The bulk read reports every id it was asked about, so a caller can index the
+	 * result by file id. A file with no lock is reported as false, not left out.
+	 */
+	public function testBulkReadReportsEveryRequestedId(): void {
+		$folder = $this->loginAndGetUserFolder(self::USER1);
+		$locked = $folder->newFile('bulk-locked.txt', 'AAA');
+		$free = $folder->newFile('bulk-free.txt', 'AAA');
+		$this->lockManager->lock(new LockContext($locked, ILock::TYPE_USER, self::USER1));
+		$this->lockService()->clearCache();
+
+		$locks = $this->lockService()->getLockForNodeIds([$locked->getId(), $free->getId()]);
+
+		self::assertArrayHasKey($free->getId(), $locks, 'a file with no lock must still be reported');
+		self::assertFalse($locks[$free->getId()]);
+		self::assertInstanceOf(FileLock::class, $locks[$locked->getId()]);
 	}
 
 	public function testConflictReportsWinningLock(): void {

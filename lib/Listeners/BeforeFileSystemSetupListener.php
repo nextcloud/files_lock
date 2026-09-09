@@ -17,7 +17,6 @@ use OCP\EventDispatcher\IEventListener;
 use OCP\Files\Events\BeforeFileSystemSetupEvent;
 use OCP\Files\Lock\ILockManager;
 use OCP\Files\Storage\IStorage;
-use OCP\IUserSession;
 use Override;
 
 /**
@@ -26,7 +25,6 @@ use Override;
 class BeforeFileSystemSetupListener implements IEventListener {
 	public function __construct(
 		private readonly ILockManager $lockManager,
-		private readonly IUserSession $userSession,
 		private readonly LockService $lockService,
 	) {
 	}
@@ -45,7 +43,6 @@ class BeforeFileSystemSetupListener implements IEventListener {
 				[
 					'storage' => $storage,
 					'lock_manager' => $this->lockManager,
-					'user_session' => $this->userSession,
 					'lock_service' => $this->lockService,
 				]
 			), 0);

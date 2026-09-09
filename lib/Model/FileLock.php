@@ -51,14 +51,13 @@ class FileLock implements ILock, JsonSerializable {
 	}
 
 	/**
-	 * @param int $timeout lifetime in seconds counted from creation, <= 0 for a lock that never expires
+	 * The lock never expires until a caller sets an expiry on it.
 	 */
-	public static function fromLockScope(LockContext $lockScope, int $timeout): FileLock {
+	public static function fromLockScope(LockContext $lockScope): FileLock {
 		$lock = new FileLock();
 		$lock->setUserId($lockScope->getOwner());
 		$lock->setLockType($lockScope->getType());
 		$lock->setFileId($lockScope->getNode()->getId());
-		$lock->setTimeout($timeout);
 		return $lock;
 	}
 
@@ -241,7 +240,7 @@ class FileLock implements ILock, JsonSerializable {
 	}
 
 	/**
-	 * Import the shape produced by jsonSerialize() (also accepts database column names).
+	 * Import a lock from the properties a remote DAV storage reports.
 	 */
 	public function import(array $data): void {
 		$this->setId((int)($data['id'] ?? 0));
@@ -251,13 +250,7 @@ class FileLock implements ILock, JsonSerializable {
 		$this->setToken((string)($data['token'] ?? ''));
 		$this->setCreation((int)($data['creation'] ?? 0));
 		$this->setLockType((int)($data['type'] ?? ILock::TYPE_USER));
-		if (array_key_exists('expiresAt', $data)) {
-			$this->setExpiresAt($data['expiresAt'] === null ? null : (int)$data['expiresAt']);
-		} elseif (array_key_exists('expires_at', $data)) {
-			$this->setExpiresAt($data['expires_at'] === null ? null : (int)$data['expires_at']);
-		} elseif (isset($data['ttl'])) {
-			$this->setTimeout((int)$data['ttl']);
-		}
+		$this->setTimeout((int)($data['ttl'] ?? 0));
 		$this->setDisplayName((string)($data['displayName'] ?? $data['owner'] ?? ''));
 	}
 

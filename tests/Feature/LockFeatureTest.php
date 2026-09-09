@@ -243,7 +243,7 @@ class LockFeatureTest extends TestCase {
 		// Travel past the 30m timeout window.
 		$this->toTheFuture(30 * 60 + 1);
 		$mapToIds = fn (ILock $deprecatedLock): int => $deprecatedLock->getId();
-		$deprecated = array_map($mapToIds, $service->getDeprecatedLocks());
+		$deprecated = array_map($mapToIds, $service->getExpiredLocks());
 
 		self::assertContains(
 			$lock->getId(),
@@ -279,7 +279,7 @@ class LockFeatureTest extends TestCase {
 	}
 
 	// Use expired locks to model the cron cleanup workflow:
-	// getDeprecatedLocks() selects stale locks and removeLocks() deletes them.
+	// getExpiredLocks() selects stale locks and removeLocks() deletes them.
 	public function testRemoveDeprecatedLocks(): void {
 		$service = \OCP\Server::get(LockService::class);
 		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, 30);
@@ -289,13 +289,13 @@ class LockFeatureTest extends TestCase {
 		$lock2 = $this->lockManager->lock(new LockContext($file2, ILock::TYPE_USER, self::TEST_USER1));
 		$this->toTheFuture(30 * 60 + 1);
 		$mapToIds = fn (ILock $lock): int => $lock->getId();
-		$deprecated = array_map($mapToIds, $service->getDeprecatedLocks());
+		$deprecated = array_map($mapToIds, $service->getExpiredLocks());
 
 		self::assertContains($lock1->getId(), $deprecated);
 		self::assertContains($lock2->getId(), $deprecated);
 
 		$service->removeLocks([$lock1, $lock2]);
-		$deprecated = array_map($mapToIds, $service->getDeprecatedLocks());
+		$deprecated = array_map($mapToIds, $service->getExpiredLocks());
 
 		self::assertNotContains($lock1->getId(), $deprecated);
 		self::assertNotContains($lock2->getId(), $deprecated);

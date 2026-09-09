@@ -104,7 +104,7 @@ Administrators can manually lock files using `occ`:
 
 `occ files:lock <fileId> [<lockOwner>] [--status] [--unlock]`
 
-Only files can be locked through the Web UI, the OCS API, `X-User-Lock` and the command line; a folder ID is refused there. Native WebDAV clients may still lock a collection as RFC 4918 requires; such a lock protects the collection's own name and location, not its members.
+Only files can be locked through the Web UI, the OCS API, `X-User-Lock`, the command line and the PHP `ILockManager` API; a folder is refused there. Native WebDAV clients may still lock a collection as RFC 4918 requires; such a lock protects the collection's own name and location, not its members.
 
 ## Capabilities API
 
