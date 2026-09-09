@@ -25,10 +25,6 @@ class Unlock extends TimedJob {
 
 	#[\Override]
 	protected function run($argument): void {
-		$this->deleteExpiredLocks();
-	}
-
-	private function deleteExpiredLocks(): void {
 		$this->lockService->removeLocksIfExpired($this->lockService->getExpiredLocks(1000));
 	}
 }

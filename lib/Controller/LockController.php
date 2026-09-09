@@ -40,7 +40,6 @@ use Psr\Log\LoggerInterface;
  * @package OCA\FilesLock\Controller
  */
 class LockController extends OCSController {
-	private const array SUPPORTED_LOCK_TYPES = [ILock::TYPE_USER, ILock::TYPE_APP, ILock::TYPE_TOKEN];
 
 	private int $ocsVersion;
 
@@ -70,7 +69,7 @@ class LockController extends OCSController {
 	#[NoAdminRequired]
 	#[NoSubAdminRequired]
 	public function locking(string $fileId, int $lockType = ILock::TYPE_USER): DataResponse {
-		if (!in_array($lockType, self::SUPPORTED_LOCK_TYPES, true)) {
+		if (!in_array($lockType, Application::SUPPORTED_LOCK_TYPES, true)) {
 			return $this->fail(new \InvalidArgumentException('Unsupported lock type'), [], Http::STATUS_BAD_REQUEST, false);
 		}
 		if (!is_numeric($fileId)) {
@@ -105,7 +104,7 @@ class LockController extends OCSController {
 	#[NoAdminRequired]
 	#[NoSubAdminRequired]
 	public function unlocking(string $fileId, int $lockType = ILock::TYPE_USER): DataResponse {
-		if (!in_array($lockType, self::SUPPORTED_LOCK_TYPES, true)) {
+		if (!in_array($lockType, Application::SUPPORTED_LOCK_TYPES, true)) {
 			return $this->fail(new \InvalidArgumentException('Unsupported lock type'), [], Http::STATUS_BAD_REQUEST, false);
 		}
 		if (!is_numeric($fileId)) {

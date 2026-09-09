@@ -35,7 +35,7 @@ use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 
 class LockPlugin extends SabreLockPlugin {
-	private const array SUPPORTED_LOCK_TYPES = [ILock::TYPE_USER, ILock::TYPE_APP, ILock::TYPE_TOKEN];
+	private const string TOKEN_PREFIX = 'opaquelocktoken:';
 
 	public function __construct(
 		private readonly LockService $lockService,
@@ -95,7 +95,6 @@ class LockPlugin extends SabreLockPlugin {
 		$ids[] = (int)$directory->getId();
 		// the lock service will take care of the caching
 		$this->lockService->getLockForNodeIds($ids);
-		$this->lockService->prefetchRemoteLocks($directory->getNode());
 	}
 
 	public function customProperties(PropFind $propFind, INode $node): void {
@@ -112,84 +111,48 @@ class LockPlugin extends SabreLockPlugin {
 
 		$nodeId = $node->getId();
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK, function () use ($nodeId, $node): bool {
-			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
-			return $lock instanceof FileLock;
+		$lockOf = fn (): ?FileLock => $this->lockService->getLockForNodeId($nodeId, $node->getNode());
+
+		$propFind->handle(Application::DAV_PROPERTY_LOCK, fn (): bool => $lockOf() !== null);
+
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER, function () use ($lockOf): ?string {
+			$lock = $lockOf();
+			return $lock === null || $lock->getType() === ILock::TYPE_APP ? null : $lock->getOwner();
 		});
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER, function () use ($nodeId, $node): ?string {
-			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_TIME, fn (): ?int => $lockOf()?->getCreatedAt());
 
-			if ($lock === false) {
-				return null;
-			}
-
-			if ($lock->getType() === ILock::TYPE_APP) {
-				return null;
-			}
-
-			return $lock->getOwner();
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_TIMEOUT, function () use ($lockOf): ?int {
+			$lock = $lockOf();
+			return $lock === null ? null : $this->davTimeout($lock);
 		});
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_TIME, function () use ($nodeId, $node): ?int {
-			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
-
-			if ($lock === false) {
-				return null;
-			}
-
-			return $lock->getCreatedAt();
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME, function () use ($lockOf): ?string {
+			$lock = $lockOf();
+			return $lock === null ? null : $this->lockService->injectMetadata($lock)->getDisplayName();
 		});
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_TIMEOUT, function () use ($nodeId, $node): ?int {
-			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_TYPE, fn (): ?int => $lockOf()?->getType());
 
-			if ($lock === false) {
-				return null;
-			}
-
-			return $this->davTimeout($lock);
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_EDITOR, function () use ($lockOf): ?string {
+			$lock = $lockOf();
+			return $lock?->getType() === ILock::TYPE_APP ? $lock->getOwner() : null;
 		});
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME, function () use ($nodeId, $node): ?string {
-			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_TOKEN, fn (): ?string => $lockOf()?->getToken());
+	}
 
-			if ($lock === false) {
-				return null;
-			}
-
-			$this->lockService->injectMetadata($lock);
-
-			return $lock->getDisplayName();
-		});
-
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_TYPE, function () use ($nodeId, $node): ?int {
-			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
-
-			if ($lock === false) {
-				return null;
-			}
-
-			return $lock->getType();
-		});
-
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_EDITOR, function () use ($nodeId, $node): ?string {
-			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
-			if ($lock === false || $lock->getType() !== ILock::TYPE_APP) {
-				return null;
-			}
-
-			return $lock->getOwner();
-		});
-
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_TOKEN, function () use ($nodeId, $node): ?string {
-			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
-			if ($lock === false) {
-				return null;
-			}
-
-			return $lock->getToken();
-		});
+	/**
+	 * The lock token carried by one entry of an If header, or null when it is not
+	 * one of ours.
+	 *
+	 * @param array{token: mixed} $token
+	 */
+	private static function lockToken(array $token): ?string {
+		$value = (string)$token['token'];
+		return str_starts_with($value, self::TOKEN_PREFIX)
+			? substr($value, strlen(self::TOKEN_PREFIX))
+			: null;
 	}
 
 	/**
@@ -204,8 +167,9 @@ class LockPlugin extends SabreLockPlugin {
 		$this->lockService->resetPresentedTokens();
 		foreach ($conditions as $condition) {
 			foreach ($condition['tokens'] as $token) {
-				if (str_starts_with((string)$token['token'], 'opaquelocktoken:')) {
-					$this->lockService->presentToken(substr((string)$token['token'], 16));
+				$presented = self::lockToken($token);
+				if ($presented !== null) {
+					$this->lockService->presentToken($presented);
 				}
 			}
 		}
@@ -248,10 +212,10 @@ class LockPlugin extends SabreLockPlugin {
 
 		foreach ($conditions as $kk => $condition) {
 			foreach ($condition['tokens'] as $ii => $token) {
-				if (!str_starts_with((string)$token['token'], 'opaquelocktoken:')) {
+				$checkToken = self::lockToken($token);
+				if ($checkToken === null) {
 					continue;
 				}
-				$checkToken = substr((string)$token['token'], 16);
 				if (isset($byToken[$checkToken])) {
 					$conditions[$kk]['tokens'][$ii]['validToken'] = true;
 					continue;
@@ -282,11 +246,6 @@ class LockPlugin extends SabreLockPlugin {
 			$user = $this->userSession->getUser();
 			if ($user === null) {
 				throw new Forbidden('Locking requires an authenticated user');
-			}
-
-			$user = $this->userSession->getUser();
-			if ($user === null) {
-				throw new \LogicException('User not logged in');
 			}
 
 			try {
@@ -372,7 +331,7 @@ class LockPlugin extends SabreLockPlugin {
 		if ($header === null || $header === '') {
 			return ILock::TYPE_USER;
 		}
-		if (!is_numeric($header) || !in_array((int)$header, self::SUPPORTED_LOCK_TYPES, true)) {
+		if (!is_numeric($header) || !in_array((int)$header, Application::SUPPORTED_LOCK_TYPES, true)) {
 			throw new \Sabre\DAV\Exception\BadRequest('Unsupported lock type');
 		}
 		return (int)$header;

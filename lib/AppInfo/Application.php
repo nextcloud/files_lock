@@ -25,10 +25,13 @@ use OCP\Files\Cache\CacheEntryRemovedEvent;
 use OCP\Files\Events\BeforeFileSystemSetupEvent;
 use OCP\Files\Events\BeforeRemotePropfindEvent;
 use OCP\Files\Events\Node\NodeDeletedEvent;
+use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\ILockManager;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'files_lock';
+
+	public const array SUPPORTED_LOCK_TYPES = [ILock::TYPE_USER, ILock::TYPE_APP, ILock::TYPE_TOKEN];
 
 	public const DAV_PROPERTY_LOCK = '{http://nextcloud.org/ns}lock';
 	public const DAV_PROPERTY_LOCK_OWNER_TYPE = '{http://nextcloud.org/ns}lock-owner-type';

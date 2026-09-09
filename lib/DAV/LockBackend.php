@@ -101,10 +101,8 @@ class LockBackend implements BackendInterface {
 
 		$timeout = null;
 		if ($lockInfo->timeout !== null) {
-			$timeout = $lockInfo->timeout === LockInfo::TIMEOUT_INFINITE ? FileLock::ETA_INFINITE : max(0, (int)$lockInfo->timeout);
-			if ($timeout === 0) {
-				$timeout = FileLock::ETA_INFINITE;
-			}
+			$seconds = (int)$lockInfo->timeout;
+			$timeout = $seconds > 0 ? $seconds : FileLock::ETA_INFINITE;
 		}
 
 		try {

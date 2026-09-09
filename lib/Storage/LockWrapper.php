@@ -23,15 +23,8 @@ use OCP\Lock\ManuallyLockedException;
  */
 class LockWrapper extends Wrapper {
 	private readonly ILockManager $lockManager;
+	private readonly LockService $lockService;
 
-	/** @var LockService */
-	private $lockService;
-
-	/**
-	 * LockWrapper constructor.
-	 *
-	 * @param $arguments
-	 */
 	public function __construct(array $arguments) {
 		parent::__construct($arguments);
 
@@ -40,12 +33,9 @@ class LockWrapper extends Wrapper {
 	}
 
 	/**
-	 * @param $path
-	 * @param $permissions
-	 *
 	 * @throws LockedException
 	 */
-	protected function checkPermissions($path, $permissions): bool {
+	protected function checkPermissions(string $path, int $permissions): bool {
 		if ($permissions === Constants::PERMISSION_READ) {
 			return true;
 		}
@@ -69,26 +59,49 @@ class LockWrapper extends Wrapper {
 	 * Refuse an operation on a directory that would delete or relocate a locked
 	 * descendant the current user may not write.
 	 *
+	 * @return list<array{lock: FileLock, path: string}> the active locks below $path
 	 * @throws LockedException
 	 */
-	protected function checkDescendants(IStorage $storage, string $path): void {
+	protected function checkDescendants(IStorage $storage, string $path): array {
 		if (!$storage->is_dir($path)) {
-			return;
+			return [];
 		}
 		$folderId = $storage->getCache()->getId($path);
 		if ($folderId === -1) {
+			return [];
+		}
+
+		$below = $this->lockService->getLocksBelow($folderId);
+		$scope = $this->lockManager->getLockInScope();
+		foreach ($below as $entry) {
+			$lock = $entry['lock'];
+			if (!$this->lockService->canWrite($lock, $scope)) {
+				throw new ManuallyLockedException(
+					rtrim($path, '/') . '/' . $entry['path'], null, $lock->getToken(), $lock->getOwner(), $lock->getETA()
+				);
+			}
+		}
+
+		return $below;
+	}
+
+	/**
+	 * Refuse an operation that would take a locked file out of its source storage.
+	 *
+	 * @throws LockedException
+	 */
+	protected function checkSourceLock(IStorage $sourceStorage, string $path): void {
+		$fileId = $sourceStorage->getCache()->getId($path);
+		if ($fileId <= 0) {
 			return;
 		}
 
-		$blocking = $this->lockService->getBlockingLocksBelow($folderId, $this->lockManager->getLockInScope());
-		if ($blocking === []) {
+		$lock = $this->lockService->getActiveLock($fileId);
+		if ($lock === null || $this->lockService->canWrite($lock, $this->lockManager->getLockInScope())) {
 			return;
 		}
-		/** @var FileLock $lock */
-		$lock = $blocking[0]['lock'];
-		throw new ManuallyLockedException(
-			rtrim($path, '/') . '/' . $blocking[0]['path'], null, $lock->getToken(), $lock->getOwner(), $lock->getETA()
-		);
+
+		throw new ManuallyLockedException($path, null, $lock->getToken(), $lock->getOwner(), $lock->getETA());
 	}
 
 	#[\Override]
@@ -124,13 +137,7 @@ class LockWrapper extends Wrapper {
 
 	#[\Override]
 	public function copyFromStorage(IStorage $sourceStorage, string $sourceInternalPath, string $targetInternalPath): bool {
-		$fileId = $sourceStorage->getCache()->getId($sourceInternalPath);
-		if ($fileId > 0) {
-			$lock = $this->lockService->getActiveLock($fileId);
-			if ($lock !== null && !$this->lockService->canWrite($lock, $this->lockManager->getLockInScope())) {
-				throw new ManuallyLockedException($sourceInternalPath, null, $lock->getToken(), $lock->getOwner(), $lock->getETA());
-			}
-		}
+		$this->checkSourceLock($sourceStorage, $sourceInternalPath);
 
 		return parent::copyFromStorage($sourceStorage, $sourceInternalPath, $targetInternalPath);
 	}
@@ -138,13 +145,7 @@ class LockWrapper extends Wrapper {
 	#[\Override]
 	public function moveFromStorage(IStorage $sourceStorage, string $sourceInternalPath, string $targetInternalPath): bool {
 		$this->checkDescendants($sourceStorage, $sourceInternalPath);
-		$fileId = $sourceStorage->getCache()->getId($sourceInternalPath);
-		if ($fileId > 0) {
-			$lock = $this->lockService->getActiveLock($fileId);
-			if ($lock !== null && !$this->lockService->canWrite($lock, $this->lockManager->getLockInScope())) {
-				throw new ManuallyLockedException($sourceInternalPath, null, $lock->getToken(), $lock->getOwner(), $lock->getETA());
-			}
-		}
+		$this->checkSourceLock($sourceStorage, $sourceInternalPath);
 		$permissions = $this->file_exists($targetInternalPath) ? Constants::PERMISSION_UPDATE : Constants::PERMISSION_CREATE;
 
 		return $this->checkPermissions($targetInternalPath, $permissions)
@@ -166,13 +167,11 @@ class LockWrapper extends Wrapper {
 
 	#[\Override]
 	public function rmdir(string $path): bool {
-		$this->checkDescendants($this, $path);
+		$lockedIds = array_map(
+			fn (array $entry): int => $entry['lock']->getFileId(),
+			$this->checkDescendants($this, $path)
+		);
 		$this->checkPermissions($path, Constants::PERMISSION_DELETE);
-
-		$folderId = $this->getCache()->getId($path);
-		$lockedIds = $folderId > 0
-			? array_map(fn (array $entry): int => $entry['lock']->getFileId(), $this->lockService->getLocksBelow($folderId))
-			: [];
 
 		$result = parent::rmdir($path);
 		if ($result && $lockedIds !== []) {

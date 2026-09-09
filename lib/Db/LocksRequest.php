@@ -230,7 +230,8 @@ class LocksRequest {
 		$prefix = ($folder['path'] === null || $folder['path'] === '') ? '' : $folder['path'] . '/';
 
 		$qb = $this->connection->getQueryBuilder();
-		$qb->select('l.id', 'l.user_id', 'l.file_id', 'l.token', 'l.creation', 'l.type', 'l.ttl', 'l.owner', 'l.scope', 'l.expires_at', 'f.path')
+		$qb->select(...array_map(static fn (string $column): string => 'l.' . $column, self::COLUMNS))
+			->addSelect('f.path')
 			->from(self::TABLE_LOCKS, 'l')
 			->innerJoin('l', 'filecache', 'f', $qb->expr()->eq('l.file_id', 'f.fileid'))
 			->where($qb->expr()->eq('f.storage', $qb->createNamedParameter((int)$folder['storage'], IQueryBuilder::PARAM_INT)));
