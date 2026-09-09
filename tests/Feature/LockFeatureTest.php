@@ -11,6 +11,7 @@ use OCA\DAV\Connector\Sabre\File as DavFile;
 use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\ConfigLexicon;
 use OCA\FilesLock\DAV\LockPlugin;
+use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\LockService;
 use OCP\AppFramework\Utility\ITimeFactory;
@@ -24,6 +25,7 @@ use OCP\IUserManager;
 use OCP\Lock\ManuallyLockedException;
 use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\MockObject\MockObject;
 use Sabre\DAV\Locks\LockInfo;
@@ -187,6 +189,80 @@ class LockFeatureTest extends TestCase {
 
 		self::assertNotEquals($oldRootEtag, $newRootEtag);
 		self::assertNotEquals($oldEtag, $file->getEtag());
+	}
+
+	/**
+	 * Every way a lock can be dropped for having expired.
+	 *
+	 * @return array<string, list<\Closure(LockService, int): void>>
+	 */
+	public static function expiryTriggers(): array {
+		return [
+			'the cleanup job' => [static function (LockService $service, int $fileId): void {
+				$service->removeLocks($service->getDeprecatedLocks());
+			}],
+			'a single read' => [static function (LockService $service, int $fileId): void {
+				try {
+					$service->getLockFromFileId($fileId);
+				} catch (LockNotFoundException) {
+				}
+			}],
+			'the bulk read behind a directory PROPFIND' => [static function (LockService $service, int $fileId): void {
+				$service->getLockForNodeIds([$fileId]);
+			}],
+		];
+	}
+
+	/**
+	 * A lock that expires has to move the etag the way an explicit unlock does.
+	 * Sync clients only re-read a file's lock properties when its etag changed,
+	 * so without this the desktop keeps showing an expired lock and keeps the
+	 * local file read-only until someone locks and unlocks it by hand.
+	 *
+	 * @param \Closure(LockService, int): void $expire
+	 */
+	#[DataProvider('expiryTriggers')]
+	public function testExpiredLockPropagatesEtag(\Closure $expire): void {
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, 30);
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('etag_test', 'etag_test');
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->get('etag_test');
+		$fileId = $file->getId();
+		$lockedEtag = $file->getEtag();
+		$lockedRootEtag = $this->loginAndGetUserFolder(self::TEST_USER1)->getEtag();
+
+		$this->toTheFuture(30 * 60 + 1);
+		$service = \OCP\Server::get(LockService::class);
+		$service->clearCache();
+		$expire($service, $fileId);
+
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->get('etag_test');
+		$newRootEtag = $this->loginAndGetUserFolder(self::TEST_USER1)->getEtag();
+
+		self::assertNotEquals($lockedEtag, $file->getEtag(), 'the file etag must change when the lock expires');
+		self::assertNotEquals($lockedRootEtag, $newRootEtag, 'and the change must propagate up the tree');
+	}
+
+	/**
+	 * An app lock is owned by an app id, not by an account, so the file cannot be
+	 * resolved through an owner's folder and has to come from the mount cache.
+	 */
+	public function testExpiredAppLockPropagatesEtag(): void {
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, 30);
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->newFile('etag_test', 'etag_test');
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_APP, 'collaborative_app'));
+
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->get('etag_test');
+		$lockedEtag = $file->getEtag();
+
+		$this->toTheFuture(30 * 60 + 1);
+		$service = \OCP\Server::get(LockService::class);
+		$service->clearCache();
+		$service->removeLocks($service->getDeprecatedLocks());
+
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->get('etag_test');
+		self::assertNotEquals($lockedEtag, $file->getEtag(), 'an app owned lock has no account to resolve through');
 	}
 
 	public function testUnlockEtagShare(): void {
