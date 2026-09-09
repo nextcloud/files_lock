@@ -17,6 +17,7 @@ use OCA\FilesLock\Model\FileLock;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
+use OCP\IDBConnection;
 use OCP\IUserManager;
 use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
@@ -48,6 +49,45 @@ class AcquisitionTest extends LockTestCase {
 		} catch (LockConflictException) {
 		}
 		self::assertSame(1, $this->lockRowCount($file->getId()));
+	}
+
+	/**
+	 * The token has a unique index of its own, so an insert can be refused over a
+	 * token another file already holds. That is not a conflict on this file: the
+	 * acquisition takes a fresh token and completes.
+	 */
+	public function testTokenCollisionTakesAFreshToken(): void {
+		$folder = $this->loginAndGetUserFolder(self::USER1);
+		$taken = $folder->newFile('token-taken.txt', 'AAA');
+		$free = $folder->newFile('token-free.txt', 'AAA');
+
+		$first = $this->lockService()->acquire(new LockContext($taken, ILock::TYPE_TOKEN, self::USER1), null, 'files_lock/collide');
+		self::assertSame('files_lock/collide', $first->getToken(), 'without this the second acquisition never collides');
+
+		$second = $this->lockService()->acquire(new LockContext($free, ILock::TYPE_TOKEN, self::USER1), null, 'files_lock/collide');
+
+		self::assertNotSame('files_lock/collide', $second->getToken(), 'the colliding token must be replaced');
+		self::assertStringStartsWith('files_lock/', $second->getToken());
+		self::assertSame(1, $this->lockRowCount($free->getId()));
+		self::assertSame('files_lock/collide', $this->storedLock($taken->getId())?->getToken(), 'the first lock keeps its token');
+	}
+
+	/**
+	 * The scope belongs to the row from the start. Rows written before it was
+	 * stored on insert hold 0, which is not a valid scope, and read back as
+	 * exclusive like every other lock.
+	 */
+	public function testScopeIsWrittenOnInsertAndLegacyRowsReadAsExclusive(): void {
+		$file = $this->loginAndGetUserFolder(self::USER1)->newFile('scope.txt', 'AAA');
+		$this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::USER1));
+
+		$connection = \OCP\Server::get(IDBConnection::class);
+		$stored = (int)$connection->executeQuery('SELECT `scope` FROM `*PREFIX*files_lock` WHERE `file_id` = ?', [$file->getId()])->fetchOne();
+		self::assertSame(ILock::LOCK_EXCLUSIVE, $stored, 'read raw, because reading it back through the model would coerce it');
+
+		$connection->executeStatement('UPDATE `*PREFIX*files_lock` SET `scope` = 0 WHERE `file_id` = ?', [$file->getId()]);
+
+		self::assertSame(ILock::LOCK_EXCLUSIVE, $this->storedLock($file->getId())?->getScope(), 'a row predating the stored scope reads back as exclusive');
 	}
 
 	/**

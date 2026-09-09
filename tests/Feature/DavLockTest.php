@@ -327,6 +327,14 @@ class DavLockTest extends LockTestCase {
 		self::assertSame(ILock::TYPE_TOKEN, $this->storedLock($file->getId())?->getType());
 		self::assertSame(423, $this->request(self::USER2, 'UNLOCK', '/xuser.txt', null, ['X-User-Lock' => '1', 'X-User-Lock-Type' => '2'])->getStatus());
 		self::assertSame(200, $this->request(self::USER1, 'UNLOCK', '/xuser.txt', null, ['X-User-Lock' => '1', 'X-User-Lock-Type' => '2'])->getStatus());
+
+		// The desktop client always takes the lock as a user lock but releases it
+		// with whatever type its own journal recorded, so the two disagree as soon
+		// as that record goes stale. Asserted through the recipient, who does not
+		// own the file, because the file owner is let through before any of this.
+		self::assertSame(200, $this->request(self::USER2, 'LOCK', '/xuser.txt', null, ['X-User-Lock' => '1', 'X-User-Lock-Type' => '0'])->getStatus());
+		self::assertSame(200, $this->request(self::USER2, 'UNLOCK', '/xuser.txt', null, ['X-User-Lock' => '1', 'X-User-Lock-Type' => '2'])->getStatus());
+		self::assertSame(0, $this->lockRowCount($file->getId()), 'a lock the holder asked to release must not survive');
 	}
 
 	public function testAncestorOperationsAreRefusedBeforeMutation(): void {
