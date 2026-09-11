@@ -1,5 +1,12 @@
 # Changelog
 
+## 29.0.4
+
+### Fixed
+
+- Fix/lock deletion by @salmart-dev [#1292](https://github.com/nextcloud/files_lock/pull/1292)
+- fix(DAV): Fix getFileFromAbsoluteUri by @provokateurin [#1012](https://github.com/nextcloud/files_lock/pull/1012)
+
 ## 29.0.3
 
 ### Fixed
