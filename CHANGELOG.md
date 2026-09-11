@@ -4,6 +4,12 @@
 -->
 # Changelog
 
+## 30.0.5
+
+### Fixed
+
+- [stable30] Fix/lock deletion by @salmart-dev [#1293](https://github.com/nextcloud/files_lock/pull/1293)
+
 ## 30.0.4
 
 ### Fixed
