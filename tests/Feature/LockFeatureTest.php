@@ -45,6 +45,7 @@ class LockFeatureTest extends TestCase {
 
 	private LockManager $lockManager;
 	private IRootFolder $rootFolder;
+	private ITimeFactory $timeFactory;
 	private ?int $time = null;
 
 	public static function setUpBeforeClass(): void {
@@ -60,15 +61,7 @@ class LockFeatureTest extends TestCase {
 		$this->time = null;
 		$this->lockManager = \OC::$server->get(ILockManager::class);
 		$this->rootFolder = \OC::$server->get(IRootFolder::class);
-		$this->timeFactory = $this->createMock(ITimeFactory::class);
-		$this->timeFactory->expects(self::any())
-			->method('getTime')
-			->willReturnCallback(function () {
-				if ($this->time) {
-					return $this->time;
-				}
-				return time();
-			});
+		$this->timeFactory = new TestTimeFactory(fn () => $this->time);
 		$folder = $this->loginAndGetUserFolder(self::TEST_USER1);
 		$folder->delete('testfile');
 		$folder->delete('testfile2');
@@ -401,7 +394,6 @@ class LockFeatureTest extends TestCase {
 	}
 
 	public function tearDown(): void {
-		parent::tearDown();
 		$folder = $this->rootFolder->getUserFolder(self::TEST_USER1);
 		$folder->delete('testfile');
 		$folder->delete('etag_test');
@@ -409,5 +401,18 @@ class LockFeatureTest extends TestCase {
 		$folder->delete('testfile3');
 		$folder->delete('testfile-infinite');
 		$folder->delete('testfile_public');
+		parent::tearDown();
+	}
+}
+
+class TestTimeFactory extends \OC\AppFramework\Utility\TimeFactory {
+	public function __construct(
+		private \Closure $overrideTime,
+	) {
+		parent::__construct();
+	}
+
+	public function getTime(): int {
+		return ($this->overrideTime)() ?: time();
 	}
 }
