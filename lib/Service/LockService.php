@@ -120,7 +120,7 @@ class LockService {
 		$expiredLocks = [];
 		foreach ($newLocks as $lock) {
 			if ($lock->getETA() === 0) {
-				$expiredLocks[] = $lock->getId();
+				$expiredLocks[] = $lock;
 				$locks[$lock->getFileId()] = false;
 				$this->lockCache[$lock->getFileId()] = false;
 			} else {
@@ -129,9 +129,7 @@ class LockService {
 			}
 		}
 
-		if (count($expiredLocks) > 0) {
-			$this->locksRequest->removeIds($expiredLocks);
-		}
+		$this->removeLocks($expiredLocks);
 
 		return $locks;
 	}
@@ -163,7 +161,7 @@ class LockService {
 			$this->logger->notice('locking file', ['fileLock' => $lock]);
 			$this->injectMetadata($lock);
 			$this->locksRequest->save($lock);
-			$this->propagateEtag($lockScope);
+			$this->propagateEtag($lockScope->getNode());
 			return $lock;
 		}
 	}
@@ -194,7 +192,7 @@ class LockService {
 
 		$this->locksRequest->delete($known);
 		$this->lockCache[$lock->getNode()->getId()] = false;
-		$this->propagateEtag($lock);
+		$this->propagateEtag($lock->getNode());
 		$this->injectMetadata($known);
 		return $known;
 	}
@@ -278,7 +276,6 @@ class LockService {
 			$lockType,
 			$userId,
 		);
-		$this->propagateEtag($lock);
 		return $this->unlock($lock, $force);
 	}
 
@@ -309,7 +306,7 @@ class LockService {
 	public function getLockFromFileId(int $fileId): FileLock {
 		$lock = $this->locksRequest->getFromFileId($fileId);
 		if ($lock->getETA() === 0) {
-			$this->locksRequest->delete($lock);
+			$this->removeLocks([$lock]);
 			throw new LockNotFoundException('lock is ignored and deleted as being too old.');
 		}
 
@@ -377,6 +374,9 @@ class LockService {
 		$this->logger->notice('removing locks', ['ids' => $ids]);
 
 		$this->locksRequest->removeIds($ids);
+		foreach ($locks as $lock) {
+			$this->propagateEtagForLock($lock);
+		}
 	}
 
 	public function getRemoteLockFromDav(int $nodeId, ?Node $node = null): ?FileLock {
@@ -436,8 +436,31 @@ class LockService {
 		}
 	}
 
-	private function propagateEtag(LockContext $lockContext): void {
-		$node = $lockContext->getNode();
+	/**
+	 * A lock that goes away on its own has to move the etag the way an explicit
+	 * unlock does, because sync clients only re-read the lock properties of a
+	 * file whose etag changed.
+	 *
+	 * Runs without a session, for the cleanup job: the owner's folder gives a
+	 * scoped lookup for a user lock, and the root falls back on the mount cache
+	 * for an app owned lock, whose owner is an app id rather than an account.
+	 */
+	private function propagateEtagForLock(FileLock $lock): void {
+		try {
+			$node = null;
+			if ($this->userManager->userExists($lock->getOwner())) {
+				$node = $this->rootFolder->getUserFolder($lock->getOwner())->getFirstNodeById($lock->getFileId());
+			}
+			$node ??= $this->rootFolder->getFirstNodeById($lock->getFileId());
+			if ($node !== null) {
+				$this->propagateEtag($node);
+			}
+		} catch (Exception $e) {
+			$this->logger->warning('Failed to propagate the etag of an expired lock', ['exception' => $e]);
+		}
+	}
+
+	private function propagateEtag(Node $node): void {
 		$node->getStorage()->getCache()->update($node->getId(), [
 			'etag' => uniqid(),
 		]);
