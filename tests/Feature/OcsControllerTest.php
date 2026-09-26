@@ -48,6 +48,10 @@ class OcsControllerTest extends LockTestCase {
 		self::assertSame(self::USER1, $body['ocs']['data']['userId']);
 		self::assertSame(ILock::TYPE_USER, $body['ocs']['data']['type']);
 		self::assertStringStartsWith('files_lock/', $body['ocs']['data']['token']);
+		self::assertSame(-1, $body['ocs']['data']['eta']);
+
+		[$status, $body] = $this->render($this->controller()->locking((string)$file->getId()));
+		self::assertSame(Http::STATUS_OK, $status, 'locking again refreshes');
 
 		[$status] = $this->render($this->controller()->unlocking((string)$file->getId()));
 		self::assertSame(Http::STATUS_OK, $status);
@@ -70,15 +74,70 @@ class OcsControllerTest extends LockTestCase {
 				self::assertSame(self::USER1, $body['ocs']['data']['userId']);
 				self::assertSame($file->getId(), $body['ocs']['data']['fileId']);
 				self::assertStringContainsString('locked by', $body['ocs']['meta']['message']);
+				self::assertArrayNotHasKey('token', $body['ocs']['data'], 'the conflict payload must not hand out the lock token');
 			} else {
 				self::assertStringContainsString('<userId>' . self::USER1 . '</userId>', $body);
 				self::assertStringContainsString('<statuscode>423</statuscode>', $body);
+				self::assertStringNotContainsString('<token>', $body, 'the conflict payload must not hand out the lock token');
 			}
 		}
 
 		[$status, $body] = $this->render($this->controller()->unlocking((string)$file->getId()));
 		self::assertSame(Http::STATUS_LOCKED, $status, 'a recipient may not release the owner lock');
 		self::assertSame(self::USER1, $body['ocs']['data']['userId']);
+		self::assertArrayNotHasKey('token', $body['ocs']['data'], 'nor may the failed unlock hand it out');
 		self::assertSame(1, $this->lockRowCount($file->getId()));
+	}
+
+	public function testFileOwnerReleasesRecipientLock(): void {
+		$file = $this->sharedFile('override.txt');
+		$this->loginAndGetUserFolder(self::USER2);
+		[$status] = $this->render($this->controller()->locking((string)$file->getId()));
+		self::assertSame(Http::STATUS_OK, $status);
+
+		$this->loginAndGetUserFolder(self::USER1);
+		[$status] = $this->render($this->controller()->unlocking((string)$file->getId()));
+		self::assertSame(Http::STATUS_OK, $status);
+		self::assertSame(0, $this->lockRowCount($file->getId()));
+	}
+
+	public function testLockTypeIsHonouredOnUnlock(): void {
+		$file = $this->sharedFile('typed.txt');
+		$this->loginAndGetUserFolder(self::USER2);
+		[$status, $body] = $this->render($this->controller()->locking((string)$file->getId(), ILock::TYPE_APP));
+		self::assertSame(Http::STATUS_OK, $status);
+		self::assertSame(ILock::TYPE_APP, $body['ocs']['data']['type']);
+		self::assertSame(self::USER2, $body['ocs']['data']['userId'], 'the session user is the recorded owner');
+
+		[$status] = $this->render($this->controller()->unlocking((string)$file->getId(), ILock::TYPE_APP));
+		self::assertSame(Http::STATUS_OK, $status, 'the recorded owner releases through the same path');
+
+		[$status, $body] = $this->render($this->controller()->locking((string)$file->getId(), ILock::TYPE_TOKEN));
+		self::assertSame(Http::STATUS_OK, $status);
+		self::assertSame(ILock::TYPE_TOKEN, $body['ocs']['data']['type']);
+		[$status] = $this->render($this->controller()->unlocking((string)$file->getId()));
+		self::assertSame(Http::STATUS_OK, $status, 'the recorded owner releases a token lock without the token');
+	}
+
+	public function testClientErrors(): void {
+		$folder = $this->loginAndGetUserFolder(self::USER1)->newFolder('folder');
+		[$status] = $this->render($this->controller()->locking('999999999'));
+		self::assertSame(Http::STATUS_NOT_FOUND, $status);
+		[$status] = $this->render($this->controller()->unlocking('999999999'));
+		self::assertSame(Http::STATUS_NOT_FOUND, $status);
+		[$status] = $this->render($this->controller()->locking((string)$folder->getId()));
+		self::assertSame(Http::STATUS_BAD_REQUEST, $status);
+		[$status] = $this->render($this->controller()->locking((string)$folder->getId(), 99));
+		self::assertSame(Http::STATUS_BAD_REQUEST, $status);
+		[$status] = $this->render($this->controller()->locking((string)$folder->getId(), -1));
+		self::assertSame(Http::STATUS_BAD_REQUEST, $status);
+		[$status] = $this->render($this->controller()->locking('abc'));
+		self::assertSame(Http::STATUS_BAD_REQUEST, $status);
+
+		$file = $this->sharedFile('readonly.txt', 1);
+		$this->loginAndGetUserFolder(self::USER2);
+		[$status, $body] = $this->render($this->controller()->locking((string)$file->getId()));
+		self::assertSame(Http::STATUS_FORBIDDEN, $status);
+		self::assertSame(0, $this->lockRowCount($file->getId()));
 	}
 }

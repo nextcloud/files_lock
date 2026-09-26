@@ -26,6 +26,7 @@ use OCP\Console\IOutput;
 use OCP\Files\InvalidPathException;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
+use OCP\Files\Lock\OwnerLockedException;
 use OCP\Files\NotFoundException;
 use OCP\IUserManager;
 use OCP\User\Exceptions\UserNotFoundException;
@@ -42,11 +43,10 @@ use Symfony\Component\Console\Exception\InvalidArgumentException;
   <comment>occ files:lock --status &lt;file_id&gt;</comment>
 
 <info>Forcibly unlock a file:</info>
-  <comment>occ files:lock --unlock &lt;file_id&gt; [&lt;user_id&gt;]</comment>
+  <comment>occ files:lock --unlock &lt;file_id&gt;</comment>
 
-For app-owned locks, provide a user ID that has access to the file. This can be
-needed for files stored in Groupfolders:
-  <comment>occ files:lock --unlock &lt;file_id&gt; &lt;user_id&gt;</comment>
+A forced unlock removes the lock of any type regardless of who holds it and
+does not require the lock owner to still have access to the file.
 
 <info>Uninstall the app and delete all locks:</info>
   <comment>occ files:lock --uninstall</comment>
@@ -63,9 +63,6 @@ class Lock {
 	}
 
 	/**
-	 * @throws NotFoundException
-	 * @throws UnauthorizedUnlockException
-	 * @throws NotFileException
 	 * @throws InvalidPathException
 	 */
 	public function __invoke(
@@ -73,7 +70,7 @@ class Lock {
 		IInput $input,
 		#[Argument(description: 'ID of the file to lock, unlock, or inspect', name: 'file_id')]
 		?string $fileId = null,
-		#[Argument(description: 'Lock owner when locking; user with file access when unlocking an app-owned lock', name: 'user_id')]
+		#[Argument(description: 'Lock owner when locking', name: 'user_id')]
 		?string $userId = null,
 		#[Option(description: 'Fully uninstall the app from your Nextcloud')]
 		bool $uninstall = false,
@@ -98,14 +95,26 @@ class Lock {
 		}
 
 		if ($unlock === true) {
-			return $this->unlockFile($output, $userId, $fileId);
+			return $this->unlockFile($output, $fileId);
 		}
 
 		if ($userId === null || $userId === '') {
 			throw new InvalidArgumentException('Not enough arguments (missing: "user_id")');
 		}
 
-		return $this->lockFile($output, $fileId, $userId);
+		try {
+			return $this->lockFile($output, $fileId, $userId);
+		} catch (OwnerLockedException $e) {
+			$output->writeln('<error>File #' . $fileId . ' is already locked by ' . $e->getLock()->getOwner() . '</error>');
+		} catch (NotFileException) {
+			$output->writeln('<error>#' . $fileId . ' is not a file; only files can be locked</error>');
+		} catch (UnauthorizedUnlockException|UserNotFoundException $e) {
+			$output->writeln('<error>' . $e->getMessage() . '</error>');
+		} catch (NotFoundException) {
+			$output->writeln('<error>File #' . $fileId . ' not found for user ' . $userId . '</error>');
+		}
+
+		return ExitCode::Failure;
 	}
 
 	private function getStatus(IOutput $output, int $fileId): ExitCode {
@@ -144,18 +153,15 @@ class Lock {
 		$file = $this->fileService->getFileFromId($user->getUID(), $fileId);
 
 		$output->writeln('<info>locking ' . $file->getName() . ' to ' . $userId . '</info>');
-		$this->lockService->lock(new LockContext(
+		$this->lockService->acquire(new LockContext(
 			$file, ILock::TYPE_USER, $userId
 		));
 		return ExitCode::Success;
 	}
 
-	/**
-	 * @throws UnauthorizedUnlockException
-	 */
-	private function unlockFile(IOutput $output, ?string $userId, int $fileId): ExitCode {
+	private function unlockFile(IOutput $output, int $fileId): ExitCode {
 		try {
-			$this->lockService->unlockFile($fileId, $userId, true);
+			$this->lockService->forceUnlock($fileId);
 			$output->writeln('<info>Unlocked file #' . $fileId . '</info>');
 		} catch (LockNotFoundException) {
 			$output->writeln('<comment>File #' . $fileId . ' was already unlocked</comment>');
