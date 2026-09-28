@@ -48,9 +48,10 @@ class Version1000Date20220201111525 extends SimpleMigrationStep {
 
 		if (!$table->hasColumn('ttl')) {
 			$table->addColumn(
-				'ttl', Types::INTEGER,
+				'ttl', Types::BIGINT,
 				[
 					'default' => 0,
+					'length' => 20,
 				]
 			);
 			$hasSchemaChanges = true;
