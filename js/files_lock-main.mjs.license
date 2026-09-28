@@ -45,7 +45,7 @@ This file is generated from multiple sources. Included packages:
 	- version: 3.4.1
 	- license: GPL-3.0-or-later
 - @nextcloud/vue
-	- version: 9.11.0
+	- version: 9.12.0
 	- license: AGPL-3.0-or-later
 - @vue/reactivity
 	- version: 3.5.42
@@ -69,7 +69,7 @@ This file is generated from multiple sources. Included packages:
 	- version: 1.18.1
 	- license: MIT
 - dompurify
-	- version: 3.4.14
+	- version: 3.4.15
 	- license: (MPL-2.0 OR Apache-2.0)
 - escape-html
 	- version: 1.0.3
@@ -93,5 +93,5 @@ This file is generated from multiple sources. Included packages:
 	- version: 0.28.0
 	- license: MIT
 - vue-router
-	- version: 5.2.0
+	- version: 5.3.1
 	- license: MIT
