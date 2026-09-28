@@ -10,11 +10,11 @@ declare(strict_types=1);
 namespace OCA\FilesLock\Tests\Unit\Migration;
 
 use Doctrine\DBAL\Schema\Table as DBALTable;
+use OC\DB\Schema\Table;
 use OCA\FilesLock\Migration\Version0001Date20191105000001;
 use OCA\FilesLock\Migration\Version1000Date20220201111525;
 use OCA\FilesLock\Migration\Version1000Date20220430180808;
 use OCA\FilesLock\Migration\Version35000Date20260928000000;
-use OC\DB\Schema\Table;
 use OCP\DB\ISchemaWrapper;
 use OCP\DB\Types;
 use OCP\IDBConnection;

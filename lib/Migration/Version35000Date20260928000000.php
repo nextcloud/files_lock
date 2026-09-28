@@ -13,6 +13,7 @@ use OCP\Migration\BigIntMigration;
 
 class Version35000Date20260928000000 extends BigIntMigration {
 
+	#[\Override]
 	protected function getColumnsByTable(): array {
 		return [
 			'files_lock' => ['id', 'file_id', 'ttl'],
