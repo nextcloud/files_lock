@@ -23,7 +23,10 @@ use PHPUnit\Framework\TestCase;
 
 class Version35000Date20260928000000Test extends TestCase {
 
-	public function testMigrationPreservesSchemaAndCanRunAgain(): void {
+	/**
+	 * @dataProvider schemaProvider
+	 */
+	public function testMigrationPreservesSchemaAndCanRunAgain(bool $legacySchema): void {
 		$table = new Table(new DBALTable('files_lock'));
 		$schema = $this->createMock(ISchemaWrapper::class);
 		$schema->method('hasTable')->with('files_lock')->willReturn(false);
@@ -35,6 +38,15 @@ class Version35000Date20260928000000Test extends TestCase {
 		(new Version0001Date20191105000001($this->createMock(IDBConnection::class)))->changeSchema($output, $schemaClosure, []);
 		(new Version1000Date20220201111525())->changeSchema($output, $schemaClosure, []);
 		(new Version1000Date20220430180808())->changeSchema($output, $schemaClosure, []);
+		foreach (['id', 'file_id', 'ttl'] as $name) {
+			$column = $table->getColumn($name);
+			self::assertSame(Types::BIGINT, $column->getType()->getName());
+			self::assertSame(20, $column->getLength());
+			if ($legacySchema) {
+				$column->setType(Types::INTEGER);
+				$column->setLength($name === 'ttl' ? null : 11);
+			}
+		}
 		$before = clone $table->getWrappedTable();
 
 		$migration = new Version35000Date20260928000000();
@@ -51,5 +63,12 @@ class Version35000Date20260928000000Test extends TestCase {
 			}
 			self::assertEquals($before->getIndexes(), $table->getWrappedTable()->getIndexes());
 		}
+	}
+
+	public static function schemaProvider(): array {
+		return [
+			'fresh install' => [false],
+			'legacy integer columns' => [true],
+		];
 	}
 }
