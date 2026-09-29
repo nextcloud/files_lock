@@ -12,6 +12,7 @@ namespace OCA\FilesLock\Db;
 use OC;
 use OC\DB\Connection;
 use OC\DB\SchemaWrapper;
+use OCA\FilesLock\Cron\Unlock;
 
 /**
  * Class CoreRequestBuilder
@@ -53,7 +54,7 @@ class CoreRequestBuilder {
 		$dbConn = OC::$server->get(Connection::class);
 		$schema = new SchemaWrapper($dbConn);
 
-		foreach (array_keys(self::$tables) as $table) {
+		foreach (self::$tables as $table) {
 			if ($schema->hasTable($table)) {
 				$schema->dropTable($table);
 			}
@@ -68,8 +69,7 @@ class CoreRequestBuilder {
 	public function removeFromMigrations() {
 		$qb = $this->getQueryBuilder();
 		$qb->delete('migrations');
-		$qb->where($qb->exprLimitToDBField('app', 'files_lock', true, true));
-
+		$qb->where($qb->exprLimit('app', 'files_lock'));
 		$qb->executeStatement();
 	}
 
@@ -79,7 +79,7 @@ class CoreRequestBuilder {
 	public function removeFromJobs() {
 		$qb = $this->getQueryBuilder();
 		$qb->delete('jobs');
-		$qb->where($qb->exprLimitToDBField('class', 'OCA\FilesLock\Cron\Unlock', true, true));
+		$qb->where($qb->exprLimit('class', Unlock::class));
 		$qb->executeStatement();
 	}
 }
