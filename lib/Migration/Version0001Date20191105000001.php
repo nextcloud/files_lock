@@ -37,12 +37,12 @@ class Version0001Date20191105000001 extends SimpleMigrationStep {
 		$table = $schema->createTable('files_lock');
 
 		$table->addColumn(
-			'id', 'integer',
+			'id', 'bigint',
 			[
 				'autoincrement' => true,
 				'unsigned' => true,
 				'notnull' => true,
-				'length' => 11
+				'length' => 20
 			]
 		);
 		$table->addColumn(
@@ -53,11 +53,11 @@ class Version0001Date20191105000001 extends SimpleMigrationStep {
 			]
 		);
 		$table->addColumn(
-			'file_id', 'integer',
+			'file_id', 'bigint',
 			[
 				'notnull' => true,
 				'unsigned' => true,
-				'length' => 11,
+				'length' => 20,
 			]
 		);
 		$table->addColumn(
