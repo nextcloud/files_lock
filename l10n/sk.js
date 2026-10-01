@@ -10,7 +10,7 @@ OC.L10N.register(
     "iOS client" : "iOS klient",
     "Android client" : "Android klient",
     "Temporary files lock" : "Dočasný zámok súborov",
-    "Temporary lock your files" : "Dočasne zamykajte svoje súbory",
+    "Temporary lock your files" : "Dočasne zamknite svoje súbory",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Umožňuje vašim používateľom dočasne zamykať svoje súbory a vyhýbať sa tak konfliktom pri práci na zdieľaných súboroch.",
     "Manually locked by {user}" : "Manuálne zamknuté od {user}",
     "Locked by editing online in {app}" : "Uzamknuté úpravou online v {app}",
