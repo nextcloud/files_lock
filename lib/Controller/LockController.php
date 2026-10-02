@@ -14,6 +14,7 @@ use OC\AppFramework\OCS\V1Response;
 use OC\AppFramework\OCS\V2Response;
 use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
+use OCA\FilesLock\Exceptions\NotFileException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\FileService;
@@ -26,6 +27,8 @@ use OCP\AppFramework\OCSController;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
+use OCP\Files\NotFoundException;
+use OCP\Files\NotPermittedException;
 use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IUserSession;
@@ -66,6 +69,13 @@ class LockController extends OCSController {
 	#[NoAdminRequired]
 	#[NoSubAdminRequired]
 	public function locking(string $fileId, int $lockType = ILock::TYPE_USER): DataResponse {
+		if (!in_array($lockType, Application::SUPPORTED_LOCK_TYPES, true)) {
+			return $this->fail(new \InvalidArgumentException('Unsupported lock type'), [], Http::STATUS_BAD_REQUEST, false);
+		}
+		if (!is_numeric($fileId)) {
+			return $this->fail(new \InvalidArgumentException('Invalid file id'), [], Http::STATUS_BAD_REQUEST, false);
+		}
+
 		try {
 			$user = $this->userSession->getUser();
 			if ($user === null) {
@@ -73,13 +83,19 @@ class LockController extends OCSController {
 			}
 
 			$file = $this->fileService->getFileFromId($user->getUID(), (int)$fileId);
-			$lock = $this->lockService->lock(new LockContext(
+			$lock = $this->lockService->acquire(new LockContext(
 				$file, $lockType, $user->getUID()
 			));
 
 			return new DataResponse($lock, Http::STATUS_OK);
 		} catch (OwnerLockedException $e) {
 			return new DataResponse($e->getLock(), Http::STATUS_LOCKED);
+		} catch (NotFoundException $e) {
+			return $this->fail($e, [], Http::STATUS_NOT_FOUND, false);
+		} catch (NotFileException $e) {
+			return $this->fail($e, [], Http::STATUS_BAD_REQUEST, false);
+		} catch (UnauthorizedUnlockException|NotPermittedException $e) {
+			return $this->fail($e, [], Http::STATUS_FORBIDDEN, false);
 		} catch (Exception $e) {
 			return $this->fail($e);
 		}
@@ -88,14 +104,20 @@ class LockController extends OCSController {
 	#[NoAdminRequired]
 	#[NoSubAdminRequired]
 	public function unlocking(string $fileId, int $lockType = ILock::TYPE_USER): DataResponse {
+		if (!in_array($lockType, Application::SUPPORTED_LOCK_TYPES, true)) {
+			return $this->fail(new \InvalidArgumentException('Unsupported lock type'), [], Http::STATUS_BAD_REQUEST, false);
+		}
+		if (!is_numeric($fileId)) {
+			return $this->fail(new \InvalidArgumentException('Invalid file id'), [], Http::STATUS_BAD_REQUEST, false);
+		}
+
 		try {
 			$user = $this->userSession->getUser();
 			if ($user === null) {
 				throw new \LogicException('User not logged in');
 			}
 
-			$this->lockService->enableUserOverride();
-			$this->lockService->unlockFile((int)$fileId, $user->getUID());
+			$this->lockService->unlockFile((int)$fileId, $user->getUID(), false, $lockType);
 
 			return new DataResponse();
 		} catch (LockNotFoundException) {
@@ -103,14 +125,15 @@ class LockController extends OCSController {
 			$response->setStatus(Http::STATUS_PRECONDITION_FAILED);
 			return $response;
 		} catch (UnauthorizedUnlockException) {
-			try {
-				$lock = $this->lockService->getLockFromFileId((int)$fileId);
-			} catch (LockNotFoundException) {
+			$lock = $this->lockService->getActiveLock((int)$fileId);
+			if ($lock === null) {
 				$response = new DataResponse();
 				$response->setStatus(Http::STATUS_PRECONDITION_FAILED);
 				return $response;
 			}
 			return new DataResponse($lock, Http::STATUS_LOCKED);
+		} catch (NotFoundException $e) {
+			return $this->fail($e, [], Http::STATUS_NOT_FOUND, false);
 		} catch (Exception $e) {
 			return $this->fail($e);
 		}
@@ -133,7 +156,13 @@ class LockController extends OCSController {
 		}
 
 		if ($containedData instanceof FileLock) {
-			$data->setData($containedData->jsonSerialize());
+			$payload = $containedData->jsonSerialize();
+			if ($data->getStatus() === Http::STATUS_LOCKED) {
+				// the token is the credential of a token lock and OCS never accepts
+				// one, so the caller that just lost the conflict has no use for it
+				unset($payload['token']);
+			}
+			$data->setData($payload);
 		}
 
 		if ($this->ocsVersion === 1) {
