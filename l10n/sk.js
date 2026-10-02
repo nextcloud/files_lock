@@ -14,7 +14,7 @@ OC.L10N.register(
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Umožňuje vašim používateľom dočasne zamykať svoje súbory a vyhýbať sa tak konfliktom pri práci na zdieľaných súboroch.",
     "Manually locked by {user}" : "Manuálne zamknuté od {user}",
     "Locked by editing online in {app}" : "Uzamknuté úpravou online v {app}",
-    "Automatically locked by {user}" : "Automaticky zamknuté od {user}",
+    "Automatically locked by {user}" : "Automaticky zamknuté používateľom {user}",
     "Unlock file" : "Odomknúť súbor",
     "Lock file" : "Zamknúť súbor",
     "files_lock" : "files_lock",
