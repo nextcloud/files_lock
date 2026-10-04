@@ -1,7 +1,7 @@
 OC.L10N.register(
     "files_lock",
     {
-    "File is currently locked by %s" : "Súbor je momentálne zamknutý od %s",
+    "File is currently locked by %s" : "Súbor je momentálne zamknutý používateľom %s",
     "File is not locked" : "Súbor nie je zamknutý",
     "File can only be locked with update permissions." : "Súbor možno zamknúť iba s oprávneniami na aktualizáciu.",
     "File can only be unlocked by providing a valid owner lock token" : "Súbor môže byť odomknutý iba poskytnutím správneho tokenu vlastníkom zámku",
