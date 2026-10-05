@@ -1,6 +1,9 @@
 OC.L10N.register(
     "files_lock",
     {
+    "File is currently locked by %s" : "Filen er låst af %s lige nu",
+    "File is not locked" : "Filen er ikke låst",
+    "File can only be locked with update permissions." : "Filen kan kun låses med rettighed til at opdatere.",
     "File can only be unlocked by providing a valid owner lock token" : "Filen kan kun låses op ved at angive et gyldigt ejerlåstoken",
     "File can only be unlocked by the owner of the lock" : "Filen kan kun låses op af ejeren af låsen",
     "Desktop client" : "Dekstopklient",
@@ -9,7 +12,15 @@ OC.L10N.register(
     "Temporary files lock" : "Midlertidig fillås",
     "Temporary lock your files" : "Lås dine filer midlertidigt",
     "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Tillad brugere midlertidigt at låse deres filer for at undgå konflikter mens de arbejder på delte filer",
+    "Manually locked by {user}" : "Låst manuelt af {user}",
+    "Locked by editing online in {app}" : "Låst, fordi den redigeres online i {app}",
+    "Automatically locked by {user}" : "Låst automatisk af {user}",
     "Unlock file" : "Lås filen",
-    "Lock file" : "Lås filen op"
+    "Lock file" : "Lås filen op",
+    "files_lock" : "files_lock",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Denne fil er låst automatisk af en klient. Hvis du fjerner låsen, kan det give en konflikt, når filen gemmes.",
+    "Keep lock" : "Behold lås",
+    "Force unlock" : "Gennemtving oplåsning",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "Giv dine brugere mulighed for midlertidigt at låse deres filer for at undgå konflikter, når de arbejder på delte filer.\n\nℹ️ Fra og med Nextcloud 34 følger appen med Nextcloud Hub og udgives derfor ikke længere via App Store."
 },
 "nplurals=2; plural=(n != 1);");
