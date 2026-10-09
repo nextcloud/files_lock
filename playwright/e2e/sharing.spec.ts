@@ -34,14 +34,14 @@ test('Share a file read only that cannot be locked by the recipient', async ({ p
 	expect(shareResponse.ok()).toBeTruthy()
 
 	// Check recipient cannot lock
-	await pageRecipient.goto('/apps/files')
+	await pageRecipient.goto('apps/files')
 	await pageRecipient.waitForURL(/apps\/files/)
 	const rowRecipient = await pageRecipient.getByRole('row', { name: filename })
 	await rowRecipient.getByRole('button', { name: 'Actions' }).click()
 	await expect(pageRecipient.getByRole('menuitem', { name: 'Lock file' })).not.toBeVisible()
 
 	// Check owner can still lock
-	await pageOwner.goto('/apps/files')
+	await pageOwner.goto('apps/files')
 	await pageOwner.waitForURL(/apps\/files/)
 	const rowOwner = await pageOwner.getByRole('row', { name: filename })
 	await rowOwner.getByRole('button', { name: 'Actions' }).click()
