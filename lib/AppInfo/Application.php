@@ -15,6 +15,9 @@ use OCA\FilesLock\ConfigLexicon;
 use OCA\FilesLock\Listeners\BeforeFileSystemSetupListener;
 use OCA\FilesLock\Listeners\LoadAdditionalScripts;
 use OCA\FilesLock\Listeners\PropfindPropertiesListener;
+use OCA\FilesLock\Listeners\ShareDeletedListener;
+use OCA\FilesLock\Listeners\UserChangedListener;
+use OCA\FilesLock\Listeners\UserDeletedListener;
 use OCA\FilesLock\LockProvider;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -23,6 +26,9 @@ use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\Files\Events\BeforeFileSystemSetupEvent;
 use OCP\Files\Events\BeforeRemotePropfindEvent;
 use OCP\Files\Lock\ILockManager;
+use OCP\Share\Events\ShareDeletedEvent;
+use OCP\User\Events\UserChangedEvent;
+use OCP\User\Events\UserDeletedEvent;
 
 class Application extends App implements IBootstrap {
 	public const APP_ID = 'files_lock';
@@ -54,6 +60,18 @@ class Application extends App implements IBootstrap {
 		$context->registerEventListener(
 			BeforeFileSystemSetupEvent::class,
 			BeforeFileSystemSetupListener::class
+		);
+		$context->registerEventListener(
+			UserChangedEvent::class,
+			UserChangedListener::class
+		);
+		$context->registerEventListener(
+			UserDeletedEvent::class,
+			UserDeletedListener::class
+		);
+		$context->registerEventListener(
+			ShareDeletedEvent::class,
+			ShareDeletedListener::class
 		);
 		$context->registerConfigLexicon(ConfigLexicon::class);
 	}
