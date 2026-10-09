@@ -72,6 +72,8 @@ The file owner can override existing locks through access paths that support use
 
 By default, files are locked indefinitely.
 
+Locks owned by a user are removed when the account is disabled or deleted, and when a share is removed and the user can no longer access the locked file. App-owned locks are not affected.
+
 When unlocking an app-owned lock, provide a user ID that has access to the file:
 
 `occ files:lock --unlock <fileId> <userId>`
