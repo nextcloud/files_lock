@@ -21,6 +21,7 @@ use OCA\FilesLock\Tools\Traits\TStringTools;
 use OCP\App\IAppManager;
 use OCP\Constants;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\Files\Folder;
 use OCP\Files\InvalidPathException;
 use OCP\Files\IRootFolder;
 use OCP\Files\Lock\ILock;
@@ -393,6 +394,31 @@ class LockService {
 		$lock->setToken(self::PREFIX . '/' . $this->uuid());
 	}
 
+	public function removeLocksOfUser(string $userId): void {
+		$userLocks = $this->locksRequest->getFromOwner($userId);
+		$this->removeLocks($userLocks);
+	}
+
+	public function removeInaccessibleLocksOfUser(string $userId, Node $node): void {
+		$userLocks = $this->locksRequest->getFromOwner($userId);
+		if ($userLocks === [] || !$this->userManager->userExists($userId)) {
+			return;
+		}
+
+		$userFolder = $this->rootFolder->getUserFolder($userId);
+		$inaccessibleLocks = [];
+		foreach ($userLocks as $lock) {
+			$fileId = $lock->getFileId();
+			$isInNode = $node->getId() === $fileId
+				|| ($node instanceof Folder && $node->getFirstNodeById($fileId) !== null);
+			if ($isInNode && $userFolder->getFirstNodeById($fileId) === null) {
+				$inaccessibleLocks[] = $lock;
+			}
+		}
+
+		$this->removeLocks($inaccessibleLocks);
+	}
+
 	/**
 	 * @param FileLock[] $locks
 	 */
@@ -410,6 +436,9 @@ class LockService {
 		$this->logger->notice('removing locks', ['ids' => $ids]);
 
 		$this->locksRequest->removeIds($ids);
+		foreach ($locks as $lock) {
+			$this->lockCache[$lock->getFileId()] = false;
+		}
 	}
 
 	public function getRemoteLockFromDav(int $nodeId, ?Node $node = null): ?FileLock {
