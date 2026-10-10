@@ -7,17 +7,16 @@
 
 namespace OCA\FilesLock\DAV;
 
-use OCA\DAV\Connector\Sabre\CachingTree;
 use OCA\DAV\Connector\Sabre\Directory;
 use OCA\DAV\Connector\Sabre\FakeLockerPlugin;
 use OCA\DAV\Connector\Sabre\File;
 use OCA\DAV\Connector\Sabre\FilesPlugin;
-use OCA\DAV\Connector\Sabre\ObjectTree;
+use OCA\DAV\Connector\Sabre\Node as SabreNode;
 use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
+use OCA\FilesLock\Exceptions\NotFileException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
-use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\AppFramework\Http;
 use OCP\Files\Lock\ILock;
@@ -25,7 +24,9 @@ use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
 use OCP\Files\Node;
 use OCP\IUserSession;
-use Sabre\DAV\Exception\LockTokenMatchesRequestUri;
+use Sabre\DAV\Exception\Forbidden;
+use Sabre\DAV\Exception\Locked;
+use Sabre\DAV\Exception\NotFound;
 use Sabre\DAV\INode;
 use Sabre\DAV\Locks\Plugin as SabreLockPlugin;
 use Sabre\DAV\PropFind;
@@ -34,9 +35,10 @@ use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 
 class LockPlugin extends SabreLockPlugin {
+	private const string TOKEN_PREFIX = 'opaquelocktoken:';
+
 	public function __construct(
 		private readonly LockService $lockService,
-		private readonly FileService $fileService,
 		private readonly IUserSession $userSession,
 	) {
 	}
@@ -51,19 +53,26 @@ class LockPlugin extends SabreLockPlugin {
 			$server->removeListener('validateTokens', [$fakePlugin, 'validateTokens']);
 		}
 
-		$absolute = false;
-		switch ($server->tree::class) {
-			case ObjectTree::class:
-				$absolute = false;
-				break;
-
-			case CachingTree::class:
-				$absolute = true;
-				break;
-		}
-		$this->locksBackend = new LockBackend($this->fileService, $this->lockService, $absolute, $this->userSession);
+		$this->locksBackend = new LockBackend(
+			$this->lockService,
+			fn (string $uri): Node => $this->resolveNode($uri),
+			$this->userSession,
+		);
 		$server->on('propFind', $this->customProperties(...));
 		parent::initialize($server);
+	}
+
+	/**
+	 * Resolve a request uri through the DAV tree, whichever tree the server uses.
+	 *
+	 * @throws NotFound
+	 */
+	private function resolveNode(string $uri): Node {
+		$node = $this->server->tree->getNodeForPath($uri);
+		if (!$node instanceof SabreNode) {
+			throw new NotFound('Resource is not a file system node');
+		}
+		return $node->getNode();
 	}
 
 	private function cacheDirectory(Directory $directory): void {
@@ -80,10 +89,10 @@ class LockPlugin extends SabreLockPlugin {
 				continue;
 			}
 
-			$ids[] = (string)$id;
+			$ids[] = (int)$id;
 		}
 
-		$ids[] = (string)$directory->getId();
+		$ids[] = (int)$directory->getId();
 		// the lock service will take care of the caching
 		$this->lockService->getLockForNodeIds($ids);
 	}
@@ -102,102 +111,145 @@ class LockPlugin extends SabreLockPlugin {
 
 		$nodeId = $node->getId();
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK, function () use ($nodeId, $node): bool {
-			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
-			return $lock instanceof FileLock;
+		$lockOf = fn (): ?FileLock => $this->lockService->getLockForNodeId($nodeId, $node->getNode());
+
+		$propFind->handle(Application::DAV_PROPERTY_LOCK, fn (): bool => $lockOf() !== null);
+
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER, function () use ($lockOf): ?string {
+			$lock = $lockOf();
+			return $lock === null || $lock->getType() === ILock::TYPE_APP ? null : $lock->getOwner();
 		});
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER, function () use ($nodeId, $node): ?string {
-			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_TIME, fn (): ?int => $lockOf()?->getCreatedAt());
 
-			if ($lock === false) {
-				return null;
-			}
-
-			if ($lock->getType() === ILock::TYPE_APP) {
-				return null;
-			}
-
-			return $lock->getOwner();
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_TIMEOUT, function () use ($lockOf): ?int {
+			$lock = $lockOf();
+			return $lock === null ? null : $this->davTimeout($lock);
 		});
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_TIME, function () use ($nodeId, $node): ?int {
-			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
-
-			if ($lock === false) {
-				return null;
-			}
-
-			return $lock->getCreatedAt();
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME, function () use ($lockOf): ?string {
+			$lock = $lockOf();
+			return $lock === null ? null : $this->lockService->injectMetadata($lock)->getDisplayName();
 		});
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_TIMEOUT, function () use ($nodeId, $node): ?int {
-			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_TYPE, fn (): ?int => $lockOf()?->getType());
 
-			if ($lock === false) {
-				return null;
-			}
-
-			return $this->davTimeout($lock);
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_EDITOR, function () use ($lockOf): ?string {
+			$lock = $lockOf();
+			return $lock?->getType() === ILock::TYPE_APP ? $lock->getOwner() : null;
 		});
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_DISPLAYNAME, function () use ($nodeId, $node): ?string {
-			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
+		$propFind->handle(Application::DAV_PROPERTY_LOCK_TOKEN, fn (): ?string => $lockOf()?->getToken());
+	}
 
-			if ($lock === false) {
-				return null;
+	/**
+	 * The lock token carried by one entry of an If header, or null when it is not
+	 * one of ours.
+	 *
+	 * @param array{token: mixed} $token
+	 */
+	private static function lockToken(array $token): ?string {
+		$value = (string)$token['token'];
+		return str_starts_with($value, self::TOKEN_PREFIX)
+			? substr($value, strlen(self::TOKEN_PREFIX))
+			: null;
+	}
+
+	/**
+	 * Replace Sabre's token-only validation with the application policy: a lock
+	 * blocks a modifying request unless the acting principal may write the file
+	 * (owner of a user lock, or owner of a token lock presenting its token).
+	 *
+	 * @param mixed $conditions
+	 */
+	#[\Override]
+	public function validateTokens(RequestInterface $request, &$conditions): void {
+		$this->lockService->resetPresentedTokens();
+		foreach ($conditions as $condition) {
+			foreach ($condition['tokens'] as $token) {
+				$presented = self::lockToken($token);
+				if ($presented !== null) {
+					$this->lockService->presentToken($presented);
+				}
 			}
+		}
 
-			$this->lockService->injectMetadata($lock);
+		$method = $request->getMethod();
+		if ($method === 'LOCK') {
+			parent::validateTokens($request, $conditions);
+			return;
+		}
 
-			return $lock->getDisplayName();
-		});
+		/** @var LockBackend $backend */
+		$backend = $this->locksBackend;
+		$mustLocks = [];
+		switch ($method) {
+			case 'DELETE':
+				$mustLocks = $backend->getFileLocks($request->getPath(), true);
+				break;
+			case 'MKCOL':
+			case 'MKCALENDAR':
+			case 'PROPPATCH':
+			case 'PUT':
+			case 'PATCH':
+				$mustLocks = $backend->getFileLocks($request->getPath(), false);
+				break;
+			case 'MOVE':
+				$mustLocks = array_merge(
+					$backend->getFileLocks($request->getPath(), true),
+					$backend->getFileLocks($this->server->calculateUri($request->getHeader('Destination')), false)
+				);
+				break;
+			case 'COPY':
+				$mustLocks = $backend->getFileLocks($this->server->calculateUri($request->getHeader('Destination')), false);
+				break;
+		}
 
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_OWNER_TYPE, function () use ($nodeId, $node): ?int {
-			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
+		$byToken = [];
+		foreach ($mustLocks as $lock) {
+			$byToken[$lock->getToken()] = $lock;
+		}
 
-			if ($lock === false) {
-				return null;
+		foreach ($conditions as $kk => $condition) {
+			foreach ($condition['tokens'] as $ii => $token) {
+				$checkToken = self::lockToken($token);
+				if ($checkToken === null) {
+					continue;
+				}
+				if (isset($byToken[$checkToken])) {
+					$conditions[$kk]['tokens'][$ii]['validToken'] = true;
+					continue;
+				}
+				foreach ($backend->getFileLocks($condition['uri'], false) as $oddLock) {
+					if ($oddLock->getToken() === $checkToken) {
+						$conditions[$kk]['tokens'][$ii]['validToken'] = true;
+						continue 2;
+					}
+				}
 			}
+		}
 
-			return $lock->getType();
-		});
-
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_EDITOR, function () use ($nodeId, $node): ?string {
-			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
-			if ($lock === false || $lock->getType() !== ILock::TYPE_APP) {
-				return null;
+		foreach ($byToken as $lock) {
+			if (!$this->lockService->canWrite($lock, null)) {
+				throw new Locked($lock->toLockInfo());
 			}
-
-			return $lock->getOwner();
-		});
-
-		$propFind->handle(Application::DAV_PROPERTY_LOCK_TOKEN, function () use ($nodeId, $node): ?string {
-			$lock = $this->lockService->getLockForNodeId($nodeId, $node->getNode());
-			if ($lock === false) {
-				return null;
-			}
-
-			return $lock->getToken();
-		});
+		}
 	}
 
 	#[\Override]
 	public function httpLock(RequestInterface $request, ResponseInterface $response) {
 		if ($request->getHeader('X-User-Lock')) {
-			/** @var ILock::TYPE_* $lockType */
-			$lockType = (int)($request->getHeader('X-User-Lock-Type') ?? ILock::TYPE_USER);
+			$lockType = $this->getRequestedLockType($request);
 			$response->setHeader('Content-Type', 'application/xml; charset=utf-8');
 
-			$file = $this->fileService->getFileFromAbsoluteUri($this->server->getRequestUri());
-
+			$file = $this->resolveNode($this->server->getRequestUri());
 			$user = $this->userSession->getUser();
 			if ($user === null) {
-				throw new \LogicException('User not logged in');
+				throw new Forbidden('Locking requires an authenticated user');
 			}
 
 			try {
-				$lockInfo = $this->lockService->lock(new LockContext(
+				$lockInfo = $this->lockService->acquire(new LockContext(
 					$file, $lockType, $user->getUID()
 				));
 				$response->setStatus(200);
@@ -208,13 +260,16 @@ class LockPlugin extends SabreLockPlugin {
 					)
 				);
 			} catch (OwnerLockedException $e) {
+				$existing = $e->getLock();
 				$response->setStatus(423);
 				$response->setBody(
 					$this->server->xml->write(
 						'{DAV:}prop',
-						$this->getLockProperties($e->getLock(), $file)
+						$this->getLockProperties($existing instanceof FileLock ? $existing : null, $file)
 					)
 				);
+			} catch (NotFileException|UnauthorizedUnlockException $e) {
+				throw new Forbidden($e->getMessage());
 			}
 
 			return false;
@@ -226,16 +281,18 @@ class LockPlugin extends SabreLockPlugin {
 	#[\Override]
 	public function httpUnlock(RequestInterface $request, ResponseInterface $response) {
 		if ($request->getHeader('X-User-Lock')) {
-			/** @var ILock::TYPE_* $lockType */
-			$lockType = (int)($request->getHeader('X-User-Lock-Type') ?? ILock::TYPE_USER);
+			$lockType = $this->getRequestedLockType($request);
 			$response->setHeader('Content-Type', 'application/xml; charset=utf-8');
 
-			$file = $this->fileService->getFileFromAbsoluteUri($this->server->getRequestUri());
+			$file = $this->resolveNode($this->server->getRequestUri());
+			$user = $this->userSession->getUser();
+			if ($user === null) {
+				throw new Forbidden('Unlocking requires an authenticated user');
+			}
 
 			try {
-				$this->lockService->enableUserOverride();
 				$this->lockService->unlock(new LockContext(
-					$file, $lockType, $this->userSession->getUser()->getUID()
+					$file, $lockType, $user->getUID()
 				));
 				$response->setStatus(200);
 				$response->setBody(
@@ -253,7 +310,7 @@ class LockPlugin extends SabreLockPlugin {
 					)
 				);
 			} catch (UnauthorizedUnlockException) {
-				$lock = $this->lockService->getLockFromFileId($file->getId());
+				$lock = $this->lockService->getActiveLock($file->getId());
 				$response->setStatus(Http::STATUS_LOCKED);
 				$response->setBody(
 					$this->server->xml->write(
@@ -266,20 +323,28 @@ class LockPlugin extends SabreLockPlugin {
 			return false;
 		}
 
-		try {
-			return parent::httpUnlock($request, $response);
-		} catch (LockTokenMatchesRequestUri) {
-			// Skip logging with wrong lock token
-			return false;
+		return parent::httpUnlock($request, $response);
+	}
+
+	private function getRequestedLockType(RequestInterface $request): int {
+		$header = $request->getHeader('X-User-Lock-Type');
+		if ($header === null || $header === '') {
+			return ILock::TYPE_USER;
 		}
+		if (!is_numeric($header) || !in_array((int)$header, Application::SUPPORTED_LOCK_TYPES, true)) {
+			throw new \Sabre\DAV\Exception\BadRequest('Unsupported lock type');
+		}
+		return (int)$header;
 	}
 
 	private function getLockProperties(?FileLock $lock, Node $file): array {
-		// We need to fetch the node again to get the proper new Etag
-		$actingUser = ($file->getOwner() ? $file->getOwner()->getUID() : null) ?? $this->userSession->getUser()->getUID();
-		$file = $this->fileService->getFileFromId($actingUser, $file->getId());
+		if ($lock !== null) {
+			$this->lockService->injectMetadata($lock);
+		}
+		// the lock change updated the etag in the cache, read it back from there
+		$etag = $file->getStorage()->getCache()->get($file->getInternalPath())?->getEtag() ?? $file->getEtag();
 		return [
-			FilesPlugin::GETETAG_PROPERTYNAME => $file->getEtag(),
+			FilesPlugin::GETETAG_PROPERTYNAME => $etag,
 			Application::DAV_PROPERTY_LOCK => $lock !== null,
 			Application::DAV_PROPERTY_LOCK_OWNER_TYPE => $lock ? $lock->getType() : null,
 			Application::DAV_PROPERTY_LOCK_OWNER => $lock ? $lock->getOwner() : null,
