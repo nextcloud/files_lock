@@ -10,8 +10,10 @@ use OC\Files\View;
 use OCA\DAV\Connector\Sabre\File as DavFile;
 use OCA\FilesLock\AppInfo\Application;
 use OCA\FilesLock\ConfigLexicon;
+use OCA\FilesLock\DAV\LockBackend;
 use OCA\FilesLock\DAV\LockPlugin;
 use OCA\FilesLock\Model\FileLock;
+use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Files\File;
@@ -21,6 +23,7 @@ use OCP\Files\Lock\ILockManager;
 use OCP\Files\Lock\LockContext;
 use OCP\IConfig;
 use OCP\IUserManager;
+use OCP\IUserSession;
 use OCP\Lock\ManuallyLockedException;
 use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
@@ -50,6 +53,7 @@ class LockFeatureTest extends TestCase {
 		'test-file-creation-clock',
 		'test-file-dav-infinite',
 		'test-file-dav-expiring',
+		'test-file-dav-refresh',
 		'test-file_public',
 		'test-file-client',
 		'etag_test',
@@ -350,6 +354,34 @@ class LockFeatureTest extends TestCase {
 		$expiring = $folder->newFile('test-file-dav-expiring', 'AAA');
 		$this->lockManager->lock(new LockContext($expiring, ILock::TYPE_USER, self::TEST_USER1));
 		self::assertSame(30 * 60, $this->davLockTimeout($expiring));
+	}
+
+	/**
+	 * A WebDAV client keeps refreshing its lock while the file is open, each
+	 * time asking for the same Timeout. The expiry has to move out from the
+	 * refresh, otherwise the lock dies at the first Timeout and every later
+	 * save fails although the client refreshed on schedule.
+	 */
+	public function testWebdavLockRefreshExtendsExpiry(): void {
+		$this->loginAndGetUserFolder(self::TEST_USER1)->newFile('test-file-dav-refresh', 'AAA');
+		$backend = new LockBackend(
+			\OCP\Server::get(FileService::class),
+			\OCP\Server::get(LockService::class),
+			false,
+			\OCP\Server::get(IUserSession::class),
+		);
+		$lockInfo = new LockInfo();
+		$lockInfo->token = 'test-file-dav-refresh-token';
+		$lockInfo->timeout = 3600;
+		$lockInfo->owner = self::TEST_USER1;
+		$lockInfo->scope = LockInfo::EXCLUSIVE;
+
+		self::assertTrue($backend->lock('test-file-dav-refresh', $lockInfo));
+		$this->toTheFuture(1800);
+		self::assertTrue($backend->lock('test-file-dav-refresh', $lockInfo));
+
+		$this->toTheFuture(1800 + 60);
+		self::assertCount(1, $backend->getLocks('test-file-dav-refresh', false));
 	}
 
 	/**
