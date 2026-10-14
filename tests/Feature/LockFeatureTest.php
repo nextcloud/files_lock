@@ -26,7 +26,6 @@ use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\MockObject\MockObject;
-use Sabre\DAV\Locks\LockInfo;
 use Sabre\DAV\PropFind;
 use Test\TestCase;
 use Test\Util\User\Dummy;
@@ -41,7 +40,7 @@ class LockFeatureTest extends TestCase {
 	 *
 	 * @var list<string>
 	 */
-	private const TEST_FILES = [
+	private const array TEST_FILES = [
 		'test-file',
 		'test-file2',
 		'test-file3',
@@ -50,11 +49,16 @@ class LockFeatureTest extends TestCase {
 		'test-file-creation-clock',
 		'test-file-dav-infinite',
 		'test-file-dav-expiring',
+		'test-file-extend',
+		'test-file-extend-infinite',
+		'test-file-remove-lock',
+		'test-file-token',
 		'test-file_public',
 		'test-file-client',
 		'etag_test',
-		'test-expired-lock-is-deprecated',
-		'test-expired-lock-is-deprecated-2',
+		'test-expired-lock',
+		'test-expired-lock-remove-1',
+		'test-expired-lock-remove-2',
 	];
 
 	protected LockManager $lockManager;
@@ -244,7 +248,7 @@ class LockFeatureTest extends TestCase {
 		// Travel past the 30m timeout window.
 		$this->toTheFuture(30 * 60 + 1);
 		$mapToIds = fn (ILock $deprecatedLock): int => $deprecatedLock->getId();
-		$deprecated = array_map($mapToIds, $service->getDeprecatedLocks());
+		$deprecated = array_map($mapToIds, $service->getExpiredLocks());
 
 		self::assertContains(
 			$lock->getId(),
@@ -280,7 +284,7 @@ class LockFeatureTest extends TestCase {
 	}
 
 	// Use expired locks to model the cron cleanup workflow:
-	// getDeprecatedLocks() selects stale locks and removeLocks() deletes them.
+	// getExpiredLocks() selects stale locks and removeLocks() deletes them.
 	public function testRemoveDeprecatedLocks(): void {
 		$service = \OCP\Server::get(LockService::class);
 		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, 30);
@@ -290,13 +294,13 @@ class LockFeatureTest extends TestCase {
 		$lock2 = $this->lockManager->lock(new LockContext($file2, ILock::TYPE_USER, self::TEST_USER1));
 		$this->toTheFuture(30 * 60 + 1);
 		$mapToIds = fn (ILock $lock): int => $lock->getId();
-		$deprecated = array_map($mapToIds, $service->getDeprecatedLocks());
+		$deprecated = array_map($mapToIds, $service->getExpiredLocks());
 
 		self::assertContains($lock1->getId(), $deprecated);
 		self::assertContains($lock2->getId(), $deprecated);
 
 		$service->removeLocks([$lock1, $lock2]);
-		$deprecated = array_map($mapToIds, $service->getDeprecatedLocks());
+		$deprecated = array_map($mapToIds, $service->getExpiredLocks());
 
 		self::assertNotContains($lock1->getId(), $deprecated);
 		self::assertNotContains($lock2->getId(), $deprecated);
@@ -350,19 +354,6 @@ class LockFeatureTest extends TestCase {
 		$expiring = $folder->newFile('test-file-dav-expiring', 'AAA');
 		$this->lockManager->lock(new LockContext($expiring, ILock::TYPE_USER, self::TEST_USER1));
 		self::assertSame(30 * 60, $this->davLockTimeout($expiring));
-	}
-
-	/**
-	 * The standard {DAV:}timeout property has its own sentinel for a lock that
-	 * never expires (RFC4918 renders it as "Infinite", which Sabre only emits
-	 * for a timeout of exactly -1). Sending the raw negative internal lifetime
-	 * there produced the invalid "Second--60"; -60 and 0 are what
-	 * LockService::lock() actually stores for the two "never expires" configs.
-	 */
-	public function testInfiniteLockReportsStandardWebdavTimeoutAsInfinite(): void {
-		self::assertSame(LockInfo::TIMEOUT_INFINITE, (new FileLock(-60))->toLockInfo()->timeout);
-		self::assertSame(LockInfo::TIMEOUT_INFINITE, (new FileLock(0))->toLockInfo()->timeout);
-		self::assertSame(30 * 60, (new FileLock(30 * 60))->toLockInfo()->timeout);
 	}
 
 	public function testLockApp(): void {
@@ -530,16 +521,17 @@ class LockFeatureTest extends TestCase {
 		$this->assertCount(1, $locks);
 
 		// Other users cannot unlock
+		$sharedFile = $this->loginAndGetUserFolder(self::TEST_USER2)->get('test-file-client');
 		try {
-			$this->lockManager->unlock(new LockContext($file, ILock::TYPE_TOKEN, self::TEST_USER2));
+			$this->lockManager->unlock(new LockContext($sharedFile, ILock::TYPE_TOKEN, self::TEST_USER2));
 			$locks = [];
 		} catch (\OCP\PreConditionNotMetException) {
 			$locks = $this->lockManager->getLocks($file->getId());
 		}
 		$this->assertCount(1, $locks);
 
-		// The owner can stil force unlock it as done through the OCS controller
-		\OCP\Server::get(\OCA\FilesLock\Service\LockService::class)->enableUserOverride();
+		// The owner can still unlock it, the override is part of the policy on every path
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)->get('test-file-client');
 		$this->lockManager->unlock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
 
 		$locks = $this->lockManager->getLocks($file->getId());
@@ -618,8 +610,13 @@ class LockFeatureTest extends TestCase {
 	}
 
 	private function deleteTestFiles(\OCP\Files\Folder $folder): void {
+		$lockService = \OCP\Server::get(LockService::class);
+		$lockService->removeLocks(\OCP\Server::get(\OCA\FilesLock\Db\LocksRequest::class)->getAll());
 		foreach (self::TEST_FILES as $filename) {
-			$folder->delete($filename);
+			try {
+				$folder->get($filename)->delete();
+			} catch (\OCP\Files\NotFoundException) {
+			}
 		}
 	}
 

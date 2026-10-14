@@ -9,23 +9,36 @@ declare(strict_types=1);
 
 namespace OCA\FilesLock\DAV;
 
-use Exception;
-use OCA\FilesLock\Service\FileService;
+use Closure;
+use OCA\FilesLock\Exceptions\LockNotFoundException;
+use OCA\FilesLock\Exceptions\NotFileException;
+use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
+use OCA\FilesLock\Model\FileLock;
 use OCA\FilesLock\Service\LockService;
+use OCP\Files\Folder;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
 use OCP\Files\Node;
-use OCP\Files\NotFoundException;
 use OCP\IUserSession;
+use Sabre\DAV\Exception\Forbidden;
+use Sabre\DAV\Exception\Locked;
+use Sabre\DAV\Exception\NotFound;
 use Sabre\DAV\Locks\Backend\BackendInterface;
 use Sabre\DAV\Locks\LockInfo;
 
+/**
+ * Thin adapter between Sabre's lock backend contract and the canonical lock
+ * service. Every lock stored by the app is presented to Sabre as an exclusive
+ * write lock, so Sabre's token validation applies to all lock types.
+ */
 class LockBackend implements BackendInterface {
+	/**
+	 * @param Closure(string): Node $nodeResolver resolves a request uri to a node, throws Sabre NotFound
+	 */
 	public function __construct(
-		private readonly FileService $fileService,
 		private readonly LockService $lockService,
-		private readonly bool $absolute,
+		private readonly Closure $nodeResolver,
 		private readonly IUserSession $userSession,
 	) {
 	}
@@ -36,86 +49,115 @@ class LockBackend implements BackendInterface {
 	 */
 	#[\Override]
 	public function getLocks($uri, $returnChildLocks): array {
-		$locks = [];
-		try {
-			// TODO: check parent
-			$file = $this->getFileFromUri($uri);
-			$lock = $this->lockService->getLockFromFileId($file->getId());
-
-			if ($lock->getType() === ILock::TYPE_USER && $lock->getOwner() === $this->userSession->getUser()?->getUID()) {
-				return [];
-			}
-
-			$lock->setUri($uri);
-
-			return [$lock->toLockInfo()];
-		} catch (Exception) {
-			return $locks;
-		}
+		return array_map(
+			fn (FileLock $lock): LockInfo => $lock->toLockInfo(),
+			$this->getFileLocks($uri, (bool)$returnChildLocks)
+		);
 	}
 
 	/**
-	 * Locks a uri
+	 * Active locks of the resource at $uri, optionally including locks on files below it.
 	 *
+	 * @return list<FileLock>
+	 */
+	public function getFileLocks(string $uri, bool $returnChildLocks): array {
+		try {
+			$node = $this->resolve($uri);
+		} catch (NotFound) {
+			return [];
+		}
+
+		$locks = [];
+		$lock = $this->lockService->getActiveLock($node->getId());
+		if ($lock !== null) {
+			$lock->setUri($uri);
+			$locks[] = $lock;
+		}
+
+		if ($returnChildLocks && $node instanceof Folder) {
+			foreach ($this->lockService->getLocksBelow($node->getId()) as $entry) {
+				$entry['lock']->setUri(rtrim($uri, '/') . '/' . $entry['path']);
+				$locks[] = $entry['lock'];
+			}
+		}
+
+		return $locks;
+	}
+
+	/**
+	 * Create or refresh a token lock. The complete lock is built before it is
+	 * persisted, so a refused request never leaves a partial row behind.
 	 *
+	 * @throws Locked when another lock is held on the resource
+	 * @throws Forbidden when the caller may not lock the resource
 	 */
 	#[\Override]
 	public function lock($uri, LockInfo $lockInfo): bool {
-		try {
-			$file = $this->getFileFromUri($uri);
-			$lock = $this->lockService->lock(new LockContext(
-				$file,
-				ILock::TYPE_TOKEN,
-				$lockInfo->token
-			));
-
-			$user = $this->userSession->getUser();
-			if ($user === null) {
-				return false;
-			}
-
-			$lock->setUserId($user->getUID());
-			$lock->setTimeout($lockInfo->timeout ?? 0);
-			$lock->setToken($lockInfo->token);
-			$lock->setDisplayName($lockInfo->owner);
-			$lock->setScope($lockInfo->scope);
-			$this->lockService->update($lock);
-			return true;
-		} catch (NotFoundException) {
-			return true;
-		} catch (OwnerLockedException) {
-			return false;
+		$node = $this->resolve($uri);
+		$user = $this->userSession->getUser();
+		if ($user === null) {
+			throw new Forbidden('Locking requires an authenticated user');
 		}
+
+		$timeout = null;
+		if ($lockInfo->timeout !== null) {
+			$seconds = (int)$lockInfo->timeout;
+			$timeout = $seconds > 0 ? $seconds : FileLock::ETA_INFINITE;
+		}
+
+		try {
+			$lock = $this->lockService->acquire(
+				new LockContext($node, ILock::TYPE_TOKEN, $user->getUID()),
+				$timeout,
+				$lockInfo->token,
+				null,
+				false
+			);
+		} catch (OwnerLockedException $e) {
+			/** @var FileLock $existing */
+			$existing = $e->getLock();
+			$existing->setUri($uri);
+			throw new Locked($existing->toLockInfo());
+		} catch (NotFileException|UnauthorizedUnlockException $e) {
+			throw new Forbidden($e->getMessage());
+		}
+
+		$lockInfo->token = $lock->getToken();
+		$lockInfo->owner = $lock->getDisplayName();
+		$lockInfo->created = $lock->getCreatedAt();
+		$lockInfo->timeout = $lock->isInfinite() ? LockInfo::TIMEOUT_INFINITE : $lock->getETA();
+		$lockInfo->depth = 0;
+		$lockInfo->uri = $uri;
+		return true;
 	}
 
 	/**
 	 * Removes a lock from a uri
 	 *
-	 *
+	 * @throws Forbidden when the presented token or the caller may not release the lock
 	 */
 	#[\Override]
 	public function unlock($uri, LockInfo $lockInfo): bool {
 		try {
-			$file = $this->getFileFromUri($uri);
-		} catch (NotFoundException) {
+			$node = $this->resolve($uri);
+		} catch (NotFound) {
 			return true;
 		}
-		$this->lockService->unlock(new LockContext(
-			$file,
-			ILock::TYPE_TOKEN,
-			$lockInfo->token
-		));
+		$owner = $this->userSession->getUser()?->getUID() ?? $lockInfo->token;
+		try {
+			$this->lockService->unlock(new LockContext($node, ILock::TYPE_TOKEN, $owner), false, $lockInfo->token);
+		} catch (LockNotFoundException) {
+			return true;
+		} catch (UnauthorizedUnlockException $e) {
+			throw new Forbidden($e->getMessage());
+		}
 		return true;
 	}
 
 	/**
-	 * @throws NotFoundException
+	 * @throws NotFound
 	 */
-	private function getFileFromUri(string $uri): Node {
-		if ($this->absolute) {
-			return $this->fileService->getFileFromAbsoluteUri($uri);
-		}
-
-		return $this->fileService->getFileFromUri($uri);
+	private function resolve(string $uri): Node {
+		return ($this->nodeResolver)($uri);
 	}
 }
