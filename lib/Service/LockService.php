@@ -268,11 +268,13 @@ class LockService {
 		}
 
 		if ($force) {
-			$userId = in_array($lock->getType(), [ILock::TYPE_USER, ILock::TYPE_TOKEN]) ? $lock->getOwner() : $userId;
+			$userId = $lock->getOwner();
 			$lockType = $lock->getType();
+			$node = $this->rootFolder->getFirstNodeById($fileId) ?? throw new NotFoundException();
+		} else {
+			$node = $this->fileService->getFileFromId($userId, $fileId);
 		}
 
-		$node = $this->fileService->getFileFromId($userId, $fileId);
 		$lock = new LockContext(
 			$node,
 			$lockType,
