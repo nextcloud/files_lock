@@ -50,6 +50,8 @@ An access path is the mechanism used to create or remove a lock. Locks can be cr
 
   A `LOCK` request creates a token-owned lock and associates it with a WebDAV lock token. A subsequent `UNLOCK` request must provide that token.
 
+  A `LOCK` request that carries the token in its `If` header and has no body refreshes the lock: its expiry moves to the requested `Timeout` counted from the refresh, not from the original `LOCK`.
+
 - **WebDAV with `X-User-Lock`**
 
   `X-User-Lock` is a Nextcloud-specific WebDAV extension that handles `LOCK` and `UNLOCK` requests through the Files Lock API rather than the native WebDAV lock-token flow. The optional `X-User-Lock-Type` header selects one of the existing lock types; if omitted, it defaults to type `0`.
