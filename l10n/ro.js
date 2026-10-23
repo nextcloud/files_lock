@@ -1,13 +1,26 @@
 OC.L10N.register(
     "files_lock",
     {
-    "File can only be unlocked by providing a valid owner lock token" : "Fișierul poate fi deblocat numai prin furnizarea unui token de blocare a proprietarului valid",
-    "File can only be unlocked by the owner of the lock" : "Fișierul poate fi deblocat numai de către deținătorul fișierului",
+    "File is currently locked by %s" : "Fișierul este blocat în prezent de %s",
+    "File is not locked" : "Fișierul nu este blocat",
+    "File can only be locked with update permissions." : "Fișierul poate fi blocat doar cu permisiuni de actualizare.",
+    "File can only be unlocked by providing a valid owner lock token" : "Fișierul poate fi deblocat doar prin furnizarea unui token de blocare valid al proprietarului",
+    "File can only be unlocked by the owner of the lock" : "Fișierul poate fi deblocat doar de cel care l-a blocat",
     "Desktop client" : "Client desktop",
-    "Temporary files lock" : "Blocaj temporar de fișiere",
-    "Temporary lock your files" : "Blochează-ți  temporar fișierele",
-    "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Permite utilizatorilor sa își blocheze temporar fișierele pentru a evita conflictele în timp ce lucrezi la fișiere partajate.",
+    "iOS client" : "Client iOS",
+    "Android client" : "Client Android",
+    "Temporary files lock" : "Blocarea temporară a fișierelor",
+    "Temporary lock your files" : "Blochează-ți temporar fișierele",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files." : "Le permite utilizatorilor să își blocheze temporar fișierele pentru a evita conflictele atunci când lucrează la fișiere partajate.",
+    "Manually locked by {user}" : "Blocat manual de {user}",
+    "Locked by editing online in {app}" : "Blocat prin editare online în {app}",
+    "Automatically locked by {user}" : "Blocat automat de {user}",
     "Unlock file" : "Deblochează fișierul",
-    "Lock file" : "Blochează fișierul"
+    "Lock file" : "Blochează fișierul",
+    "files_lock" : "files_lock",
+    "This file has been locked automatically by a client. Removing the lock may lead to a conflict saving the file." : "Acest fișier a fost blocat automat de un client. Eliminarea blocării poate duce la un conflict la salvarea fișierului.",
+    "Keep lock" : "Păstrează blocarea",
+    "Force unlock" : "Forțează deblocarea",
+    "Allow your users to temporary lock their files to avoid conflicts while working on shared files.\n\nℹ️ As of Nextcloud 34 this app is bundled with Nextcloud Hub and hence not released through the appstore anymore." : "Le permite utilizatorilor să își blocheze temporar fișierele pentru a evita conflictele atunci când lucrează la fișiere partajate.\n\nℹ️ Începând cu Nextcloud 34, această aplicație este inclusă în Nextcloud Hub și, prin urmare, nu mai este publicată în magazinul de aplicații."
 },
 "nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));");
