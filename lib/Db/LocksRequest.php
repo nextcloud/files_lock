@@ -18,6 +18,7 @@ use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\DB\Exception;
 use OCP\DB\IResult;
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\Files\Lock\ILock;
 use OCP\IDBConnection;
 use OCP\Server;
 
@@ -118,6 +119,19 @@ class LocksRequest {
 		$qb->select('id', 'user_id', 'file_id', 'token', 'creation', 'type', 'ttl', 'owner')
 			->from(self::TABLE_LOCKS)
 			->where($qb->expr()->in('file_id', $qb->createNamedParameter($fileIds, IQueryBuilder::PARAM_INT_ARRAY)));
+
+		return $this->getLocksFromRequest($qb->executeQuery());
+	}
+
+	/**
+	 * @return list<FileLock>
+	 */
+	public function getFromOwner(string $userId): array {
+		$qb = $this->connection->getQueryBuilder();
+		$qb->select('id', 'user_id', 'file_id', 'token', 'creation', 'type', 'ttl', 'owner')
+			->from(self::TABLE_LOCKS)
+			->where($qb->expr()->eq('user_id', $qb->createNamedParameter($userId)))
+			->andWhere($qb->expr()->in('type', $qb->createNamedParameter([ILock::TYPE_USER, ILock::TYPE_TOKEN], IQueryBuilder::PARAM_INT_ARRAY)));
 
 		return $this->getLocksFromRequest($qb->executeQuery());
 	}
