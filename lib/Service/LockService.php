@@ -205,7 +205,8 @@ class LockService {
 
 	public function getAppName(string $appId): ?string {
 		$appInfo = $this->appManager->getAppInfo($appId);
-		return $appInfo['name'] ?? null;
+		$name = $appInfo['name'] ?? null;
+		return is_string($name) ? $name : null;
 	}
 
 	/**
