@@ -85,12 +85,7 @@ class LockService {
 		$this->logger = $logger;
 	}
 
-	/**
-	 * @param int $nodeId
-	 *
-	 * @return FileLock|bool
-	 */
-	public function getLockForNodeId(int $nodeId, ?Node $node = null) {
+	public function getLockForNodeId(int $nodeId, ?Node $node = null): FileLock|false {
 		if (array_key_exists($nodeId, $this->lockCache) && $this->lockCache[$nodeId] !== false) {
 			return $this->lockCache[$nodeId];
 		}
@@ -205,7 +200,8 @@ class LockService {
 
 	public function getAppName(string $appId): ?string {
 		$appInfo = $this->appManager->getAppInfo($appId);
-		return $appInfo['name'] ?? null;
+		$name = $appInfo['name'] ?? null;
+		return is_string($name) ? $name : null;
 	}
 
 	/**
