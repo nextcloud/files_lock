@@ -17,6 +17,7 @@ export const getLockStateFromAttributes = (node: Node): LockState => {
 		lockOwnerType: parseInt(node.attributes['lock-owner-type']),
 		lockOwnerEditor: node.attributes['lock-owner-editor'],
 		lockTime: parseInt(node.attributes['lock-time']),
+		lockManager: !!node.attributes['lock-manager'],
 	}
 }
 
@@ -39,6 +40,12 @@ export const canUnlock = (node: Node): boolean => {
 
 	if (!isUpdatable(node)) {
 		return false
+	}
+
+	const aclManager = !!node.attributes['acl-can-manage']
+
+	if (state.lockManager || aclManager) {
+		return true
 	}
 
 	if (state.lockOwnerType === LockType.User && state.lockOwner === getCurrentUser()?.uid) {
