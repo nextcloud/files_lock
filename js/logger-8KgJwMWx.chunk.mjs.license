@@ -18,19 +18,19 @@ This file is generated from multiple sources. Included packages:
 	- version: 3.3.3
 	- license: GPL-3.0-or-later
 - @nextcloud/files
-	- version: 4.0.0
+	- version: 4.1.1
 	- license: AGPL-3.0-or-later
 - @nextcloud/logger
 	- version: 3.0.3
 	- license: GPL-3.0-or-later
 - @nextcloud/router
-	- version: 3.1.0
+	- version: 3.2.0
 	- license: GPL-3.0-or-later
 - semver
 	- version: 7.7.3
 	- license: ISC
 - vite
-	- version: 7.3.6
+	- version: 7.3.7
 	- license: MIT
 - vite-plugin-node-polyfills
 	- version: 0.28.0
