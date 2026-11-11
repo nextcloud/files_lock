@@ -23,7 +23,6 @@ import {
 } from './helper'
 import { getCurrentUser } from '@nextcloud/auth'
 
-import '@nextcloud/dialogs/style.css'
 import './styles.css'
 
 import LockSvg from '@mdi/svg/svg/lock-outline.svg?raw'
