@@ -33,6 +33,10 @@ updates:
     labels:
       - "3. to review"
       - "dependencies"
+    ignore:
+      # typescript-eslint does not support TypeScript 7 yet
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   # Main stableXX npm
   - package-ecosystem: npm
