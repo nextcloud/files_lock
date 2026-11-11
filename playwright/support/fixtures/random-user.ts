@@ -14,7 +14,8 @@ interface RandomUserFixture {
  * This test fixture ensures a new random user is created and used for the test (current page)
  */
 export const test = base.extend<RandomUserFixture>({
-	user: async (_, use) => {
+	// eslint-disable-next-line no-empty-pattern -- Playwright requires a destructured fixture argument
+	user: async ({}, use) => {
 		const user = await createRandomUser()
 		await use(user)
 	},

@@ -26,11 +26,13 @@ interface SharingUserFixture {
  * - recipient: The user who will receive the shares
  */
 export const test = base.extend<SharingUserFixture>({
-	owner: async (_, use) => {
+	// eslint-disable-next-line no-empty-pattern -- Playwright requires a destructured fixture argument
+	owner: async ({}, use) => {
 		const user = await createRandomUser()
 		await use(user)
 	},
-	recipient: async (_, use) => {
+	// eslint-disable-next-line no-empty-pattern -- Playwright requires a destructured fixture argument
+	recipient: async ({}, use) => {
 		const user = await createRandomUser()
 		await use(user)
 	},
