@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { test as base } from '@playwright/test'
 import { createRandomUser, login } from '@nextcloud/e2e-test-server/playwright'
+import { test as base } from '@playwright/test'
 
 // The User type from e2e-test-server
 interface User {
@@ -26,11 +26,13 @@ interface SharingUserFixture {
  * - recipient: The user who will receive the shares
  */
 export const test = base.extend<SharingUserFixture>({
-	owner: async ({ }, use) => {
+	// eslint-disable-next-line no-empty-pattern -- Playwright requires a destructured fixture argument
+	owner: async ({}, use) => {
 		const user = await createRandomUser()
 		await use(user)
 	},
-	recipient: async ({ }, use) => {
+	// eslint-disable-next-line no-empty-pattern -- Playwright requires a destructured fixture argument
+	recipient: async ({}, use) => {
 		const user = await createRandomUser()
 		await use(user)
 	},
