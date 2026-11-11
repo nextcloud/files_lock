@@ -18,6 +18,7 @@ use OCA\FilesLock\Db\LocksRequest;
 use OCA\FilesLock\Exceptions\LockNotFoundException;
 use OCA\FilesLock\Exceptions\UnauthorizedUnlockException;
 use OCA\FilesLock\Model\FileLock;
+use OCA\GroupFolders\Mount\GroupMountPoint;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Services\IAppConfig;
 use OCP\Constants;
@@ -30,8 +31,10 @@ use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
 use OCP\Files\Node;
 use OCP\Files\NotFoundException;
+use OCP\IGroupManager;
 use OCP\IL10N;
 use OCP\IRequest;
+use OCP\IUser;
 use OCP\IUserManager;
 use OCP\IUserSession;
 use Psr\Log\LoggerInterface;
@@ -45,6 +48,7 @@ class LockService {
 	public function __construct(
 		private readonly IL10N $l10n,
 		private readonly IUserManager $userManager,
+		private readonly IGroupManager $groupManager,
 		private readonly LocksRequest $locksRequest,
 		private readonly FileService $fileService,
 		private readonly IAppConfig $appConfig,
@@ -473,5 +477,25 @@ class LockService {
 			'etag' => uniqid(),
 		]);
 		$node->getStorage()->getUpdater()->propagate($node->getInternalPath(), $node->getMTime());
+	}
+
+	public function isLockManager(IUser $user, ?Node $node): bool {
+		if ($this->groupManager->isAdmin($user->getUID())) {
+			return true;
+		}
+
+		$lockManagerGroups = explode('|', $this->appConfig->getAppValueString(ConfigLexicon::LOCK_MANAGERS));
+		$userGroups = $this->groupManager->getUserGroupIds($user);
+		$matchGroups = !empty(array_intersect($lockManagerGroups, $userGroups));
+
+		if ($matchGroups) {
+			return true;
+		}
+
+		if ($node && $node->getOwner()?->getUID() === $user->getUID() && !$node->getMountPoint() instanceof GroupMountPoint) {
+			return true;
+		}
+
+		return false;
 	}
 }

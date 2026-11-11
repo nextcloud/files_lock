@@ -31,9 +31,12 @@ namespace OC\AppFramework\OCS {
 	}
 }
 
+namespace OCA\GroupFolders\Mount {
+	class GroupMountPoint {}
+}
+
 
 define('UUID_TYPE_DEFAULT', 0);
 define('UUID_TYPE_RANDOM', 4);
 function uuid_create($uuid_type = \UUID_TYPE_DEFAULT): string {
 }
-
