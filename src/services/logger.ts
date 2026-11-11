@@ -6,6 +6,6 @@
 import { getLoggerBuilder } from '@nextcloud/logger'
 
 export const logger = getLoggerBuilder()
-	.setApp('password_policy')
+	.setApp('files_lock')
 	.detectUser()
 	.build()
