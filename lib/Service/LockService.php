@@ -484,7 +484,7 @@ class LockService {
 			if ($node !== null) {
 				$this->propagateEtag($node);
 			}
-		} catch (Exception $e) {
+		} catch (\Throwable $e) {
 			$this->logger->warning('Failed to propagate the etag of an expired lock', ['exception' => $e]);
 		}
 	}
