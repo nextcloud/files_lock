@@ -6,6 +6,8 @@ name: Check node dist files
 on:
   pull_request:
 
+permissions:
+  contents: read
 
 jobs:
   changed_files:
@@ -14,20 +16,22 @@ jobs:
       contents: read
       pull-requests: read
 
+    name: Check node dist files
     steps:
-      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: changes
         with:
+          list-files: shell
           filters: |
             assets:
               - 'js/**'
               - 'css/**'
 
-    name: Check node dist files
-    steps:
-      - name: Run step if any file(s) in the assets folder change
-        if: needs.changes.outputs.assets == 'true'
+      - name: Fail if any file in the assets folders changed
+        if: steps.changes.outputs.assets == 'true'
+        env:
+          ASSETS_FILES: ${{ steps.changes.outputs.assets_files }}
         run: |
-          echo "One or more files in the js folder has changed. Do NOT commit files in there as they will be generated automatically once a pull request is merged"
-          echo "List all the files that have changed: ${{ steps.changes.outputs.assets_files }}"
+          echo "One or more files in js/ or css/ changed. Do NOT commit files in there as they will be generated automatically once a pull request is merged"
+          echo "Changed files: $ASSETS_FILES"
           exit 1
