@@ -22,6 +22,7 @@ use OCP\Config\ValueType;
  */
 class ConfigLexicon implements ILexicon {
 	public const LOCK_TIMEOUT = 'lock_timeout';
+	public const LOCK_MANAGERS = 'lock_managers';
 
 	#[\Override]
 	public function getStrictness(): Strictness {
@@ -36,6 +37,12 @@ class ConfigLexicon implements ILexicon {
 				ValueType::INT,
 				defaultRaw: -1,
 				definition: 'Time in minutes until a lock expires. -1 = never expires.',
+			),
+			new Entry(
+				self::LOCK_MANAGERS,
+				ValueType::STRING,
+				defaultRaw: '',
+				definition: 'Pipe-separated list of group ids whose members can unlock any file.',
 			),
 		];
 	}
