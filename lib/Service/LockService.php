@@ -294,13 +294,13 @@ class LockService {
 		}
 
 		try {
-			$locks = $this->locksRequest->getLocksOlderThan($timeout, $limit);
+			$oldLocks = $this->locksRequest->getLocksOlderThan($timeout, $limit);
 		} catch (Exception $e) {
 			$this->logger->warning('Failed to get locks older then timeout', ['exception' => $e]);
 			return [];
 		}
 
-		return $locks;
+		return array_filter($oldLocks, fn (FileLock $lock): bool => $lock->getETA() === 0);
 	}
 
 	/**
