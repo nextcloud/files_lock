@@ -333,6 +333,28 @@ class LockFeatureTest extends TestCase {
 		);
 	}
 
+	public function testExtendedLocksAreNotDeprecated(): void {
+		$service = \OCP\Server::get(LockService::class);
+		\OCP\Server::get(IConfig::class)->setAppValue(Application::APP_ID, ConfigLexicon::LOCK_TIMEOUT, 30);
+		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
+			->newFile('test-expired-lock', 'AAA');
+		$lock = $this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+		// Travel 15m to expand the timeout window.
+		$this->toTheFuture(15 * 60);
+		$lock = $this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+		// Travel past the original 30m timeout window.
+		$this->toTheFuture(15 * 60 + 1);
+		$lock = $this->lockManager->lock(new LockContext($file, ILock::TYPE_USER, self::TEST_USER1));
+		$mapToIds = fn (ILock $deprecatedLock): int => $deprecatedLock->getId();
+		$deprecated = array_map($mapToIds, $service->getDeprecatedLocks());
+
+		self::assertNotContains(
+			$lock->getId(),
+			$deprecated,
+			'The lock with an extended timeout is not returned as deprecated.',
+		);
+	}
+
 	public function testRemoveLocks(): void {
 		$service = \OCP\Server::get(LockService::class);
 		$file = $this->loginAndGetUserFolder(self::TEST_USER1)
