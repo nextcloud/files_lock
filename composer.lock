@@ -211,8 +211,7 @@
                 "issues": "https://github.com/nextcloud-deps/ocp/issues",
                 "source": "https://github.com/nextcloud-deps/ocp/tree/stable34"
             },
-            "time": "2026-11-18T05:00:44+00:00",
-            "published-time": "2026-11-18T05:00:49+00:00"
+            "time": "2026-11-18T05:00:44+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -884,16 +883,16 @@
         },
         {
             "name": "psalm/phar",
-            "version": "6.20.10",
+            "version": "6.20.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/psalm/phar.git",
-                "reference": "42f6faee9fb721ea0dcc60e095d1780135e3f11e"
+                "reference": "add3077849833ad9b6a628e2545409f802065059"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/psalm/phar/zipball/42f6faee9fb721ea0dcc60e095d1780135e3f11e",
-                "reference": "42f6faee9fb721ea0dcc60e095d1780135e3f11e",
+                "url": "https://api.github.com/repos/psalm/phar/zipball/add3077849833ad9b6a628e2545409f802065059",
+                "reference": "add3077849833ad9b6a628e2545409f802065059",
                 "shasum": ""
             },
             "require": {
@@ -913,9 +912,9 @@
             "description": "Composer-based Psalm Phar",
             "support": {
                 "issues": "https://github.com/psalm/phar/issues",
-                "source": "https://github.com/psalm/phar/tree/6.20.10"
+                "source": "https://github.com/psalm/phar/tree/6.20.11"
             },
-            "time": "2026-11-07T17:30:07+00:00"
+            "time": "2026-11-11T22:30:51+00:00"
         },
         {
             "name": "psr/clock",
@@ -2769,5 +2768,5 @@
     "platform-overrides": {
         "php": "8.2.31"
     },
-    "plugin-api-version": "2.11.0"
+    "plugin-api-version": "2.9.0"
 }
