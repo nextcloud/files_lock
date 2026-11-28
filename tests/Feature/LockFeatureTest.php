@@ -18,6 +18,7 @@ use OCP\Files\Lock\ILockManager;
 use OCP\Files\Lock\LockContext;
 use OCP\IConfig;
 use OCP\IUserManager;
+use OCP\IUserSession;
 use OCP\Lock\ManuallyLockedException;
 use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;

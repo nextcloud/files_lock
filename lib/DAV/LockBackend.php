@@ -12,12 +12,14 @@ namespace OCA\FilesLock\DAV;
 use Exception;
 use OCA\FilesLock\Service\FileService;
 use OCA\FilesLock\Service\LockService;
+use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Files\Lock\ILock;
 use OCP\Files\Lock\LockContext;
 use OCP\Files\Lock\OwnerLockedException;
 use OCP\Files\Node;
 use OCP\Files\NotFoundException;
 use OCP\IUserSession;
+use OCP\Server;
 use Sabre\DAV\Locks\Backend\BackendInterface;
 use Sabre\DAV\Locks\LockInfo;
 
@@ -77,8 +79,15 @@ class LockBackend implements BackendInterface {
 				return false;
 			}
 
+			$timeout = $lockInfo->timeout ?? 0;
+			if ($timeout > 0) {
+				// The lifetime counts from creation, which an update leaves untouched,
+				// so a refresh has to add the time that has already elapsed.
+				$timeout += Server::get(ITimeFactory::class)->getTime() - $lock->getCreatedAt();
+			}
+
 			$lock->setUserId($user->getUID());
-			$lock->setTimeout($lockInfo->timeout ?? 0);
+			$lock->setTimeout($timeout);
 			$lock->setToken($lockInfo->token);
 			$lock->setDisplayName($lockInfo->owner);
 			$lock->setScope($lockInfo->scope);
